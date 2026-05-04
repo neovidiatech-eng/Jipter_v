@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jipter_postgres
+    restart: unless-stopped
+    ports:
+      - "54432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jipter_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: jipter_pgadmin
+    restart: unless-stopped
+    ports:
+      - "5052:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - jipter_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: jipter_redis
+    restart: unless-stopped
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - jipter_network
+
+  app:
+    image: jipter_api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jipter_app
+    restart: unless-stopped
+    ports:
+      - "6000:6000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPT_KEY: ${ENCRYPT_KEY}
+      SALT: ${SALT}
+      JWT_SECRET_ACCESS_ADMIN: ${JWT_SECRET_ACCESS_ADMIN}
+      JWT_SECRET_REFRESH_ADMIN: ${JWT_SECRET_REFRESH_ADMIN}
+      APP_EMAIL: ${APP_EMAIL}
+      APP_PASSWORD: ${APP_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      MOOD: ${MOOD}
+      PORT: "6000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - jipter_network
+
+networks:
+  jipter_network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  pgadmin_data:
+  redis_data:
