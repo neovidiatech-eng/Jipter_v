@@ -39,7 +39,7 @@ const bootstrap = async () => {
         "http://localhost:5173",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
-        "https://jipter-front.vercel.app",
+        "https://jupiter-two-amber.vercel.app",
       ];
 
   app.use(
