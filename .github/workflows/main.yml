@@ -69,7 +69,7 @@ jobs:
           script: |
             set -e
 
-            cd /root/backend/Jipter_backend
+            cd /root/backend/Jipter_v
 
             # ── Step 1: Pull latest code ──────────────────────────────────────
             git pull origin main
@@ -98,16 +98,18 @@ jobs:
             ENVEOF
 
             # ── Step 3: Rebuild containers ────────────────────────────────────
-            docker compose down
+            docker compose down --remove-orphans
             docker compose up -d --build
 
             # ── Step 4: Wait for Postgres to be healthy ───────────────────────
             echo "⏳ Waiting for postgres to be healthy..."
             timeout=60
             elapsed=0
-            until docker inspect --format='{{.State.Health.Status}}' jipter_postgres 2>/dev/null | grep -q 'healthy'; do
+            until [ "$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q postgres) 2>/dev/null)" = "healthy" ]; do
               if [ $elapsed -ge $timeout ]; then
                 echo "❌ Postgres healthcheck timed out"
+                # Dump logs for debugging if it fails
+                docker compose logs postgres
                 exit 1
               fi
               sleep 3

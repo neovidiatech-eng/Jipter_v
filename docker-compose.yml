@@ -1,7 +1,7 @@
+name: jipter_v
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: jipter_postgres
     restart: unless-stopped
     ports:
       - "54432:5432"
@@ -10,9 +10,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - jip_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,7 +21,6 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: jipter_pgadmin
     restart: unless-stopped
     ports:
       - "5052:80"
@@ -29,7 +28,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - jip_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,12 +37,11 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: jipter_redis
     restart: unless-stopped
     ports:
       - "6382:6379"
     volumes:
-      - redis_data:/data
+      - jip_redis_data:/data
     networks:
       - jipter_network
 
@@ -52,7 +50,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: jipter_app
     restart: unless-stopped
     ports:
       - "6000:6000"
@@ -84,6 +81,6 @@ networks:
     driver: bridge
 
 volumes:
-  pgdata:
-  pgadmin_data:
-  redis_data:
+  jip_postgres_data:
+  jip_pgadmin_data:
+  jip_redis_data:
