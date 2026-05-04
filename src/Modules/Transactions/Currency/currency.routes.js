@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../../Middlewares/Authentication.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import * as currencyController from "./currency.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
 import {
@@ -14,32 +14,32 @@ const router = Router();
 
 router.get(
   "/currencies",
-  authentication(),
+  authentication,
   validation(getCurrenciesSchema),
   currencyController.getCurrencies,
 );
 router.get(
   "/:id",
-  authentication(),
+  authentication,
   validation(getCurrencyById),
   currencyController.getCurrencyById,
 );
 router.post(
   "/add-currency",
-  authentication(),
+  authentication,
   validation(addCurrencySchema),
   currencyController.addCurrency,
 );
 router.patch(
   "/update-currency/:id",
-  authentication(),
+  authentication,
   validation(updateCurrencySchema),
   currencyController.updateCurrency,
 );
 
 router.delete(
   "/delete-currency/:id",
-  authentication(),
+  authentication,
   validation(deleteCurrencySchema),
   currencyController.deleteCurrency,
 );

@@ -14,24 +14,26 @@ export async function seedSubscriptions() {
 
   const student = await prisma.student.findFirst({
     where: { user: { email: "john.doe@jipter.com" } },
-    include: { user: true }
+    include: { user: true },
   });
 
   const plan = await prisma.plans.findFirst({
-    where: { name_en: "Monthly Pro" }
+    where: { name_en: "Standard Plan" },
   });
 
   const currency = await prisma.currency.findFirst({
-    where: { code: "USD" }
+    where: { code: "USD" },
   });
 
   if (!student || !student.user_id) {
-    console.warn("Student or associated user not found. Skipping subscriptions.");
+    console.warn(
+      "Student or associated user not found. Skipping subscriptions.",
+    );
     return;
   }
 
   if (!plan) {
-    console.warn("Plan 'Monthly Pro' not found. Skipping subscriptions.");
+    console.warn("Plan 'Standard Plan' not found. Skipping subscriptions.");
     return;
   }
 
@@ -41,7 +43,7 @@ export async function seedSubscriptions() {
   }
 
   const existingSubscription = await prisma.subscription.findFirst({
-    where: { userId: student.user_id }
+    where: { userId: student.user_id },
   });
 
   if (existingSubscription) {
@@ -52,7 +54,7 @@ export async function seedSubscriptions() {
         status: "active",
         amount: parseFloat(plan.price) || 50,
         currencyId: currency.id,
-        paidAt: new Date()
+        paidAt: new Date(),
       },
     });
   } else {
@@ -63,12 +65,12 @@ export async function seedSubscriptions() {
         status: "active",
         amount: parseFloat(plan.price) || 50,
         currencyId: currency.id,
-        paidAt: new Date()
+        paidAt: new Date(),
       },
     });
   }
 
-  console.log("Seeded subscriptions.");
+  console.log("Seeded subscriptions successfully.");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

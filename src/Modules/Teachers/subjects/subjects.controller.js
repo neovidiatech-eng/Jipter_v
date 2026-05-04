@@ -12,8 +12,7 @@ export const getSubjects = asyncHandler(async (req, res, next) => {
 
   if (search) {
     where.OR = [
-      { name_en: { contains: search } },
-      { name_ar: { contains: search } },
+      { name: { contains: search, mode: "insensitive" } },
     ];
   }
 
@@ -25,7 +24,6 @@ export const getSubjects = asyncHandler(async (req, res, next) => {
     db.count({ model: "subjects" }),
     db.count({ model: "subjects", where: { active: true } }),
   ]);
-
 
   const subjects = await db.findMany({
     model: "subjects",
@@ -45,15 +43,29 @@ export const getSubjects = asyncHandler(async (req, res, next) => {
   });
 });
 export const createSubject = asyncHandler(async (req, res, next) => {
-  const { name_en, name_ar, active, color } = req.body;
+  const { name, rankId, active, color } = req.body;
 
   const existsSubject = await db.findOne({
     model: "subjects",
     where: {
-      name_en,
-      name_ar,
+      name,
+      rankId,
     },
   });
+  const rankExists = await db.findOne({
+    model: "ranks",
+    where: {
+      id: rankId,
+    },
+  });
+  if (!rankExists) {
+    return errorResponse({
+      req,
+      next,
+      message: "RANK_NOT_FOUND",
+      status: 404,
+    });
+  }
 
   if (existsSubject) {
     return errorResponse({
@@ -67,8 +79,8 @@ export const createSubject = asyncHandler(async (req, res, next) => {
   const subject = await db.create({
     model: "subjects",
     data: {
-      name_en,
-      name_ar,
+      name,
+      rankId,
       active,
       color,
     },
@@ -93,7 +105,7 @@ export const createSubject = asyncHandler(async (req, res, next) => {
 
 export const updateSubject = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name_en, name_ar, active, color } = req.body;
+  const { name, rankId, active, color } = req.body;
 
   const subject = await db.findOne({
     model: "subjects",
@@ -115,8 +127,8 @@ export const updateSubject = asyncHandler(async (req, res, next) => {
       model: "subjects",
       where: {
         OR: [
-          name_en ? { name_en } : undefined,
-          name_ar ? { name_ar } : undefined,
+        name ? { name } : undefined,
+        rankId ? { rankId } : undefined,
         ].filter(Boolean),
         NOT: { id },
       },
@@ -134,8 +146,8 @@ export const updateSubject = asyncHandler(async (req, res, next) => {
 
   // Prepare data for update (only sent fields)
   const data = {};
-  if (name_en !== undefined) data.name_en = name_en;
-  if (name_ar !== undefined) data.name_ar = name_ar;
+  if (name !== undefined) data.name = name;
+  if (rankId !== undefined) data.rankId = rankId;
   if (active !== undefined) data.active = active;
   if (color !== undefined) data.color = color;
 

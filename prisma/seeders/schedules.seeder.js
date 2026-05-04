@@ -27,9 +27,7 @@ export async function seedSchedules() {
   const student = await prisma.student.findFirst({
     where: { user: { email: "john.doe@jipter.com" } },
   });
-  const subject = await prisma.subjects.findFirst({
-    where: { name_en: "Mathematics" },
-  });
+  const subject = await prisma.subjects.findFirst({ where: { name: "Math" } });
 
   if (!teacher || !student || !subject) {
     console.warn(

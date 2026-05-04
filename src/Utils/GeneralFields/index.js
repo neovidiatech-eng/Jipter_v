@@ -8,7 +8,12 @@ export const generalFeilds = {
     "any.required": "Role name is required",
   }),
   url: Joi.string().uri(),
-
+  platform: Joi.string().valid("zoom", "google").messages({
+    "string.base": "Platform must be a string",
+    "string.empty": "Platform cannot be empty",
+    "any.only": "Platform must be either 'zoom' or 'google'",
+    "any.required": "Platform is required",
+  }),
   permission_name: Joi.string().min(3).max(32).messages({
     "string.base": "Permission name must be a string",
     "string.empty": "Permission name cannot be empty",
@@ -276,5 +281,22 @@ export const generalFeilds = {
       "string.empty": "Color cannot be empty",
       "string.pattern.base": "Color must be a valid hex color",
       "any.required": "Color is required",
+    }),
+
+  ageRange: Joi.object({
+    minAge: Joi.number().positive().required().messages({
+      "number.base": "Minimum age must be a number",
+      "number.positive": "Minimum age must be a positive number",
+      "any.required": "Minimum age is required",
+    }),
+    maxAge: Joi.number().positive().required().messages({
+      "number.base": "Maximum age must be a number",
+      "number.positive": "Maximum age must be a positive number",
+      "any.required": "Maximum age is required",
+    }),
+  })
+    .required()
+    .messages({
+      "any.required": "Age range is required",
     }),
 };

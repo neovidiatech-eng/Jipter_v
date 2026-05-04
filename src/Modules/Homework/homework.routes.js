@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../Middlewares/Authentication.js";
+import authentication from "../../Middlewares/Authentication.js";
 import { validation } from "../../Middlewares/Validation.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import * as homeworkController from "./homework.controller.js";
@@ -10,7 +10,7 @@ const router = Router();
 
 router.post(
   "/",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.createHomework }),
   validation(schema.createHomework),
   homeworkController.createHomework,
@@ -18,7 +18,7 @@ router.post(
 
 router.patch(
   "/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.updateHomework }),
   validation(schema.updateHomework),
   homeworkController.updateHomework,
@@ -26,7 +26,7 @@ router.patch(
 
 router.delete(
   "/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.deleteHomework }),
   validation(schema.deleteHomework),
   homeworkController.deleteHomework,
@@ -34,21 +34,21 @@ router.delete(
 
 router.get(
   "/student/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getHomework }),
   validation(schema.getHomework),
   homeworkController.getHomework,
 );
 router.get(
   "/student-homework",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getHomework }),
   homeworkController.getStudentHomework,
 );
 
 router.get(
   "/",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getHomework }), // Sharing getHomework roles for list as well
   validation(schema.getAllHomework),
   homeworkController.getAllHomework,

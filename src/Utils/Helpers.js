@@ -68,3 +68,17 @@ export const normalizeDate = (date) => {
 };
 
 export { getDatesBetweenUTC, combineDateAndTime };
+
+export const getImageUrl = (image, req) => {
+    if (!image) return null;
+    if (image.secure_url) return image.secure_url;
+    
+    // For local files, construct URL
+    if (typeof image === 'string' && image.startsWith('uploads')) {
+        const protocol = req.protocol;
+        const host = req.get('host');
+        return `${protocol}://${host}/${image}`;
+    }
+    
+    return image;
+};

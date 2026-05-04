@@ -14,15 +14,17 @@ export async function seedSubscriptionRequests() {
 
   const student = await prisma.student.findFirst({
     where: { user: { email: "john.doe@jipter.com" } },
-    include: { user: true }
+    include: { user: true },
   });
 
   const plan = await prisma.plans.findFirst({
-    where: { name_en: "Monthly Pro" }
+    where: { name_en: "Monthly Pro" },
   });
 
   if (!student || !student.user_id) {
-    console.warn("Student or associated user not found. Skipping subscription requests.");
+    console.warn(
+      "Student or associated user not found. Skipping subscription requests.",
+    );
     return;
   }
 
@@ -32,7 +34,7 @@ export async function seedSubscriptionRequests() {
   }
 
   const existingRequest = await prisma.subscription_requests.findFirst({
-    where: { user_id: student.user_id }
+    where: { user_id: student.user_id },
   });
 
   if (existingRequest) {
@@ -53,7 +55,7 @@ export async function seedSubscriptionRequests() {
     });
   }
 
-  console.log("Seeded subscription requests.");
+  console.log("Seeded subscription requests successfully.");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

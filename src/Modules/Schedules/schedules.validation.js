@@ -12,6 +12,7 @@ export const createSchedule = {
           "string.pattern.base": "STUDENT_ID_INVALID",
         })
         .required(),
+      platform: generalFeilds.platform.required(),
       teacherId: generalFeilds.id
         .messages({
           "string.empty": "TEACHER_ID_REQUIRED",

@@ -3,8 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import dotenv from "dotenv";
 import { seedCurrencies } from "./seeders/currency.seeder.js";
-import { seedPlans } from "./seeders/plans.seeder.js";
 import { seedSubjects } from "./seeders/subjects.seeder.js";
+import { seedPlans } from "./seeders/plans.seeder.js";
 import { seedPermissions } from "./seeders/permissions.seeder.js";
 import { seedRoles } from "./seeders/roles.seeder.js";
 import { seedRolePermissions } from "./seeders/rolePermission.seeder.js";
@@ -12,11 +12,12 @@ import { seedStuff } from "./seeders/stuff.seeder.js";
 import { seedTeachers } from "./seeders/teachers.seeder.js";
 import { seedStudents } from "./seeders/student.seeder.js";
 import { seedSchedules } from "./seeders/schedules.seeder.js";
-import { seedTeacherSubjects } from "./seeders/teacherSubject.seeder.js";
 import { seedSubscriptionRequests } from "./seeders/subscriptionRequests.seeder.js";
 import { seedExpenses } from "./seeders/expenses.seeder.js";
 import { seedSubscriptions } from "./seeders/subscriptions.seeder.js";
 import { seedSystemWallet } from "./seeders/systemWallet.seeder.js";
+import { seedSessionRequests } from "./seeders/sessionRequests.seeder.js";
+import { seedRanks } from "./seeders/ranks.seeder.js";
 
 dotenv.config();
 
@@ -28,19 +29,20 @@ async function main() {
   console.log("--- Starting Global Seeding ---");
 
   await seedCurrencies();
-  await seedPlans();
+  await seedRanks();
   await seedSubjects();
+  await seedPlans();
   await seedPermissions();
   await seedRoles();
   await seedRolePermissions();
   await seedStuff();
   await seedTeachers();
-  await seedTeacherSubjects();
   await seedStudents();
   await seedSubscriptionRequests();
   await seedSchedules();
   await seedExpenses();
   await seedSystemWallet();
+  await seedSessionRequests();
 
   console.log("--- Seeding Finished Successfully ---");
 }

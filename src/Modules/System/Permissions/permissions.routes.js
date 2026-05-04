@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../../Middlewares/Authentication.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import { authorization } from "../../../Middlewares/Authorization.js";
 import { validation } from "../../../Middlewares/Validation.js";
 import * as permissionsController from "./permissions.controller.js";
@@ -14,14 +14,14 @@ const router = Router();
 
 router.get(
   "/",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getAllPermissions }),
   permissionsController.getAllPermissions,
 );
 
 router.post(
   "/create",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.createPermission }),
   validation(createPermissionSchema),
   permissionsController.createPermission,
@@ -29,7 +29,7 @@ router.post(
 
 router.patch(
   "/update/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.updatePermission }),
   validation(updatePermissionSchema),
   permissionsController.updatePermission,
@@ -37,7 +37,7 @@ router.patch(
 
 router.delete(
   "/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.deletePermission }),
   validation(deletePermissionSchema),
   permissionsController.deletePermission,

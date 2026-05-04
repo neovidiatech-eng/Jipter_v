@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../Middlewares/Authentication.js";
+import authentication from "../../Middlewares/Authentication.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import { validation } from "../../Middlewares/Validation.js";
 import permissionsRouter from "./Permissions/permissions.routes.js";
@@ -20,14 +20,14 @@ router.use("/stuff", stuffRouter);
 
 router.get(
   "/roles",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getAllRoles }),
   systemController.getAllRoles,
 );
 
 router.post(
   "/roles/create",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.createRoles }),
   validation(createRoleSchema),
   systemController.createRole,
@@ -35,7 +35,7 @@ router.post(
 
 router.post(
   "/roles/assign/:user_id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.assignRole }),
   validation(assignRoleSchema),
   systemController.assignRoleToUser,
@@ -43,7 +43,7 @@ router.post(
 
 router.patch(
   "/roles/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.updateRole }),
   validation(updateRoleSchema),
   systemController.updateRole,
@@ -51,7 +51,7 @@ router.patch(
 
 router.delete(
   "/roles/:id",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.deleteRole }),
   validation(deleteRoleSchema),
   systemController.deleteRole,

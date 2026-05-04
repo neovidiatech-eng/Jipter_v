@@ -20,6 +20,8 @@ import teacherDashboardRouter from "./Modules/TeacherDashboard/TeacherDashboard.
 import transactionsRouter from "./Modules/Transactions/Transactions/Transactions.routes.js";
 import withdrawalsRouter from "./Modules/Withdrawals/withdrawals.routes.js";
 import chatRouter from "./Modules/chat/chat.routes.js";
+import settingsRouter from "./Modules/Settings/settings.routes.js";
+import materialsRouter from "./Modules/matrials/matrials.routes.js";
 const rootRouter = Router();
 
 // API Routes
@@ -40,7 +42,8 @@ rootRouter.use("/exams", examRouter);
 rootRouter.use("/session-requests", sessionRequestsRouter);
 rootRouter.use("/withdrawals", withdrawalsRouter);
 rootRouter.use("/chat", chatRouter);
-
+rootRouter.use("/settings", settingsRouter);
+rootRouter.use("/materials", materialsRouter);
 
 // Static files
 rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));

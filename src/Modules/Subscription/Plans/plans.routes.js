@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../../Middlewares/Authentication.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import * as plans from "./plans.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
 import {
@@ -12,19 +12,19 @@ const router = Router();
 router.get("/", plans.getAllPlans);
 router.post(
   "/",
-  authentication(),
+  authentication,
   validation(createPlanSchema),
   plans.createPlan,
 );
 router.patch(
   "/:id",
-  authentication(),
+  authentication,
   validation(updatePlanSchema),
   plans.updatePlan,
 );
 router.delete(
   "/:id",
-  authentication(),
+  authentication,
   validation(deletePlanSchema),
   plans.deletePlan,
 );

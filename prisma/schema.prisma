@@ -20,6 +20,7 @@ model user {
   status               String                  @default("pending")
   googleId             String?                 @unique
   provider             String                  @default("local")
+  image                Json?
   reviewsReceived      Review[]                @relation("ReviewsReceived")
   reviewsGiven         Review[]                @relation("ReviewsGiven")
   subscriptions        Subscription[]
@@ -90,6 +91,7 @@ model currency {
   expenses           expenses[]
   teachers           teacher[]
   withdrawalRequests WithdrawalRequest[]
+  ranks              ranks[]
 
   @@index([name_en])
   @@index([name_ar])
@@ -121,20 +123,21 @@ model Plans {
 }
 
 model subjects {
-  id              String            @id @default(uuid())
-  name_en         String            @unique
-  name_ar         String            @unique
-  active          Boolean           @default(false)
-  color           String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  exams           exam[]
-  homeworks       homework[]
-  schedules       schedule[]
-  teacherSubjects teacher_subject[]
+  id        String     @id @default(uuid())
+  name      String     @default(dbgenerated("1"))
+  active    Boolean    @default(false)
+  color     String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  rankId    String
+  rank      ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  exams     exam[]
+  homeworks homework[]
+  schedules schedule[]
 
-  @@index([name_en])
-  @@index([name_ar])
+  @@unique([name, rankId], name: "name_rankId")
+  @@index([name])
+  @@index([rankId])
 }
 
 model subscription_requests {
@@ -162,93 +165,81 @@ model stuff {
 }
 
 model teacher {
-  id              String            @id @default(uuid())
-  user_id         String            @unique
-  currencyId      String
-  hour_price      Float
-  gender          String
-  active          Boolean           @default(false)
-  roleId          String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  avgRating       Float             @default(0)
-  totalReviews    Int               @default(0)
-  exams           exam[]
-  homeworks       homework[]
-  schedules       schedule[]
-  currency        currency          @relation(fields: [currencyId], references: [id])
-  role            role?             @relation(fields: [roleId], references: [id])
-  user            user              @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  teacherSubjects teacher_subject[]
-  conversations   Conversation[]
-}
+  id           String     @id @default(uuid())
+  user_id      String     @unique
+  currencyId   String
+  hour_price   Float
+  gender       String
+  active       Boolean    @default(false)
+  roleId       String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  avgRating    Float      @default(0)
+  totalReviews Int        @default(0)
+  exams        exam[]
+  homeworks    homework[]
+  schedules    schedule[]
+  currency     currency   @relation(fields: [currencyId], references: [id])
+  role         role?      @relation(fields: [roleId], references: [id])
+  user         user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-model teacher_subject {
-  id        String   @id @default(uuid())
-  teacherId String
-  subjectId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  subject   subjects @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  teacher   teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-
-  @@unique([teacherId, subjectId])
-  @@index([teacherId])
-  @@index([subjectId])
+  conversations Conversation[]
 }
 
 model student {
-  id                 String     @id @default(uuid())
-  user_id            String     @unique
+  id                 String         @id @default(uuid())
+  user_id            String         @unique
   birth_date         DateTime
   gender             String
-  active             Boolean    @default(false)
+  active             Boolean        @default(false)
   planId             String?
   country            String
-  status             String     @default("pending")
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  sessions           Float      @default(0)
-  sessions_attended  Float      @default(0)
-  sessions_remaining Float      @default(0)
-  avgRating          Float      @default(0)
-  totalReviews       Int        @default(0)
+  status             String         @default("pending")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  sessions           Float          @default(0)
+  sessions_attended  Float          @default(0)
+  sessions_remaining Float          @default(0)
+  avgRating          Float          @default(0)
+  totalReviews       Int            @default(0)
   exams              exam[]
   homeworks          homework[]
   schedules          schedule[]
-  plan               Plans?     @relation(fields: [planId], references: [id])
-  user               user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan               Plans?         @relation(fields: [planId], references: [id])
+  user               user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
   conversations      Conversation[]
 }
 
 model schedule {
-  id                  String            @id @default(uuid())
+  id                  String   @id @default(uuid())
   teacherId           String
   studentId           String
-  status              String            @default("scheduled")
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  status              String   @default("scheduled")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   notes               String?
   description         String
   link                String
   title               String
-  type                String            @default("half")
+  platform            String?  @default("zoom")
+  type                String   @default("half")
   end_time            DateTime
   start_time          DateTime
   day_of_week         String?
-  is_recurring        Boolean           @default(false)
+  is_recurring        Boolean  @default(false)
   parent_recurring_id String?
-  subjectId           String            @default("null")
-  rescheduledFromId   String?           @unique
-  rescheduledToId     String?           @unique
-  reviews             Review[]
-  scheduleLogs        ScheduleLog?
-  rescheduledTo       schedule?         @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
-  rescheduledFrom     schedule?         @relation("RescheduleHistory")
-  student             student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject             subjects          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  teacher             teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  requests            session_request[]
+  subjectId           String   @default("null")
+  rescheduledFromId   String?  @unique
+
+  rescheduledToId String?           @unique
+  reviews         Review[]
+  scheduleLogs    ScheduleLog?
+  rescheduledTo   schedule?         @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
+  rescheduledFrom schedule?         @relation("RescheduleHistory")
+  student         student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject         subjects          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher         teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  requests        session_request[]
 
   @@index([teacherId])
   @@index([studentId])
@@ -268,6 +259,7 @@ model session_request {
   requestedData Json?
   adminId       String?
   adminNotes    String?
+  attachments   Json?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   requester     user      @relation(fields: [requesterId], references: [id], onDelete: Cascade)
@@ -475,4 +467,19 @@ model Message {
   @@index([conversationId])
   @@index([senderId])
   @@index([createdAt])
+}
+
+model ranks {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  slug       String     @unique
+  color      String?
+  ageRange   Json
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  subjects   subjects[]
+  currency   currency?  @relation(fields: [currencyId], references: [id])
+  currencyId String?
+
+  @@index([name])
 }

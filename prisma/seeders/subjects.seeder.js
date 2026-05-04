@@ -10,43 +10,44 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 export const subjects = [
-  {
-    name_en: "Mathematics",
-    name_ar: "الرياضيات",
-    active: true,
-    color: "#3498db",
-  },
-  { name_en: "Physics", name_ar: "الفيزياء", active: true, color: "#e74c3c" },
-  { name_en: "Chemistry", name_ar: "الكيمياء", active: true, color: "#2ecc71" },
-  { name_en: "Biology", name_ar: "الأحياء", active: true, color: "#f1c40f" },
-  {
-    name_en: "English",
-    name_ar: "اللغة الإنجليزية",
-    active: true,
-    color: "#9b59b6",
-  },
-  {
-    name_en: "Arabic",
-    name_ar: "اللغة العربية",
-    active: true,
-    color: "#34495e",
-  },
-  { name_en: "History", name_ar: "التاريخ", active: true, color: "#e67e22" },
-  {
-    name_en: "Geography",
-    name_ar: "الجغرافيا",
-    active: true,
-    color: "#1abc9c",
-  },
+  { name: "Mathematics", active: true, color: "#3498db" },
+  { name: "Physics", active: true, color: "#e74c3c" },
+  { name: "Chemistry", active: true, color: "#2ecc71" },
+  { name: "Biology", active: true, color: "#f1c40f" },
+  { name: "English", active: true, color: "#9b59b6" },
+  { name: "Arabic", active: true, color: "#34495e" },
+  { name: "History", active: true, color: "#e67e22" },
+  { name: "Geography", active: true, color: "#1abc9c" },
 ];
 
 export async function seedSubjects() {
   console.log("Start seeding subjects...");
+
+  const silverRank = await prisma.ranks.findUnique({
+    where: { slug: "silver" },
+  });
+
+  if (!silverRank) {
+    console.warn("Silver rank not found, skipping subjects seeding.");
+    return;
+  }
+
   for (const subject of subjects) {
     await prisma.subjects.upsert({
-      where: { name_en: subject.name_en },
-      update: subject,
-      create: subject,
+      where: {
+        name_rankId: {
+          name: subject.name,
+          rankId: silverRank.id,
+        },
+      },
+      update: {
+        ...subject,
+        rankId: silverRank.id,
+      },
+      create: {
+        ...subject,
+        rankId: silverRank.id,
+      },
     });
   }
   console.log("Seeded subjects.");

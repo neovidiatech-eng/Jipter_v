@@ -2,17 +2,19 @@ import { Router } from "express";
 import * as sessionRequestsController from "./sessionRequests.controller.js";
 import * as sessionRequestsValidation from "./sessionRequests.validation.js";
 import { validation } from "../../Middlewares/Validation.js";
-import { authentication } from "../../Middlewares/Authentication.js";
+import authentication from "../../Middlewares/Authentication.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import { endpoints } from "./sessionRequests.authorization.js";
+import { cloudinaryMulterUpload, fileValidation } from "../../Utils/Multer/index.js";
 
 const router = Router();
 
 // Create Request
 router.post(
   "/",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.createRequest }),
+  cloudinaryMulterUpload({ validation: [...fileValidation.image, ...fileValidation.document] }).array("attachments", 5),
   validation(sessionRequestsValidation.createRequest),
   sessionRequestsController.createRequest,
 );
@@ -20,13 +22,13 @@ router.post(
 // Admin: Get All
 router.get(
   "/all",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getAllRequests }),
   sessionRequestsController.getAllRequests,
 );
 router.get(
   "/my-requests",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getMyRequests }),
   sessionRequestsController.getMyRequests,
 );
@@ -34,7 +36,7 @@ router.get(
 // Admin: Approve
 router.patch(
   "/:id/approve",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.handleRequest }),
   validation(sessionRequestsValidation.handleRequest),
   sessionRequestsController.approveRequest,
@@ -43,7 +45,7 @@ router.patch(
 // Admin: Reject
 router.patch(
   "/:id/reject",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.handleRequest }),
   validation(sessionRequestsValidation.handleRequest),
   sessionRequestsController.rejectRequest,

@@ -4,53 +4,47 @@ import path from "node:path"
 import fs from "node:fs"
 
 export const fileValidation = {
-     image: ["image/png", "image/jpeg", "image/jpg"],
-     pdf: ["application/pdf"]
-}
+    image: ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"],
+    video: ["video/mp4", "video/mpeg", "video/ogg", "video/webm"],
+    pdf: ["application/pdf"],
+    document: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ]
+};
 export const localMulterUpload = ({ customPath = "general", validation = [] } = {}) => {
-     let finalPath;
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+            let basePath = `uploads/${customPath}`;
+            if (req.user?.id) {
+                basePath += `/${req.user.id}`;
+            }
 
-     const fileFilter = function (req, file, cb) {
+            const fullPath = path.resolve(`./src/${basePath}`);
+            if (!fs.existsSync(fullPath)) {
+                fs.mkdirSync(fullPath, { recursive: true });
+            }
 
-          if (validation.includes(file.mimetype)) {
-               return cb(null, true)
-          }
-          return cb(new Error("inVaild File Format"), false)
+            file.finalPath = `${basePath}`;
+            cb(null, fullPath);
+        },
+        filename: function (req, file, cb) {
+            const uniqueFileName = `${customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 10)()}-${file.originalname}`;
+            file.finalPath = `${file.finalPath}/${uniqueFileName}`;
+            cb(null, uniqueFileName);
+        }
+    });
 
-     }
+    const fileFilter = (req, file, cb) => {
+        if (validation.length === 0 || validation.includes(file.mimetype)) {
+            return cb(null, true);
+        }
+        return cb(new Error("Invalid File Format"), false);
+    };
 
-     const storage = multer.diskStorage({
-          destination: function (req, file, cb) {
-               let basePath = `uploads/${customPath}`
-               if (req.user?.user_id) {
-                    basePath += `/${req.user?.user_id}`
-               }
-
-
-               finalPath = basePath
-               const fullPath = path.resolve(`./src/${basePath}`)
-
-
-
-               if (!fs.existsSync(fullPath)) {
-                    fs.mkdirSync(fullPath, { recursive: true })
-               }
-
-               cb(null, path.resolve(fullPath))
-          },
-          filename: function (req, file, cb) {
-               const uniqueFileName = `${customAlphabet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 5)()}-${file.originalname}`;
-               file.finalPath = `${finalPath}/${uniqueFileName}`
-               cb(null, uniqueFileName)
-          }
-     })
-
-     return multer({
-          dest: "./temp",
-          fileFilter,
-          storage
-     })
-}
+    return multer({ fileFilter, storage });
+};
 
 
 

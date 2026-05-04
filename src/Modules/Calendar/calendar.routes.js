@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authentication } from "../../Middlewares/Authentication.js";
+import authentication from "../../Middlewares/Authentication.js";
 import * as calendarController from "./calendar.controller.js";
 import { validation } from "../../Middlewares/Validation.js";
 import * as schema from "./calendar.validation.js";
@@ -8,27 +8,27 @@ import { authorization } from "../../Middlewares/Authorization.js";
 const router = Router();
 router.get(
   "/",
-  authentication(),
+  authentication,
   validation(schema.getCalendar),
   calendarController.getCalendar,
 );
 router.get(
   "/student",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getStudentCalendar }),
   validation(schema.getStudentCalendar),
   calendarController.getStudentCalendar,
 );
 router.get(
   "/teacher",
-  authentication(),
+  authentication,
   authorization({ accessRoles: endpoints.getTeacherCalendar }),
   validation(schema.getTeacherCalendar),
   calendarController.getTeacherCalendar,
 );
 router.get(
   "/teachers",
-  authentication(),
+  authentication,
   validation(schema.getTeachersCalendar),
   calendarController.getTeachersCalendar,
 );

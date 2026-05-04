@@ -5,6 +5,7 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { normalizeDate } from "../../Utils/Helpers.js";
+import { uploadToCloudinary } from "../../Utils/Cloudinary/upload.js";
 
 // 1. Create Request (Teacher/Student)
 export const createRequest = asyncHandler(async (req, res, next) => {
@@ -27,6 +28,13 @@ export const createRequest = asyncHandler(async (req, res, next) => {
       });
     }
   }
+  // Handle attachments if any
+  let attachments = [];
+  if (req.files && req.files.length > 0) {
+    const uploadPromises = req.files.map(file => uploadToCloudinary(file, "attachments"));
+    attachments = await Promise.all(uploadPromises);
+  }
+
   const request = await db.create({
     model: "session_request",
     data: {
@@ -37,6 +45,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
       reason,
       requestedData,
       status: "pending",
+      attachments: attachments.length > 0 ? attachments : null,
     },
   });
 
@@ -72,13 +81,31 @@ export const getAllRequests = asyncHandler(async (req, res, next) => {
     model: "session_request",
     where,
     include: {
-      requester: { select: { name: true, email: true } },
+      requester: {
+        select: {
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
       schedule: true,
     },
     orderBy: { createdAt: "desc" },
   });
+  let student_requests = [];
+  let teachers_requests = [];
+  for (const request of requests) {
+    if (request.requesterRole === "student") {
+      student_requests.push(request);
+    } else if (request.requesterRole === "teacher") {
+      teachers_requests.push(request);
+    }
+  }
 
-  return successResponse({ res, data: requests });
+  return successResponse({
+    res,
+    data: { student_requests, teachers_requests },
+  });
 });
 
 // 3. Approve Request (Admin)

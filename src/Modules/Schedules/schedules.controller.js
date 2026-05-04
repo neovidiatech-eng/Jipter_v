@@ -117,6 +117,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     notes,
     date,
     start_time,
+    platform,
     type,
   } = req.body;
   /* check if student and teacher exist */
@@ -205,6 +206,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         studentId,
         teacherId,
         title,
+        platform,
         description,
         link,
         notes,

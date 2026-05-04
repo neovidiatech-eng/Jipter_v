@@ -3,27 +3,45 @@ import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
 
 export const createSubjectSchema = {
   body: Joi.object({
-    name_en: generalFeilds.name_en.required(),
-    name_ar: generalFeilds.name_ar.required(),
-    active: generalFeilds.active.required(),
+    name: generalFeilds.name.required(),
     color: generalFeilds.color.required(),
+    rankId: generalFeilds.id
+      .messages({
+        "string.empty": "RANK_REQUIRED",
+        "any.required": "RANK_REQUIRED",
+      })
+      .required(),
   }),
 };
 
 export const updateSubjectSchema = {
   body: Joi.object({
-    name_en: generalFeilds.name_en,
-    name_ar: generalFeilds.name_ar,
+    name: generalFeilds.name,
     active: generalFeilds.active,
     color: generalFeilds.color,
+    rankId: generalFeilds.id
+      .messages({
+        "string.empty": "RANK_REQUIRED",
+        "any.required": "RANK_REQUIRED",
+      }),
   }),
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFeilds.id
+      .messages({
+        "string.empty": "ID_REQUIRED",
+        "any.required": "ID_REQUIRED",
+      })
+      .required(),
   }),
 };
 
 export const deleteSubjectSchema = {
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFeilds.id
+      .messages({
+        "string.empty": "ID_REQUIRED",
+        "any.required": "ID_REQUIRED",
+      })
+      .required(),
   }),
 };

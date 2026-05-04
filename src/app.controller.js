@@ -57,6 +57,7 @@ const bootstrap = async () => {
   app.use(express.json());
   app.use(langMiddleware); // Detect language for all requests
   await redisConnection();
+  app.use("/uploads", express.static(path.resolve("./src/uploads")));
 
   // Root Router
   app.use(rootRouter);
