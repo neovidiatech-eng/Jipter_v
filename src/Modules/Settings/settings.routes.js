@@ -1,15 +1,25 @@
 import { Router } from "express";
 import * as settingsController from "./settings.controller.js";
 import authentication from "../../Middlewares/Authentication.js";
-import { cloudinaryMulterUpload, fileValidation } from "../../Utils/Multer/index.js";
+import {
+  cloudinaryMulterUpload,
+  fileValidation,
+} from "../../Utils/Multer/index.js";
+
+import { validation } from "../../Middlewares/Validation.js";
+import { updateSettingsSchema } from "./settings.validation.js";
+import { authorization } from "../../Middlewares/Authorization.js";
 
 const router = Router();
 
+router.get("/", settingsController.getSettings);
+
 router.patch(
-    "/profile-image",
-    authentication,
-    cloudinaryMulterUpload({ validation: fileValidation.image }).single("image"),
-    settingsController.updateProfileImage
+  "/",
+  authentication,
+  authorization({ accessRoles: ["super_admin", "admin"] }),
+  validation(updateSettingsSchema),
+  settingsController.updateSettings,
 );
 
 export default router;

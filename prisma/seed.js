@@ -18,6 +18,7 @@ import { seedSubscriptions } from "./seeders/subscriptions.seeder.js";
 import { seedSystemWallet } from "./seeders/systemWallet.seeder.js";
 import { seedSessionRequests } from "./seeders/sessionRequests.seeder.js";
 import { seedRanks } from "./seeders/ranks.seeder.js";
+import { seedSettings } from "./seeders/settings.seeder.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ async function main() {
   console.log("--- Starting Global Seeding ---");
 
   await seedCurrencies();
+  await seedSettings();
   await seedRanks();
   await seedSubjects();
   await seedPlans();

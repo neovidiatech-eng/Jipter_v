@@ -66,12 +66,13 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     active,
   } = req.body;
 
-  const [checkUserByEmail, checkUserByPhone, checkCurrency, getrole] =
+  const [checkUserByEmail, checkUserByPhone, checkCurrency, getrole, settings] =
     await Promise.all([
       db.findOne({ model: "user", where: { email } }),
       db.findFirst({ model: "user", where: { phone } }),
       db.findOne({ model: "currency", where: { id: currency_id } }),
       db.findFirst({ model: "role", where: { name: "teacher" } }),
+      db.findFirst({ model: "settings" }),
     ]);
 
   if (!getrole)
@@ -94,12 +95,16 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
   const hashedPassword = await hash({ password });
 
   // 🔥 كل حاجة في transaction واحدة
+  const prefix = settings?.userPrefix || "jupiter";
+  const username = `${name}_${prefix}`;
+
   const result = await db.transaction(async (tx) => {
     const user = await tx.create({
       model: "user",
       data: {
         name,
         email,
+        username,
         password: hashedPassword,
         phone,
         code_country,

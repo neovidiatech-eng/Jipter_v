@@ -35,9 +35,10 @@ export const register = asyncHandler(async (req, res, next) => {
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, checkUserByPhone] = await Promise.all([
+  const [checkUserByEmail, checkUserByPhone, settings] = await Promise.all([
     db.findFirst({ model: "user", where: { email } }),
     db.findFirst({ model: "user", where: { phone } }),
+    db.findFirst({ model: "settings" }),
   ]);
 
   const userRole = await db.findFirst({
@@ -97,11 +98,15 @@ export const register = asyncHandler(async (req, res, next) => {
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
     // Create User record
+    const prefix = settings?.userPrefix || "jupiter";
+    const username = `${name}_${prefix}`;
+
     const user = await tx.create({
       model: "user",
       data: {
         name,
         email,
+        username,
         password: hashedPassword,
         phone: encryptedPhone,
         code_country: codeCountry,
@@ -148,8 +153,8 @@ export const register = asyncHandler(async (req, res, next) => {
 });
 
 export const login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const { username, password } = req.body;
+  if (!username || !password) {
     return errorResponse({
       req,
       next,
@@ -160,7 +165,7 @@ export const login = asyncHandler(async (req, res, next) => {
   const user = await db.findFirst({
     model: "user",
     where: {
-      email,
+      username,
     },
     include: {
       role: {
@@ -474,13 +479,18 @@ export const googleSignUp = asyncHandler(async (req, res, next) => {
   });
 
   if (!user) {
+    const settings = await db.findFirst({ model: "settings" });
+    const prefix = settings?.userPrefix || "jupiter";
     const fullName = `${verify.given_name} ${verify.family_name}`;
+    const username = `${fullName}_${prefix}`;
+
     await db.transaction(async (tx) => {
       user = await tx.create({
         model: "user",
         data: {
           name: fullName,
           email: verify.email,
+          username,
           provider: "google",
           googleId: verify.sub,
           confirmAt: new Date().toISOString(),

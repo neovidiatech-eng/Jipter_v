@@ -24,7 +24,7 @@ export const updatePlanSchema = {
     sessionsCount: Joi.number().integer().min(0),
     rescheduleCount: Joi.number().integer().min(0),
     active: Joi.boolean(),
-    features: Joi.object(),
+    features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid(),
   }),
 };

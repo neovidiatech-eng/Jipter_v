@@ -1,39 +1,66 @@
 import { asyncHandler, successResponse, errorResponse } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../../Utils/Cloudinary/upload.js";
 
-export const updateProfileImage = asyncHandler(async (req, res, next) => {
-    if (!req.file) {
-        return errorResponse({ req, next, message: "FILE_REQUIRED", status: 400 });
-    }
-
-    const user = await db.findOne({
-        model: "user",
-        where: { id: req.user.id }
+export const getSettings = asyncHandler(async (req, res, next) => {
+    let settings = await db.findFirst({
+        model: "settings"
     });
 
-    // Delete old image from Cloudinary if it exists
-    if (user.image && user.image.public_id) {
-        await deleteFromCloudinary(user.image.public_id);
+    if (!settings) {
+        settings = await db.create({
+            model: "settings",
+            data: {
+                userPrefix: "jupiter",
+                socialLinks: {},
+                contactInfo: {}
+            }
+        });
     }
-
-    // Upload new image
-    const { secure_url, public_id } = await uploadToCloudinary(req.file, "profiles");
-
-    // Update user record
-    const updatedUser = await db.updateOne({
-        model: "user",
-        where: { id: req.user.id },
-        data: {
-            image: { secure_url, public_id }
-        }
-    });
 
     return successResponse({
         res,
         req,
-        message: "PROFILE_IMAGE_UPDATED",
-        data: { image: updatedUser.image },
+        message: "FETCH_SUCCESS",
+        data: settings,
         status: 200
     });
 });
+
+export const updateSettings = asyncHandler(async (req, res, next) => {
+    const { userPrefix, socialLinks, contactInfo } = req.body;
+
+    let settings = await db.findFirst({
+        model: "settings"
+    });
+
+    if (!settings) {
+        settings = await db.create({
+            model: "settings",
+            data: {
+                userPrefix: userPrefix || "jupiter",
+                socialLinks: socialLinks || {},
+                contactInfo: contactInfo || {}
+            }
+        });
+    } else {
+        const data = {};
+        if (userPrefix !== undefined) data.userPrefix = userPrefix;
+        if (socialLinks !== undefined) data.socialLinks = socialLinks;
+        if (contactInfo !== undefined) data.contactInfo = contactInfo;
+
+        settings = await db.updateOne({
+            model: "settings",
+            where: { id: settings.id },
+            data
+        });
+    }
+
+    return successResponse({
+        res,
+        req,
+        message: "UPDATE_SUCCESS",
+        data: settings,
+        status: 200
+    });
+});
+

@@ -87,7 +87,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     active,
   } = req.body;
 
-  const [checkUserByEmail, checkUserByPhone, checkPlan, studentRole] =
+  const [checkUserByEmail, checkUserByPhone, checkPlan, studentRole, settings] =
     await Promise.all([
       db.findOne({ model: "user", where: { email } }),
       db.findFirst({ model: "user", where: { phone } }),
@@ -96,6 +96,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         model: "role",
         where: { name: { equals: "student", mode: "insensitive" } },
       }),
+      db.findFirst({ model: "settings" }),
     ]);
 
   if (checkUserByEmail)
@@ -134,11 +135,15 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   await db.transaction(async (tx) => {
     // 1. Create user
+    const prefix = settings?.userPrefix || "jupiter";
+    const username = `${name}_${prefix}`;
+
     const user = await tx.create({
       model: "user",
       data: {
         name,
         email,
+        username,
         phone,
         password: hashedPassword,
         code_country: phone_code,

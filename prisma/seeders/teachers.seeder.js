@@ -41,6 +41,8 @@ export async function seedTeachers() {
   console.log("Start seeding teachers...");
 
   const salt = await bcrypt.genSalt(10);
+  const settings = await prisma.settings.findFirst();
+  const prefix = settings?.userPrefix || "jupiter";
 
   for (const item of teachersData) {
     const role = await prisma.role.findUnique({
@@ -79,12 +81,14 @@ export async function seedTeachers() {
       where: { email: item.email },
       update: {
         name: item.name,
+        username: `${item.name}_${prefix}`,
         phone: item.phone,
         code_country: item.code_country,
         roleId: role.id,
       },
       create: {
         email: item.email,
+        username: `${item.name}_${prefix}`,
         password: hashedPassword,
         name: item.name,
         phone: item.phone,

@@ -45,7 +45,7 @@ export const registeritonSchema = {
 export const loginSchema = {
   body: Joi.object()
     .keys({
-      email: generalFeilds.email.required(),
+      username: Joi.string().required(),
       password: generalFeilds.password.required(),
     })
     .required(),
