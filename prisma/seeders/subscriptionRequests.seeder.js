@@ -17,8 +17,8 @@ export async function seedSubscriptionRequests() {
     include: { user: true },
   });
 
-  const plan = await prisma.plans.findFirst({
-    where: { name_en: "Monthly Pro" },
+  const plan = await prisma.plan.findFirst({
+    where: { name: "Monthly Pro" },
   });
 
   if (!student || !student.user_id) {

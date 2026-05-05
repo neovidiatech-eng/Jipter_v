@@ -91,7 +91,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     await Promise.all([
       db.findOne({ model: "user", where: { email } }),
       db.findFirst({ model: "user", where: { phone } }),
-      db.findOne({ model: "Plans", where: { id: planId } }),
+      db.findOne({ model: "plan", where: { id: planId } }),
       db.findFirst({
         model: "role",
         where: { name: { equals: "student", mode: "insensitive" } },
@@ -276,7 +276,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   }
 
   if (planId && planId !== student.planId) {
-    const plan = await db.findOne({ model: "Plans", where: { id: planId } });
+    const plan = await db.findOne({ model: "plan", where: { id: planId } });
     if (!plan)
       return errorResponse({
         req,

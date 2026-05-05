@@ -17,8 +17,8 @@ export async function seedSubscriptions() {
     include: { user: true },
   });
 
-  const plan = await prisma.plans.findFirst({
-    where: { name_en: "Standard Plan" },
+  const plan = await prisma.plan.findFirst({
+    where: { name: "Standard Plan" },
   });
 
   const currency = await prisma.currency.findFirst({

@@ -17,8 +17,7 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
       OR: [
         { user: { name: { contains: search, mode: "insensitive" } } },
         { user: { email: { contains: search, mode: "insensitive" } } },
-        { plan: { name_en: { contains: search, mode: "insensitive" } } },
-        { plan: { name_ar: { contains: search, mode: "insensitive" } } },
+        { plan: { name: { contains: search, mode: "insensitive" } } },
       ],
     };
   }
@@ -168,7 +167,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
       // ✅ create subscription
       const subscription = await tx.create({
-        model: "subscription",
+        model: "Subscription",
         data: {
           userId: subscriptionRequest.user_id,
           planId: subscriptionRequest.planId,
@@ -184,7 +183,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
       // ✅ ledger (transaction)
       await tx.create({
-        model: "transaction",
+        model: "Transaction",
         data: {
           walletId: systemWallet.id,
           type: "credit",
@@ -197,7 +196,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
       // ✅ update balance
       await tx.updateOne({
-        model: "wallet",
+        model: "Wallet",
         where: { id: systemWallet.id },
         data: {
           balance: { increment: amount },

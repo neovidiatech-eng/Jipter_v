@@ -32,8 +32,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
         },
         plan: {
           id: subscription.plan.id,
-          name_en: subscription.plan.name_en,
-          name_ar: subscription.plan.name_ar,
+          name: subscription.plan.name,
           description: subscription.plan.description,
           price: subscription.plan.price,
           duration: subscription.plan.duration,
@@ -46,9 +45,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
           createdAt: subscription.plan.createdAt,
           updatedAt: subscription.plan.updatedAt,
           active: subscription.plan.active,
-          bestSeller: subscription.plan.bestSeller,
           sessionsCount: subscription.plan.sessionsCount,
-          sessionTime: subscription.plan.sessionTime,
         },
         currency: {
           id: subscription.currency.id,

@@ -5,9 +5,11 @@ import {
 } from "../../../Utils/Response.js";
 import * as db from "../../../database/dbService.js";
 
+// ========================= GET ALL =========================
 export const getAllPlans = asyncHandler(async (req, res, next) => {
-  const allPlans = await db.findMany({
-    model: "Plans",
+  const plans = await db.findMany({
+    model: "plan",
+    orderBy: { createdAt: "desc" },
     include: {
       currency: {
         select: {
@@ -20,139 +22,164 @@ export const getAllPlans = asyncHandler(async (req, res, next) => {
       },
     },
   });
+
   return successResponse({
     res,
     req,
     message: "FETCH_SUCCESS",
     status: 200,
-    data: allPlans,
+    data: plans,
   });
 });
+
+// ========================= CREATE =========================
 export const createPlan = asyncHandler(async (req, res, next) => {
   const {
-    name_en,
-    name_ar,
+    name,
     price,
     duration,
     sessionsCount,
+    rescheduleCount,
     description,
     active,
-    bestSeller,
     features,
-    sessionTime,
     currencyId,
   } = req.body;
-  const existPlan = await db.findFirst({
-    model: "Plans",
-    where: {
-      OR: [{ name_en }, { name_ar }],
-    },
-  });
-  const existCurrency = await db.findFirst({
-    model: "currency",
-    where: {
-      id: currencyId,
-    },
-  });
+
+  // 🔥 parallel queries
+  const [existPlan, existCurrency] = await Promise.all([
+    db.findFirst({ model: "plan", where: { name } }),
+    db.findFirst({ model: "currency", where: { id: currencyId } }),
+  ]);
+
+  if (existPlan) {
+    return errorResponse({
+      req,
+      next,
+      message: "PLAN_ALREADY_EXISTS",
+      status: 400,
+    });
+  }
+
   if (!existCurrency) {
     return errorResponse({
-      next,
       req,
+      next,
       message: "CURRENCY_NOT_FOUND",
       status: 404,
     });
   }
 
-  if (existPlan) {
-    return errorResponse({
-      next,
-      req,
-      message: "PLAN_ALREADY_EXISTS",
-      status: 400,
-    });
-  }
   const plan = await db.create({
-    model: "Plans",
+    model: "plan",
     data: {
-      name_en,
-      name_ar,
-      price: String(price),
-      duration,
-      sessionsCount,
+      name,
       description,
-      active: active || false,
-      bestSeller: bestSeller || false,
+      price: String(price), // ⚠️ لو غيرت الموديل لـ Float شيل String()
+      duration,
+      sessionsCount: sessionsCount ?? 0,
+      rescheduleCount: rescheduleCount ?? 0,
+      active: active ?? false,
       features,
-      sessionTime: parseInt(sessionTime),
-      currencyId,
+      currency: {
+        connect: { id: currencyId },
+      },
     },
   });
-  if (!plan) {
-    return errorResponse({
-      next,
-      req,
-      message: "CREATE_FAILED",
-      status: 400,
-    });
-  }
+
   return successResponse({
     res,
     req,
     message: "CREATE_SUCCESS",
-    status: 200,
+    status: 201,
     data: plan,
   });
 });
 
+// ========================= UPDATE =========================
 export const updatePlan = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const {
-    name_en,
-    name_ar,
+    name,
     price,
     duration,
     sessionsCount,
+    rescheduleCount,
     description,
     active,
-    bestSeller,
     features,
-    sessionTime,
     currencyId,
   } = req.body;
 
   const plan = await db.findOne({
-    model: "Plans",
+    model: "plan",
     where: { id },
   });
 
   if (!plan) {
     return errorResponse({
-      next,
       req,
+      next,
       message: "PLAN_NOT_FOUND",
       status: 404,
     });
   }
 
+  // 🔥 check unique name
+  if (name && name !== plan.name) {
+    const existPlan = await db.findFirst({
+      model: "plan",
+      where: { name },
+    });
 
-  // تجهيز البيانات للتحديث (فقط الحقول المرسلة)
+    if (existPlan) {
+      return errorResponse({
+        req,
+        next,
+        message: "PLAN_ALREADY_EXISTS",
+        status: 400,
+      });
+    }
+  }
+
+  // 🔥 check currency
+  if (currencyId) {
+    const existCurrency = await db.findFirst({
+      model: "currency",
+      where: { id: currencyId },
+    });
+
+    if (!existCurrency) {
+      return errorResponse({
+        req,
+        next,
+        message: "CURRENCY_NOT_FOUND",
+        status: 404,
+      });
+    }
+  }
+
+  // 🔥 dynamic update object
   const data = {};
 
-  if (name_en !== undefined) data.name_en = name_en;
-  if (name_ar !== undefined) data.name_ar = name_ar;
+  if (name !== undefined) data.name = name;
   if (description !== undefined) data.description = description;
   if (price !== undefined) data.price = String(price);
   if (duration !== undefined) data.duration = duration;
   if (sessionsCount !== undefined) data.sessionsCount = sessionsCount;
+  if (rescheduleCount !== undefined) data.rescheduleCount = rescheduleCount;
   if (active !== undefined) data.active = active;
-  if (bestSeller !== undefined) data.bestSeller = bestSeller;
   if (features !== undefined) data.features = features;
-  if (sessionTime !== undefined) data.sessionTime = sessionTime;
-  if (currencyId !== undefined) data.currencyId = currencyId;
+
+  if (currencyId !== undefined) {
+    data.currency = {
+      connect: { id: currencyId },
+    };
+  }
 
   const updatedPlan = await db.updateOne({
-    model: "Plans",
+    model: "plan",
     where: { id },
     data,
   });
@@ -166,25 +193,26 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
   });
 });
 
+// ========================= DELETE =========================
 export const deletePlan = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const plan = await db.findOne({
-    model: "Plans",
+    model: "plan",
     where: { id },
   });
 
   if (!plan) {
     return errorResponse({
-      next,
       req,
+      next,
       message: "PLAN_NOT_FOUND",
       status: 404,
     });
   }
 
   await db.deleteOne({
-    model: "Plans",
+    model: "plan",
     where: { id },
   });
 

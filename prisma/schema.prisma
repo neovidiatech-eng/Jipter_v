@@ -85,7 +85,7 @@ model currency {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   exchangeRate       Float
-  Plans              Plans[]
+  plan               plan[]
   subscriptions      Subscription[]
   wallets            Wallet[]
   expenses           expenses[]
@@ -98,28 +98,25 @@ model currency {
   @@index([code])
 }
 
-model Plans {
+model plan {
   id                   String                  @id @default(uuid())
-  name_en              String                  @unique
-  name_ar              String                  @unique
+  name                 String                  @unique
   description          String
   price                String
   duration             Int
-  features             String[]
+  features             Json
+  sessionsCount        Int                     @default(0)
+  rescheduleCount      Int                     @default(0)
   currencyId           String
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
   active               Boolean                 @default(false)
-  bestSeller           Boolean                 @default(false)
-  sessionsCount        Float                   @default(0)
-  sessionTime          Float                   @default(0)
   currency             currency                @relation(fields: [currencyId], references: [id])
   subscriptions        Subscription[]
   students             student[]
   subscriptionRequests subscription_requests[]
 
-  @@index([name_en])
-  @@index([name_ar])
+  @@index([name])
 }
 
 model subjects {
@@ -147,7 +144,7 @@ model subscription_requests {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user_id   String
-  plan      Plans?   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan      plan?    @relation(fields: [planId], references: [id])
   user      user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
@@ -207,7 +204,7 @@ model student {
   exams              exam[]
   homeworks          homework[]
   schedules          schedule[]
-  plan               Plans?         @relation(fields: [planId], references: [id])
+  plan               plan?          @relation(fields: [planId], references: [id])
   user               user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
   conversations      Conversation[]
 }
@@ -353,7 +350,7 @@ model Subscription {
   updatedAt    DateTime      @updatedAt
   currencyId   String
   currency     currency      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
-  plan         Plans         @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan         plan          @relation(fields: [planId], references: [id], onDelete: Cascade)
   user         user          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 }

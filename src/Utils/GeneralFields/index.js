@@ -260,9 +260,9 @@ export const generalFeilds = {
     "any.required": "Type is required",
     "any.only": "Type must be either 'full' or 'half'",
   }),
-  features: Joi.array().items(Joi.string()).required().messages({
-    "array.base": "Features must be an array",
-    "array.empty": "Features cannot be empty",
+  features: Joi.object().required().messages({
+    "object.base": "Features must be an object",
+    "object.empty": "Features cannot be empty",
     "any.required": "Features is required",
   }),
   id: Joi.string().uuid(),
@@ -282,6 +282,10 @@ export const generalFeilds = {
       "string.pattern.base": "Color must be a valid hex color",
       "any.required": "Color is required",
     }),
+  rescheduleCount: Joi.number().positive().messages({
+    "number.base": "Reschedule count must be a number",
+    "number.positive": "Reschedule count must be a positive number",
+  }),
 
   ageRange: Joi.object({
     minAge: Joi.number().positive().required().messages({

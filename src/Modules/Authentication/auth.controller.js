@@ -59,7 +59,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   if (plan_id) {
     const exitsPlan = await db.findFirst({
-      model: "Plans",
+      model: "plan",
       where: { id: plan_id },
     });
     if (!exitsPlan) {
