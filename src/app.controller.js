@@ -3,10 +3,8 @@ import swaggerUi from "swagger-ui-express";
 import cors from "cors";
 import morgan from "morgan";
 import path from "node:path";
-
 import { globalErrorHandling } from "./Utils/Response.js";
 import { langMiddleware } from "./Middlewares/i18n.js";
-import fs from "node:fs";
 import {
   notificationQueue,
   redis,

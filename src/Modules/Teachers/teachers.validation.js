@@ -28,16 +28,6 @@ export const createTeacherSchema = {
       gender: generalFeilds.gender.required(),
       hour_price: generalFeilds.price.required(),
       active: generalFeilds.active.required(),
-      subject_ids: joi
-        .array()
-        .items(
-          generalFeilds.id.messages({
-            "string.base": "SUBJECT_ID_STRING",
-            "string.empty": "SUBJECT_ID_EMPTY",
-            "any.required": "SUBJECT_ID_REQUIRED",
-          }),
-        )
-        .required(),
     })
     .required(),
 };

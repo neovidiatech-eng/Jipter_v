@@ -32,9 +32,6 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
       limit,
       include: {
         user: true,
-        teacherSubjects: {
-          include: { subject: true },
-        },
       },
     });
 
@@ -67,49 +64,25 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     gender,
     hour_price,
     active,
-    subject_ids,
   } = req.body;
 
-  // Parallel checks for existence/uniqueness
-  const [
-    checkUserByEmail,
-    checkUserByPhone,
-    checkCurrency,
-    checkSubjects,
-    getrole,
-  ] = await Promise.all([
-    db.findOne({ model: "user", where: { email } }),
-    db.findFirst({ model: "user", where: { phone } }),
-    db.findOne({ model: "currency", where: { id: currency_id } }),
-    db.findMany({
-      model: "subjects",
-      where: { id: { in: subject_ids || [] } },
-    }),
-    db.findFirst({ model: "role", where: { name: "teacher" } }),
-  ]);
+  const [checkUserByEmail, checkUserByPhone, checkCurrency, getrole] =
+    await Promise.all([
+      db.findOne({ model: "user", where: { email } }),
+      db.findFirst({ model: "user", where: { phone } }),
+      db.findOne({ model: "currency", where: { id: currency_id } }),
+      db.findFirst({ model: "role", where: { name: "teacher" } }),
+    ]);
 
   if (!getrole)
-    return errorResponse({
-      req,
-      message: "ROLE_NOT_FOUND",
-      next,
-      status: 404,
-    });
+    return errorResponse({ req, message: "ROLE_NOT_FOUND", next, status: 404 });
 
   if (checkUserByEmail)
-    return errorResponse({
-      req,
-      message: "EMAIL_EXISTS",
-      next,
-      status: 400,
-    });
+    return errorResponse({ req, message: "EMAIL_EXISTS", next, status: 400 });
+
   if (checkUserByPhone)
-    return errorResponse({
-      req,
-      message: "PHONE_EXISTS",
-      next,
-      status: 400,
-    });
+    return errorResponse({ req, message: "PHONE_EXISTS", next, status: 400 });
+
   if (!checkCurrency)
     return errorResponse({
       req,
@@ -117,20 +90,12 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
       next,
       status: 404,
     });
-  if (subject_ids && checkSubjects.length !== subject_ids.length) {
-    return errorResponse({
-      req,
-      message: "SOME_SUBJECTS_NOT_FOUND",
-      next,
-      status: 404,
-    });
-  }
 
   const hashedPassword = await hash({ password });
 
-  // Use a transaction to ensure both user and profile are created
-  const result = await db.transaction([
-    db.create({
+  // 🔥 كل حاجة في transaction واحدة
+  const result = await db.transaction(async (tx) => {
+    const user = await tx.create({
       model: "user",
       data: {
         name,
@@ -138,17 +103,13 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         password: hashedPassword,
         phone,
         code_country,
-        ...(getrole && { roleId: getrole.id }),
-        confirmAt: new Date(), // Teachers created by admin are confirmed by default
+        roleId: getrole.id,
+        confirmAt: new Date(),
         status: "active",
       },
-    }),
-  ]);
+    });
 
-  const user = result[0];
-
-  const teacher = await db.transaction([
-    db.create({
+    const teacher = await tx.create({
       model: "teacher",
       data: {
         user: { connect: { id: user.id } },
@@ -156,16 +117,11 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         gender,
         hour_price,
         active: active ?? false,
-        teacherSubjects: {
-          create: (subject_ids || []).map((subject_id) => ({
-            subject: { connect: { id: subject_id } },
-          })),
-        },
       },
       include: { user: true },
-    }),
+    });
 
-    db.create({
+    const wallet = await tx.create({
       model: "wallet",
       data: {
         type: "teacher",
@@ -174,27 +130,45 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         currencyId: checkCurrency.id,
         userId: user.id,
       },
-    }),
-  ]);
+    });
+
+    return { teacher, wallet };
+  });
+
   return successResponse({
     res,
     req,
     message: "CREATE_SUCCESS",
-    data: teacher,
+    data: result,
     status: 201,
   });
 });
-
 export const getTeacher = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const teacher = await ensureExists({
     model: "teacher",
     where: { id },
-    include: {
-      user: true,
-      currency: true,
-      teacherSubjects: {
-        include: { subject: true },
+    select: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          code_country: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+      currency: {
+        select: {
+          id: true,
+          name_en: true,
+          name_ar: true,
+          symbol: true,
+          code: true,
+          createdAt: true,
+        },
       },
     },
     message: "TEACHER_NOT_FOUND",

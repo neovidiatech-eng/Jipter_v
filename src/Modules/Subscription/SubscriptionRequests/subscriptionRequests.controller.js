@@ -56,7 +56,7 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
 
 export const changeStatus = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, rankId } = req.body;
 
   const subscriptionRequest = await ensureExists({
     model: "subscription_requests",
@@ -94,6 +94,13 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
+  if (rankId) {
+    const rank = await ensureExists({
+      model: "ranks",
+      where: { id: rankId },
+      message: "RANK_NOT_FOUND",
+    });
+  }
   const studentRole = await db.findFirst({
     model: "role",
     where: { name: { equals: "student", mode: "insensitive" } },
@@ -152,10 +159,10 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           country: parsedStudentData.country,
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
-          sessions_remaining:
-            subscriptionRequest.plan?.sessionsCount || 0,
+          sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           status: "approved",
           active: true,
+          rank: { connect: { id: rankId } },
         },
       });
 
@@ -198,16 +205,12 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       });
     });
 
-    // 🧹 clear redis AFTER success (both on approval and rejection)
     await redis.del(redisKey);
 
     return successResponse({
       res,
       req,
-      message:
-        status === "approved"
-          ? "REQUEST_APPROVED"
-          : "REQUEST_REJECTED",
+      message: status === "approved" ? "REQUEST_APPROVED" : "REQUEST_REJECTED",
       status: 200,
     });
   } catch (error) {

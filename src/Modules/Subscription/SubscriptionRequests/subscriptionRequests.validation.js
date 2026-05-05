@@ -26,5 +26,10 @@ export const changeStatus = {
       "string.base": "STATUS_STRING",
       "any.only": "STATUS_REJECTED_APPROVED",
     }),
+    rankId: generalFeilds.id.required().messages({
+      "string.base": "RANK_ID_STRING",
+      "string.empty": "RANK_ID_EMPTY",
+      "string.max": "RANK_ID_MAX",
+    }),
   }),
 };

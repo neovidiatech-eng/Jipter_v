@@ -202,6 +202,8 @@ model student {
   sessions_remaining Float          @default(0)
   avgRating          Float          @default(0)
   totalReviews       Int            @default(0)
+  rankId             String?
+  rank               ranks?         @relation(fields: [rankId], references: [id])
   exams              exam[]
   homeworks          homework[]
   schedules          schedule[]
@@ -480,6 +482,7 @@ model ranks {
   subjects   subjects[]
   currency   currency?  @relation(fields: [currencyId], references: [id])
   currencyId String?
+  students   student[]
 
   @@index([name])
 }
