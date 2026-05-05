@@ -43,6 +43,12 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
         plan: true,
+        rank: {
+          select:{
+            id:true,
+            name: true,
+          },
+        },
       },
     });
   const studentsData = await Promise.all(
