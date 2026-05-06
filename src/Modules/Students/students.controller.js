@@ -44,8 +44,8 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
         },
         plan: true,
         rank: {
-          select:{
-            id:true,
+          select: {
+            id: true,
             name: true,
           },
         },
@@ -85,19 +85,27 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     birth_date,
     gender,
     active,
+    rankId,
   } = req.body;
 
-  const [checkUserByEmail, checkUserByPhone, checkPlan, studentRole, settings] =
-    await Promise.all([
-      db.findOne({ model: "user", where: { email } }),
-      db.findFirst({ model: "user", where: { phone } }),
-      db.findOne({ model: "plan", where: { id: planId } }),
-      db.findFirst({
-        model: "role",
-        where: { name: { equals: "student", mode: "insensitive" } },
-      }),
-      db.findFirst({ model: "settings" }),
-    ]);
+  const [
+    checkUserByEmail,
+    checkUserByPhone,
+    checkPlan,
+    studentRole,
+    settings,
+    rank,
+  ] = await Promise.all([
+    db.findOne({ model: "user", where: { email } }),
+    db.findFirst({ model: "user", where: { phone } }),
+    db.findOne({ model: "plan", where: { id: planId } }),
+    db.findFirst({
+      model: "role",
+      where: { name: { equals: "student", mode: "insensitive" } },
+    }),
+    db.findFirst({ model: "settings" }),
+    db.findOne({ model: "ranks", where: { id: rankId } }),
+  ]);
 
   if (checkUserByEmail)
     return errorResponse({
@@ -115,6 +123,9 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
   if (!checkPlan)
     return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
+
+  if (!rank)
+    return errorResponse({ req, next, message: "RANK_NOT_FOUND", status: 404 });
 
   const hashedPassword = await hash({ password });
 
@@ -149,6 +160,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         code_country: phone_code,
         status: "active",
         confirmAt: new Date(),
+        gender,
+        age: birth_date ? new Date().getFullYear() - new Date(birth_date).getFullYear() : null,
         ...(studentRole && { roleId: studentRole.id }),
       },
     });
@@ -161,12 +174,12 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         country,
         plan: { connect: { id: planId } },
         birth_date: new Date(birth_date),
-        gender,
         active: active ?? false,
         status: "approved",
         sessions: checkPlan.sessionsCount,
         sessions_attended: 0,
         sessions_remaining: checkPlan.sessionsCount,
+        rank: { connect: { id: rankId } },
       },
     });
 
@@ -249,6 +262,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     birth_date,
     gender,
     active,
+    rankId,
   } = req.body;
 
   const student = await ensureExists({
@@ -290,6 +304,16 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         status: 404,
       });
   }
+  if (rankId && rankId !== student.rankId) {
+    const rank = await db.findOne({ model: "ranks", where: { id: rankId } });
+    if (!rank)
+      return errorResponse({
+        req,
+        next,
+        message: "RANK_NOT_FOUND",
+        status: 404,
+      });
+  }
 
   // Update user record if needed
   if (name || email || phone || phone_code) {
@@ -314,6 +338,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(birth_date && { birth_date: new Date(birth_date) }),
       ...(gender && { gender }),
       ...(active !== undefined && { active }),
+      ...(rankId && { rank: { connect: { id: rankId } } }),
     },
     include: { user: true, plan: true },
   });

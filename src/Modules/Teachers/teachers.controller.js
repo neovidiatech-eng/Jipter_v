@@ -62,6 +62,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     code_country,
     currency_id,
     gender,
+    age,
     hour_price,
     active,
   } = req.body;
@@ -111,6 +112,8 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         roleId: getrole.id,
         confirmAt: new Date(),
         status: "active",
+        gender,
+        age: parseInt(age),
       },
     });
 
@@ -119,7 +122,6 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
       data: {
         user: { connect: { id: user.id } },
         currency: { connect: { id: checkCurrency.id } },
-        gender,
         hour_price,
         active: active ?? false,
       },
@@ -162,6 +164,8 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
           phone: true,
           code_country: true,
           status: true,
+          gender: true,
+          age: true,
           createdAt: true,
         },
       },
@@ -197,6 +201,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     code_country,
     currency_id,
     gender,
+    age,
     hour_price,
     active,
     subject_ids,
@@ -247,6 +252,8 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
         ...(hashedPassword && { password: hashedPassword }),
         ...(phone && { phone }),
         ...(code_country && { code_country }),
+        ...(gender && { gender }),
+        ...(age && { age: parseInt(age) }),
       },
     });
   }
@@ -257,7 +264,6 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     where: { id },
     data: {
       ...(currency_id && { currency: { connect: { id: currency_id } } }),
-      ...(gender && { gender }),
       ...(hour_price !== undefined && { hour_price }),
       ...(active !== undefined && { active }),
       ...(subject_ids && {

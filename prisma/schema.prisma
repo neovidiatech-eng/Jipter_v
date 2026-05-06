@@ -14,6 +14,8 @@ model user {
   name                 String?
   phone                String?                 @unique
   createdAt            DateTime                @default(now())
+  gender               String?
+  age                  Int?
   updatedAt            DateTime                @updatedAt
   confirmAt            DateTime?
   roleId               String?
@@ -95,7 +97,6 @@ model currency {
   teachers           teacher[]
   withdrawalRequests WithdrawalRequest[]
 
-
   @@index([name_en])
   @@index([name_ar])
   @@index([code])
@@ -169,7 +170,6 @@ model teacher {
   user_id      String     @unique
   currencyId   String
   hour_price   Float
-  gender       String
   active       Boolean    @default(false)
   roleId       String?
   createdAt    DateTime   @default(now())
@@ -190,7 +190,6 @@ model student {
   id                 String              @id @default(uuid())
   user_id            String              @unique
   birth_date         DateTime
-  gender             String
   active             Boolean             @default(false)
   planId             String?
   country            String

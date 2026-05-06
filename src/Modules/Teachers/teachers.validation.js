@@ -26,6 +26,7 @@ export const createTeacherSchema = {
         })
         .required(),
       gender: generalFields.gender.required(),
+      age: generalFields.number.required(),
       hour_price: generalFields.price.required(),
       active: generalFields.active.required(),
     })
@@ -60,6 +61,7 @@ export const updateTeacherSchema = {
         "string.empty": "CURRENCY_ID_EMPTY",
       }),
       gender: generalFields.gender,
+      age: generalFields.number,
       hour_price: generalFields.price,
       active: generalFields.active,
       subject_ids: joi.array().items(

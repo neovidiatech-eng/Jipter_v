@@ -20,6 +20,7 @@ export const createStudentSchema = {
     birth_date: generalFields.birth_date.required(),
     gender: generalFields.gender.required(),
     active: generalFields.active.required(),
+    rankId: generalFields.id.required(),
   }),
 };
 
@@ -37,6 +38,7 @@ export const updateStudentSchema = {
       birth_date: generalFields.birth_date,
       gender: generalFields.gender,
       active: generalFields.active,
+      rankId: generalFields.id,
     })
     .min(1)
     .messages({ "object.min": "VALIDATION_MIN_ONE_FIELD" }),

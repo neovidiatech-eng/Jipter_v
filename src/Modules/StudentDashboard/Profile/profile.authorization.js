@@ -1,3 +1,4 @@
 export const endpoints={
-    getProfile:["student"]
+    getProfile:["student"],
+    updateProfile:["student"]
 }
