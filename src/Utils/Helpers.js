@@ -26,22 +26,6 @@ export const checkExist = async ({ model, where, next }) => {
   return existing;
 };
 
-export const checkConflict = async ({ model, where, next }) => {
-  const existing = await db.findOne({
-    model,
-    where,
-  });
-
-  if (existing) {
-    return errorResponse({
-      next,
-      status: 400,
-      message: `${model} already exists`,
-    });
-  }
-
-  return existing;
-};
 
 import {
   standardizeDate,

@@ -39,8 +39,6 @@ export const getDashboard = async ({ req, res, next }) => {
               symbol: true,
             },
           },
-
-          
         },
       },
     },
@@ -72,6 +70,7 @@ export const getDashboard = async ({ req, res, next }) => {
       rescheduledToId: true,
       teacher: {
         select: {
+          id: true,
           user: {
             select: {
               id: true,
