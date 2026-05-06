@@ -1,16 +1,16 @@
 import Joi from "joi";
-import { generalFeilds } from "../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../Utils/GeneralFields/index.js";
 
 export const registeritonSchema = {
   body: Joi.object()
     .keys({
-      name: generalFeilds.name.required(),
-      email: generalFeilds.email.required(),
-      password: generalFeilds.password.required(),
-      codeCountry: generalFeilds.codeCountry.required(),
-      birth_date: generalFeilds.birth_date.required(),
-      gender: generalFeilds.gender.required(),
-      country: generalFeilds.country.required(),
+      name: generalFields.name.required(),
+      email: generalFields.email.required(),
+      password: generalFields.password.required(),
+      codeCountry: generalFields.codeCountry.required(),
+      birth_date: generalFields.birth_date.required(),
+      gender: generalFields.gender.required(),
+      country: generalFields.country.required(),
       phone: Joi.when("codeCountry", {
         is: "+20",
         then: Joi.string()
@@ -32,7 +32,7 @@ export const registeritonSchema = {
           }),
         }),
       }),
-      plan_id: generalFeilds.id
+      plan_id: generalFields.id
         .messages({
           "string.pattern.base": "VALID_PLAN_ID",
           "any.required": "PLAN_ID_REQUIRED",
@@ -46,54 +46,54 @@ export const loginSchema = {
   body: Joi.object()
     .keys({
       username: Joi.string().required(),
-      password: generalFeilds.password.required(),
+      password: generalFields.password.required(),
     })
     .required(),
 };
 export const googleSignupSchema = {
   body: Joi.object()
     .keys({
-      idToken: generalFeilds.idToken.required(),
+      idToken: generalFields.idToken.required(),
     })
     .required(),
 };
 export const googleLoginSchema = {
   body: Joi.object()
     .keys({
-      idToken: generalFeilds.idToken.required(),
-      provider: generalFeilds.provider.required(),
+      idToken: generalFields.idToken.required(),
+      provider: generalFields.provider.required(),
     })
     .required(),
 };
 export const verifiyCodeSchema = {
   body: Joi.object()
     .keys({
-      email: generalFeilds.email.required(),
-      otp: generalFeilds.otp.required(),
+      email: generalFields.email.required(),
+      otp: generalFields.otp.required(),
     })
     .required(),
 };
 export const forgetPasswordSchema = {
   body: Joi.object()
     .keys({
-      email: generalFeilds.email.required(),
+      email: generalFields.email.required(),
     })
     .required(),
 };
 export const resendOtpSchema = {
   body: Joi.object()
     .keys({
-      email: generalFeilds.email.required(),
+      email: generalFields.email.required(),
     })
     .required(),
 };
 export const resetPasswordSchema = {
   body: Joi.object()
     .keys({
-      email: generalFeilds.email.required(),
-      otp: generalFeilds.otp.required(),
-      password: generalFeilds.password.required(),
-      confirm: generalFeilds.confirmPassword.required(),
+      email: generalFields.email.required(),
+      otp: generalFields.otp.required(),
+      password: generalFields.password.required(),
+      confirm: generalFields.confirmPassword.required(),
     })
     .required(),
 };

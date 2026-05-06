@@ -21,7 +21,7 @@ export const getCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
     db.findMany({
-      model: "schedule",
+      model: "schedule",  
     }),
     db.findMany({
       model: "schedule",

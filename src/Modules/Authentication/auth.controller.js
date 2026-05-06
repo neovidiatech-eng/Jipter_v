@@ -99,7 +99,7 @@ export const register = asyncHandler(async (req, res, next) => {
   await db.transaction(async (tx) => {
     // Create User record
     const prefix = settings?.userPrefix || "jupiter";
-    const username = `${name}_${prefix}`;
+    const username = `${name.trim().replace(/\s+/g, "-")}_${prefix}`;
 
     const user = await tx.create({
       model: "user",
@@ -482,7 +482,7 @@ export const googleSignUp = asyncHandler(async (req, res, next) => {
     const settings = await db.findFirst({ model: "settings" });
     const prefix = settings?.userPrefix || "jupiter";
     const fullName = `${verify.given_name} ${verify.family_name}`;
-    const username = `${fullName}_${prefix}`;
+    const username = `${fullName.trim().replace(/\s+/g, "-")}_${prefix}`;
 
     await db.transaction(async (tx) => {
       user = await tx.create({

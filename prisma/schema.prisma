@@ -36,6 +36,7 @@ model user {
   messages             Message[]
   conversations        Conversation[]          @relation("TeacherConversations")
   conversationsStudent Conversation[]          @relation("StudentConversations")
+  userLectures         user_lectures[]
 
   @@index([email])
   @@index([username])
@@ -93,8 +94,7 @@ model currency {
   expenses           expenses[]
   teachers           teacher[]
   withdrawalRequests WithdrawalRequest[]
-  ranks              ranks[]
-  curricula          curriculum[]
+
 
   @@index([name_en])
   @@index([name_ar])
@@ -123,18 +123,17 @@ model plan {
 }
 
 model subjects {
-  id        String       @id @default(uuid())
-  name      String       @default(dbgenerated("1"))
-  active    Boolean      @default(false)
+  id        String     @id @default(uuid())
+  name      String     @default(dbgenerated("1"))
+  active    Boolean    @default(false)
   color     String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   rankId    String
-  rank      ranks        @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  rank      ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
   exams     exam[]
   homeworks homework[]
   schedules schedule[]
-  curricula curriculum[]
 
   @@unique([name, rankId], name: "name_rankId")
   @@index([name])
@@ -188,29 +187,30 @@ model teacher {
 }
 
 model student {
-  id                 String         @id @default(uuid())
-  user_id            String         @unique
+  id                 String              @id @default(uuid())
+  user_id            String              @unique
   birth_date         DateTime
   gender             String
-  active             Boolean        @default(false)
+  active             Boolean             @default(false)
   planId             String?
   country            String
-  status             String         @default("pending")
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  sessions           Float          @default(0)
-  sessions_attended  Float          @default(0)
-  sessions_remaining Float          @default(0)
-  avgRating          Float          @default(0)
-  totalReviews       Int            @default(0)
+  status             String              @default("pending")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Float               @default(0)
+  sessions_attended  Float               @default(0)
+  sessions_remaining Float               @default(0)
+  avgRating          Float               @default(0)
+  totalReviews       Int                 @default(0)
   rankId             String?
-  rank               ranks?         @relation(fields: [rankId], references: [id])
+  rank               ranks?              @relation(fields: [rankId], references: [id])
   exams              exam[]
   homeworks          homework[]
   schedules          schedule[]
-  plan               plan?          @relation(fields: [planId], references: [id])
-  user               user           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan               plan?               @relation(fields: [planId], references: [id])
+  user               user                @relation(fields: [user_id], references: [id], onDelete: Cascade)
   conversations      Conversation[]
+  userRankHistories  user_rank_history[]
 }
 
 model schedule {
@@ -473,43 +473,87 @@ model Message {
 }
 
 model ranks {
-  id         String     @id @default(uuid())
-  name       String     @unique
-  slug       String     @unique
-  color      String?
-  ageRange   Json
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  subjects   subjects[]
-  currency   currency?  @relation(fields: [currencyId], references: [id])
-  currencyId String?
-  students   student[]
+  id                String              @id @default(uuid())
+  name              String              @unique
+  slug              String              @unique
+  color             String?
+  ageRange          Json
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  subjects          subjects[]
+  students          student[]
+  courses           courses[]
+  userRankHistories user_rank_history[]
 
   @@index([name])
 }
 
-model curriculum {
-  id            String   @id @default(uuid())
-  subjectId     String
-  title         String
-  level         String
-  description   String?
-  status        String   @default("pending")
-  sessionsCount Int      @default(0)
-  duration      String
-  price         Float
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  currency      currency @relation(fields: [currencyId], references: [id])
-  currencyId    String
-  subject       subjects @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+model courses {
+  id          String     @id @default(uuid())
+  title       String     @unique
+  description String?
+  rankId      String
+  rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  lectures    lectures[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([rankId])
 }
 
-model settings{
-  id String @id @default(uuid())
-  userPrefix String @default("jupiter")
-  socialLinks Json
-  contactInfo Json
+model lectures {
+  id        String   @id @default(uuid())
+  title     String
+  content   String?
+  videoUrl  String?
+  order     Int
+  courseId  String
+  course    courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  userLectures user_lectures[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model settings {
+  id          String   @id @default(uuid())
+  userPrefix  String   @default("jupiter")
+  socialLinks Json
+  contactInfo Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model user_lectures {
+  id          String    @id @default(uuid())
+  userId      String
+  lectureId   String
+  status      String    @default("completed")
+  progress    Float     @default(0)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lecture lectures @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId]) // مهم جدًا
+  @@index([userId])
+  @@index([lectureId])
+}
+
+model user_rank_history {
+  id         String   @id @default(uuid())
+  studentId  String
+  rankId     String
+  status     String   @default("locked") // locked, unlocked, completed
+  achievedAt DateTime @default(now())
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  rank    ranks   @relation(fields: [rankId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
 }

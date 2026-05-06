@@ -65,14 +65,14 @@ export async function seedStudents() {
       where: { email: item.email },
       update: {
         name: item.name,
-        username: `${item.name}_${prefix}`,
+        username: `${item.name.trim().replace(/\s+/g, "-")}_${prefix}`,
         phone: item.phone,
         code_country: item.code_country,
         roleId: role.id,
       },
       create: {
         email: item.email,
-        username: `${item.name}_${prefix}`,
+        username: `${item.name.trim().replace(/\s+/g, "-")}_${prefix}`,
         password: hashedPassword,
         name: item.name,
         phone: item.phone,

@@ -136,7 +136,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
   await db.transaction(async (tx) => {
     // 1. Create user
     const prefix = settings?.userPrefix || "jupiter";
-    const username = `${name}_${prefix}`;
+    const username = `${name.trim().replace(/\s+/g, "-")}_${prefix}`;
 
     const user = await tx.create({
       model: "user",

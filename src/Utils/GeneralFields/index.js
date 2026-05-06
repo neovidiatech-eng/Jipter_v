@@ -1,5 +1,5 @@
 import Joi from "joi";
-export const generalFeilds = {
+export const generalFields = {
   role_name: Joi.string().min(3).max(15).messages({
     "string.base": "Role name must be a string",
     "string.empty": "Role name cannot be empty",
@@ -49,6 +49,7 @@ export const generalFeilds = {
     "string.email": "Please enter a valid email address",
     "any.required": "Email is required",
   }),
+  number: Joi.number(),
   password: Joi.string()
     .pattern(
       new RegExp(

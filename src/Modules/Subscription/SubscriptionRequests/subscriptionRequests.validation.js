@@ -1,8 +1,8 @@
 import joi from "joi";
-import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 export const getSubscription = {
   query: joi.object({
-    search: generalFeilds.search.messages({
+    search: generalFields.search.messages({
       "string.base": "SEARCH_STRING",
       "string.empty": "SEARCH_EMPTY",
       "string.max": "SEARCH_MAX",
@@ -15,7 +15,7 @@ export const getSubscription = {
 };
 export const changeStatus = {
   params: joi.object({
-    id: generalFeilds.id.messages({
+    id: generalFields.id.messages({
       "string.base": "ID_STRING",
       "string.empty": "ID_EMPTY",
       "string.max": "ID_MAX",
@@ -26,7 +26,7 @@ export const changeStatus = {
       "string.base": "STATUS_STRING",
       "any.only": "STATUS_REJECTED_APPROVED",
     }),
-    rankId: generalFeilds.id.required().messages({
+    rankId: generalFields.id.required().messages({
       "string.base": "RANK_ID_STRING",
       "string.empty": "RANK_ID_EMPTY",
       "string.max": "RANK_ID_MAX",

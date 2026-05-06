@@ -1,29 +1,29 @@
 import Joi from "joi";
-import { generalFeilds } from "../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../Utils/GeneralFields/index.js";
 
 export const createRoleSchema = {
   body: Joi.object({
-    name: generalFeilds.role_name.required(),
+    name: generalFields.role_name.required(),
   }).required(),
 };
 
 export const updateRoleSchema = {
   body: Joi.object({
-    name: generalFeilds.role_name.required(),
+    name: generalFields.role_name.required(),
   }).required(),
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }).required(),
 };
 
 export const deleteRoleSchema = {
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }).required(),
 };
 export const assignRoleSchema = {
   params: Joi.object({
-    user_id: generalFeilds.id
+    user_id: generalFields.id
       .messages({
         "string.empty": "USER_ID_REQUIRED",
         "any.required": "USER_ID_REQUIRED",
@@ -31,7 +31,7 @@ export const assignRoleSchema = {
       .required(),
   }).required(),
   body: Joi.object({
-    role_id: generalFeilds.id
+    role_id: generalFields.id
       .messages({
         "string.empty": "ROLE_ID_REQUIRED",
         "any.required": "ROLE_ID_REQUIRED",

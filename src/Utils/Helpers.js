@@ -43,7 +43,12 @@ export const checkConflict = async ({ model, where, next }) => {
   return existing;
 };
 
-import { standardizeDate, toUTC, getDatesBetweenUTC, combineDateAndTime } from "./Date/time.js";
+import {
+  standardizeDate,
+  toUTC,
+  getDatesBetweenUTC,
+  combineDateAndTime,
+} from "./Date/time.js";
 
 export const getEndTime = (startTime, type, duration = 0) => {
   const start = toUTC(startTime);
@@ -70,15 +75,22 @@ export const normalizeDate = (date) => {
 export { getDatesBetweenUTC, combineDateAndTime };
 
 export const getImageUrl = (image, req) => {
-    if (!image) return null;
-    if (image.secure_url) return image.secure_url;
-    
-    // For local files, construct URL
-    if (typeof image === 'string' && image.startsWith('uploads')) {
-        const protocol = req.protocol;
-        const host = req.get('host');
-        return `${protocol}://${host}/${image}`;
-    }
-    
-    return image;
+  if (!image) return null;
+  if (image.secure_url) return image.secure_url;
+
+  // For local files, construct URL
+  if (typeof image === "string" && image.startsWith("uploads")) {
+    const protocol = req.protocol;
+    const host = req.get("host");
+    return `${protocol}://${host}/${image}`;
+  }
+
+  return image;
+};
+
+export const createError = ({ message, status, next }) => {
+  const error = new Error(message);
+  error.status = status;
+
+  return error;
 };

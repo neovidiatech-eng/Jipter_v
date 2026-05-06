@@ -1,65 +1,65 @@
 import Joi from "joi";
-import { generalFeilds } from "../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../Utils/GeneralFields/index.js";
 import { notificationType } from "../../Utils/Enums/sessions.js";
 
 export const createSchedule = {
   body: Joi.object()
     .keys({
-      studentId: generalFeilds.id
+      studentId: generalFields.id
         .messages({
           "string.empty": "STUDENT_ID_REQUIRED",
           "any.required": "STUDENT_ID_REQUIRED",
           "string.pattern.base": "STUDENT_ID_INVALID",
         })
         .required(),
-      platform: generalFeilds.platform.required(),
-      teacherId: generalFeilds.id
+      platform: generalFields.platform.required(),
+      teacherId: generalFields.id
         .messages({
           "string.empty": "TEACHER_ID_REQUIRED",
           "any.required": "TEACHER_ID_REQUIRED",
           "string.pattern.base": "TEACHER_ID_INVALID",
         })
         .required(),
-      subject_id: generalFeilds.id
+      subject_id: generalFields.id
         .messages({
           "string.empty": "SUBJECT_ID_REQUIRED",
           "any.required": "SUBJECT_ID_REQUIRED",
           "string.pattern.base": "SUBJECT_ID_INVALID",
         })
         .required(),
-      title: generalFeilds.name
+      title: generalFields.name
         .messages({
           "string.empty": "TITLE_REQUIRED",
           "any.required": "TITLE_REQUIRED",
           "string.pattern.base": "TITLE_INVALID",
         })
         .required(),
-      description: generalFeilds.description
+      description: generalFields.description
         .messages({
           "string.empty": "DESCRIPTION_REQUIRED",
           "any.required": "DESCRIPTION_REQUIRED",
           "string.pattern.base": "DESCRIPTION_INVALID",
         })
         .required(),
-      link: generalFeilds.url
+      link: generalFields.url
         .messages({
           "string.empty": "LINK_REQUIRED",
           "any.required": "LINK_REQUIRED",
           "string.pattern.base": "LINK_INVALID",
         })
         .required(),
-      notes: generalFeilds.description.messages({
+      notes: generalFields.description.messages({
         "string.empty": "NOTES_REQUIRED",
         "any.required": "NOTES_REQUIRED",
         "string.pattern.base": "NOTES_INVALID",
       }),
 
-      start_time: generalFeilds.date.greater("now").messages({
+      start_time: generalFields.date.greater("now").messages({
         "string.empty": "START_TIME_REQUIRED",
         "any.required": "START_TIME_REQUIRED",
         "string.pattern.base": "START_TIME_INVALID",
       }),
-      type: generalFeilds.type.required(),
+      type: generalFields.type.required(),
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required()
@@ -75,13 +75,13 @@ export const createSchedule = {
 export const createRecurringSchedule = {
   body: Joi.object()
     .keys({
-      studentId: generalFeilds.id.required(),
-      teacherId: generalFeilds.id.required(),
-      subject_id: generalFeilds.id.required(),
-      title: generalFeilds.name.required(),
-      description: generalFeilds.description.required(),
-      link: generalFeilds.url.required(),
-      notes: generalFeilds.description,
+      studentId: generalFields.id.required(),
+      teacherId: generalFields.id.required(),
+      subject_id: generalFields.id.required(),
+      title: generalFields.name.required(),
+      description: generalFields.description.required(),
+      link: generalFields.url.required(),
+      notes: generalFields.description,
       startTime: Joi.string()
         .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
         .required()
@@ -107,7 +107,7 @@ export const createRecurringSchedule = {
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required(),
-      type: generalFeilds.type.required(),
+      type: generalFields.type.required(),
     })
     .required(),
 };
@@ -115,20 +115,20 @@ export const createRecurringSchedule = {
 export const updateSchedule = {
   body: Joi.object()
     .keys({
-      title: generalFeilds.name,
-      description: generalFeilds.description,
-      link: generalFeilds.url,
-      notes: generalFeilds.description,
+      title: generalFields.name,
+      description: generalFields.description,
+      link: generalFields.url,
+      notes: generalFields.description,
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
       start_time: Joi.date().greater("now"),
-      type: generalFeilds.type,
+      type: generalFields.type,
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
     })
     .min(1)
     .required(),
   params: Joi.object()
     .keys({
-      id: generalFeilds.id.required(),
+      id: generalFields.id.required(),
     })
     .required(),
 };
@@ -136,20 +136,20 @@ export const updateSchedule = {
 export const updateRecurringGroup = {
   body: Joi.object()
     .keys({
-      title: generalFeilds.name,
-      description: generalFeilds.description,
-      link: generalFeilds.url,
-      notes: generalFeilds.description,
+      title: generalFields.name,
+      description: generalFields.description,
+      link: generalFields.url,
+      notes: generalFields.description,
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
       startTime: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/),
-      type: generalFeilds.type,
+      type: generalFields.type,
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
     })
     .min(1)
     .required(),
   params: Joi.object()
     .keys({
-      parent_recurring_id: generalFeilds.parent_recurring_id.required(),
+      parent_recurring_id: generalFields.parent_recurring_id.required(),
     })
     .required(),
 };
@@ -157,7 +157,7 @@ export const updateRecurringGroup = {
 export const getTeacherSchedules = {
   params: Joi.object()
     .keys({
-      teacherId: generalFeilds.id
+      teacherId: generalFields.id
         .messages({
           "string.empty": "TEACHER_ID_REQUIRED",
           "any.required": "TEACHER_ID_REQUIRED",
@@ -170,7 +170,7 @@ export const getTeacherSchedules = {
 export const getStudentSchedules = {
   params: Joi.object()
     .keys({
-      studentId: generalFeilds.id.messages({
+      studentId: generalFields.id.messages({
         "string.empty": "STUDENT_ID_REQUIRED",
         "any.required": "STUDENT_ID_REQUIRED",
         "string.pattern.base": "STUDENT_ID_INVALID",
@@ -181,12 +181,12 @@ export const getStudentSchedules = {
 
 export const deleteSchedule = {
   params: Joi.object().keys({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };
 export const deleteRecurringGroup = {
   params: Joi.object().keys({
-    parent_recurring_id: generalFeilds.parent_recurring_id.required(),
+    parent_recurring_id: generalFields.parent_recurring_id.required(),
   }),
 };
 
@@ -194,14 +194,14 @@ export const submitReview = {
   body: Joi.object()
     .keys({
       rating: Joi.number().min(1).max(5).required(),
-      comment: generalFeilds.description.required(),
+      comment: generalFields.description.required(),
       teacherAttended: Joi.boolean().required(),
       studentAttended: Joi.boolean().required(),
     })
     .required(),
   params: Joi.object()
     .keys({
-      id: generalFeilds.id.required(),
+      id: generalFields.id.required(),
     })
     .required(),
 };
@@ -209,7 +209,7 @@ export const submitReview = {
 export const joinSession = {
   params: Joi.object()
     .keys({
-      id: generalFeilds.id
+      id: generalFields.id
         .messages({
           "string.empty": "ID_REQUIRED",
           "any.required": "ID_REQUIRED",
@@ -223,7 +223,7 @@ export const joinSession = {
 export const leaveSession = {
   params: Joi.object()
     .keys({
-      id: generalFeilds.id
+      id: generalFields.id
         .messages({
           "string.empty": "ID_REQUIRED",
           "any.required": "ID_REQUIRED",

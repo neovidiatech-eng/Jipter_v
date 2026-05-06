@@ -1,17 +1,17 @@
 import Joi from "joi";
-import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const getCurrenciesSchema = {
   query: Joi.object()
     .keys({
-      search: generalFeilds.search_Currency.optional(),
+      search: generalFields.search_Currency.optional(),
     })
     .required(),
 };
 export const getCurrencyById = {
   query: Joi.object()
     .keys({
-      search: generalFeilds.search_Currency.optional(),
+      search: generalFields.search_Currency.optional(),
     })
     .required(),
 };
@@ -19,11 +19,11 @@ export const getCurrencyById = {
 export const addCurrencySchema = {
   body: Joi.object()
     .keys({
-      name_en: generalFeilds.name_en.required(),
-      name_ar: generalFeilds.name_ar.required(),
-      symbol: generalFeilds.symbol.required(),
-      code: generalFeilds.code.required(),
-      exchangeRate: generalFeilds.exchangeRate.required(),
+      name_en: generalFields.name_en.required(),
+      name_ar: generalFields.name_ar.required(),
+      symbol: generalFields.symbol.required(),
+      code: generalFields.code.required(),
+      exchangeRate: generalFields.exchangeRate.required(),
     })
     .required(),
 };
@@ -31,12 +31,12 @@ export const addCurrencySchema = {
 export const updateCurrencySchema = {
   body: Joi.object()
     .keys({
-      name_en: generalFeilds.name_en.optional(),
-      name_ar: generalFeilds.name_ar.optional(),
-      symbol: generalFeilds.symbol.optional(),
-      code: generalFeilds.code.optional(),
-      exchangeRate: generalFeilds.exchangeRate.optional(),
-      default: generalFeilds.default.optional(),
+      name_en: generalFields.name_en.optional(),
+      name_ar: generalFields.name_ar.optional(),
+      symbol: generalFields.symbol.optional(),
+      code: generalFields.code.optional(),
+      exchangeRate: generalFields.exchangeRate.optional(),
+      default: generalFields.default.optional(),
     })
     .required(),
   params: Joi.object()

@@ -1,5 +1,5 @@
 import joi from "joi";
-import { generalFeilds } from "../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../Utils/GeneralFields/index.js";
 
 export const getCalendar = {
   query: joi
@@ -11,7 +11,7 @@ export const getCalendar = {
   params: joi
     .object()
     .keys({
-      student_id: generalFeilds,
+      student_id: generalFields,
     })
     .required(),
 };
@@ -24,7 +24,7 @@ export const getStudentCalendar = {
     .required(),
   params: joi
     .object({
-      student_id: generalFeilds.id.messages({
+      student_id: generalFields.id.messages({
         "any.required": "STUDENT_ID_REQUIRED",
         "string.empty": "STUDENT_ID_REQUIRED",
         "string.guid": "STUDENT_ID_INVALID",
@@ -41,7 +41,7 @@ export const getTeacherCalendar = {
     .required(),
   params: joi
     .object({
-      student_id: generalFeilds.id.messages({
+      student_id: generalFields.id.messages({
         "any.required": "STUDENT_ID_REQUIRED",
         "string.empty": "STUDENT_ID_REQUIRED",
         "string.guid": "STUDENT_ID_INVALID",

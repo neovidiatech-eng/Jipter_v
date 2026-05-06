@@ -1,0 +1,208 @@
+import * as db from "../../../database/dbService.js";
+import { createError } from "../../../Utils/Helpers.js";
+
+/* -----------------------------
+   Shared Includes
+----------------------------- */
+const lecturesInclude = {
+  rank: {
+    select: {
+      name: true,
+      slug: true,
+      color: true,
+      ageRange: true,
+    },
+  },
+  lectures: {
+    orderBy: { order: "asc" },
+  },
+};
+
+/* -----------------------------
+   CREATE COURSE
+----------------------------- */
+export const createCourse = async ({ req, res, next }) => {
+  const { rankId, title, description } = req.body;
+
+  if (!rankId) {
+    const error = createError({
+      message: "rankId is required",
+      status: 400,
+      next,
+    });
+    throw error;
+  }
+
+  if (!title) {
+    const error = createError({
+      message: "title is required",
+      status: 400,
+      next,
+    });
+    throw error;
+  }
+
+  // check rank exists
+  const rank = await db.findFirst({
+    model: "ranks",
+    where: { id: rankId },
+  });
+
+  if (!rank) {
+    const error = createError({
+      message: "Rank not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  // check title exists
+  const courseTitle = await db.findFirst({
+    model: "courses",
+    where: { title },
+  });
+
+  if (courseTitle) {
+    const error = createError({
+      message: "Title already exists",
+      status: 409,
+      next,
+    });
+    throw error;
+  }
+
+  const course = await db.create({
+    model: "courses",
+    data: { rankId, title, description },
+  });
+
+  return course;
+};
+
+/* -----------------------------
+   GET ALL COURSES
+----------------------------- */
+export const getCourses = async (query = {}) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const { rankId } = query;
+
+  const where = {};
+
+  if (rankId) {
+    where.rankId = rankId;
+  }
+
+  return await db.findManyWithPaginationAndCount({
+    model: "courses",
+    where,
+    page,
+    limit,
+    include: lecturesInclude,
+  });
+};
+
+/* -----------------------------
+   GET COURSE BY ID
+----------------------------- */
+export const getCourseById = async (id) => {
+  const course = await db.findFirst({
+    model: "courses",
+    where: { id },
+    include: lecturesInclude,
+  });
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  return course;
+};
+
+/* -----------------------------
+   UPDATE COURSE
+----------------------------- */
+export const updateCourse = async ({ req, res, next }) => {
+  const { title, description, rankId } = req.body;
+  const { id } = req.params;
+
+  // validate title if exists
+  if (title) {
+    const courseTitle = await db.findFirst({
+      model: "courses",
+      where: { title, id: { not: id } },
+    });
+
+    if (courseTitle) {
+      const error = createError({
+        message: "Title already exists",
+        status: 409,
+        next,
+      });
+      throw error;
+    }
+  }
+
+  const course = await db.findFirst({
+    model: "courses",
+    where: { id },
+  });
+
+  if (!course) {
+    const error = createError({
+      message: "Course not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  // validate rank change if exists
+  if (rankId && rankId !== course.rankId) {
+    const rank = await db.findFirst({
+      model: "ranks",
+      where: { id: rankId },
+    });
+
+    if (!rank) {
+      const error = createError({
+        message: "New rank not found",
+        status: 404,
+        next,
+      });
+      throw error;
+    }
+  }
+
+  return await db.updateOne({
+    model: "courses",
+    where: { id },
+    data: { title, description, rankId },
+  });
+};
+
+/* -----------------------------
+   DELETE COURSE
+----------------------------- */
+export const deleteCourse = async ({ req, res, next }) => {
+  const { id } = req.params;
+  const course = await db.findFirst({
+    model: "courses",
+    where: { id },
+  });
+
+  if (!course) {
+    const error = createError({
+      message: "Course not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  return await db.deleteOne({
+    model: "courses",
+    where: { id },
+  });
+};

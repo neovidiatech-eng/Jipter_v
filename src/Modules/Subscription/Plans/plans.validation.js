@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createPlanSchema = {
   body: Joi.object({
@@ -30,6 +30,6 @@ export const updatePlanSchema = {
 };
 export const deletePlanSchema = {
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };

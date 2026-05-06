@@ -3,7 +3,6 @@ import { decryptText } from "../../../Utils/Security/index.js";
 import * as db from "../../../database/dbService.js";
 
 export const getProfile = asyncHandler(async (req, res, next) => {
-
   const user = await db.findOne({
     model: "student",
     where: {
@@ -25,36 +24,59 @@ export const getProfile = asyncHandler(async (req, res, next) => {
         },
       },
       schedules: {
-        include:{
-          teacher:true,
-          subject:true,
-        }
+        include: {
+          teacher: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                  image: true,
+                },
+              },
+            },
+          },
+          subject: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       },
 
       plan: {
         select: {
           id: true,
-          name_en: true,
-          name_ar: true,
+          name: true,
           description: true,
           price: true,
           duration: true,
-          sessionsCount: true,
           features: true,
-
+          sessionsCount: true,
+          rescheduleCount: true,
+          currency: {
+            select: {
+              id: true,
+              name_en: true,
+              symbol: true,
+            },
+          },
         },
       },
     },
   });
 
-const phone=await decryptText({text:user.user.phone})
-const userDecrypted={
-  ...user,
-  user:{
-    ...user.user,
-    phone:phone
-  }
-}
+  const phone = await decryptText({ text: user.user.phone });
+  const userDecrypted = {
+    ...user,
+    user: {
+      ...user.user,
+      phone: phone,
+    },
+  };
   return successResponse({
     res,
     req,

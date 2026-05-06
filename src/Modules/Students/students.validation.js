@@ -1,15 +1,15 @@
 import Joi from "joi";
-import { generalFeilds } from "../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../Utils/GeneralFields/index.js";
 
 export const createStudentSchema = {
   body: Joi.object().keys({
-    name: generalFeilds.name.required(),
-    email: generalFeilds.email.required(),
-    password: generalFeilds.password.required(),
-    phone: generalFeilds.phone.required(),
-    phone_code: generalFeilds.codeCountry.required(),
-    country: generalFeilds.country.required(),
-    planId: generalFeilds.id
+    name: generalFields.name.required(),
+    email: generalFields.email.required(),
+    password: generalFields.password.required(),
+    phone: generalFields.phone.required(),
+    phone_code: generalFields.codeCountry.required(),
+    country: generalFields.country.required(),
+    planId: generalFields.id
       .messages({
         "string.base": "PLAN_ID_MUST_BE_STRING",
         "string.empty": "PLAN_ID_CANNOT_BE_EMPTY",
@@ -17,26 +17,26 @@ export const createStudentSchema = {
         "any.required": "PLAN_ID_REQUIRED",
       })
       .required(),
-    birth_date: generalFeilds.birth_date.required(),
-    gender: generalFeilds.gender.required(),
-    active: generalFeilds.active.required(),
+    birth_date: generalFields.birth_date.required(),
+    gender: generalFields.gender.required(),
+    active: generalFields.active.required(),
   }),
 };
 
 export const updateStudentSchema = {
   params: Joi.object().keys({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
   body: Joi.object()
     .keys({
-      name: generalFeilds.name,
-      phone: generalFeilds.phone,
-      phone_code: generalFeilds.codeCountry,
-      country: generalFeilds.country,
-      planId: generalFeilds.id,
-      birth_date: generalFeilds.birth_date,
-      gender: generalFeilds.gender,
-      active: generalFeilds.active,
+      name: generalFields.name,
+      phone: generalFields.phone,
+      phone_code: generalFields.codeCountry,
+      country: generalFields.country,
+      planId: generalFields.id,
+      birth_date: generalFields.birth_date,
+      gender: generalFields.gender,
+      active: generalFields.active,
     })
     .min(1)
     .messages({ "object.min": "VALIDATION_MIN_ONE_FIELD" }),
@@ -44,6 +44,6 @@ export const updateStudentSchema = {
 
 export const studentIdSchema = {
   params: Joi.object().keys({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };

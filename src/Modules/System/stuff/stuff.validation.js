@@ -1,35 +1,35 @@
 import Joi from "joi";
-import { generalFeilds } from "../../../Middlewares/Validation.js";
+import { generalFields } from "../../../Middlewares/Validation.js";
 
 export const createStuffUserSchema = {
   body: Joi.object({
-    name: generalFeilds.name.required(),
-    email: generalFeilds.email.required(),
-    password: generalFeilds.password.required(),
-    phone: generalFeilds.phone.required(),
-    code_country: generalFeilds.codeCountry.required(),
-    roleId: generalFeilds.id.required(),
+    name: generalFields.name.required(),
+    email: generalFields.email.required(),
+    password: generalFields.password.required(),
+    phone: generalFields.phone.required(),
+    code_country: generalFields.codeCountry.required(),
+    roleId: generalFields.id.required(),
   }),
 };
 
 export const updateStuffUserSchema = {
   body: Joi.object({
-    name: generalFeilds.name.required(),
-    phone: generalFeilds.phone.required(),
-    code_country: generalFeilds.codeCountry.required(),
-    roleId: generalFeilds.id.required(),
+    name: generalFields.name.required(),
+    phone: generalFields.phone.required(),
+    code_country: generalFields.codeCountry.required(),
+    roleId: generalFields.id.required(),
   }),
 };
 
 export const deleteStuffUserSchema = {
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };
 
 export const getStuffByIdSchema = {
   params: Joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };
 

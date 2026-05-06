@@ -1,23 +1,23 @@
 import joi from "joi";
-import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createRank = {
   body: joi.object({
-    name: generalFeilds.name
+    name: generalFields.name
       .messages({
         "any.required": "Rank name is required",
         "string.empty": "Rank name cannot be empty",
         "string.base": "Rank name must be a string",
       })
       .required(),
-    color: generalFeilds.color
+    color: generalFields.color
       .messages({
         "any.required": "color is required",
         "string.empty": "color cannot be empty",
         "string.base": "color must be a string",
       })
       .required(),
-    ageRange: generalFeilds.ageRange
+    ageRange: generalFields.ageRange
       .messages({
         "any.required": "ageRange is required",
         "string.empty": "ageRange cannot be empty",
@@ -29,33 +29,33 @@ export const createRank = {
 
 export const updateRank = {
   body: joi.object({
-    name: generalFeilds.name
+    name: generalFields.name
       .messages({
         "string.empty": "Rank name cannot be empty",
         "string.base": "Rank name must be a string",
       })
       .optional(),
-    color: generalFeilds.color
+    color: generalFields.color
       .messages({
         "string.empty": "color cannot be empty",
         "string.base": "color must be a string",
       })
       .optional(),
-    ageRange: generalFeilds.ageRange.optional(),
+    ageRange: generalFields.ageRange.optional(),
   }),
   params: joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };
 
 export const deleteRank = {
   params: joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };
 
 export const getRank = {
   params: joi.object({
-    id: generalFeilds.id.required(),
+    id: generalFields.id.required(),
   }),
 };

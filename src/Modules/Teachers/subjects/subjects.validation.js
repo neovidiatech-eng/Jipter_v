@@ -1,11 +1,11 @@
 import Joi from "joi";
-import { generalFeilds } from "../../../Utils/GeneralFields/index.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createSubjectSchema = {
   body: Joi.object({
-    name: generalFeilds.name.required(),
-    color: generalFeilds.color.required(),
-    rankId: generalFeilds.id
+    name: generalFields.name.required(),
+    color: generalFields.color.required(),
+    rankId: generalFields.id
       .messages({
         "string.empty": "RANK_REQUIRED",
         "any.required": "RANK_REQUIRED",
@@ -16,17 +16,16 @@ export const createSubjectSchema = {
 
 export const updateSubjectSchema = {
   body: Joi.object({
-    name: generalFeilds.name,
-    active: generalFeilds.active,
-    color: generalFeilds.color,
-    rankId: generalFeilds.id
-      .messages({
-        "string.empty": "RANK_REQUIRED",
-        "any.required": "RANK_REQUIRED",
-      }),
+    name: generalFields.name,
+    active: generalFields.active,
+    color: generalFields.color,
+    rankId: generalFields.id.messages({
+      "string.empty": "RANK_REQUIRED",
+      "any.required": "RANK_REQUIRED",
+    }),
   }),
   params: Joi.object({
-    id: generalFeilds.id
+    id: generalFields.id
       .messages({
         "string.empty": "ID_REQUIRED",
         "any.required": "ID_REQUIRED",
@@ -37,7 +36,7 @@ export const updateSubjectSchema = {
 
 export const deleteSubjectSchema = {
   params: Joi.object({
-    id: generalFeilds.id
+    id: generalFields.id
       .messages({
         "string.empty": "ID_REQUIRED",
         "any.required": "ID_REQUIRED",
