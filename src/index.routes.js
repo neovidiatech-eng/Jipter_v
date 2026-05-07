@@ -22,7 +22,14 @@ import withdrawalsRouter from "./Modules/Withdrawals/withdrawals.routes.js";
 import chatRouter from "./Modules/chat/chat.routes.js";
 import settingsRouter from "./Modules/Settings/settings.routes.js";
 import materialsRouter from "./Modules/matrials/matrials.routes.js";
+import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js";
+
+import timezoneMiddleware from "./Middlewares/Timezone.js";
+
 const rootRouter = Router();
+
+// Apply timezone middleware globally
+rootRouter.use(timezoneMiddleware);
 
 // API Routes
 rootRouter.use("/auth", authRouter);
@@ -45,6 +52,7 @@ rootRouter.use("/chat", chatRouter);
 rootRouter.use("/settings", settingsRouter);
 rootRouter.use("/materials", materialsRouter);
 
+ 
 // Static files
 rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));
 

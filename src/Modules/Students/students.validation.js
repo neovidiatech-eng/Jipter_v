@@ -21,6 +21,7 @@ export const createStudentSchema = {
     gender: generalFields.gender.required(),
     active: generalFields.active.required(),
     rankId: generalFields.id.required(),
+    timezone: generalFields.timezone, // optional — fallback to default
   }),
 };
 
@@ -39,6 +40,7 @@ export const updateStudentSchema = {
       gender: generalFields.gender,
       active: generalFields.active,
       rankId: generalFields.id,
+      timezone: generalFields.timezone,
     })
     .min(1)
     .messages({ "object.min": "VALIDATION_MIN_ONE_FIELD" }),

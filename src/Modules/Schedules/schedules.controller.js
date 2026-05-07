@@ -96,11 +96,20 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
         subject: true,
       },
     });
+  const scheduleData = await Promise.all(
+    schedule.map(async (schedule) => {
+      return {
+        ...schedule,
+        start_time: toLocal(schedule.start_time, req.timezone),
+        end_time: toLocal(schedule.end_time, req.timezone),
+      };
+    }),
+  );
 
   return successResponse({
     res,
     req,
-    data: { schedule, pagination },
+    data: { schedule: scheduleData, pagination },
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -140,7 +149,8 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const startTime = normalizeDate(start_time);
+  const tz = req.timezone;
+  const startTime = normalizeDate(start_time, tz);
   const endTime = getEndTime(startTime, type, student.plan?.sessionTime);
 
   /* check if student and teacher are available at the same time */
@@ -251,8 +261,11 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     res,
     req,
     data: {
-      schedule: newSchedule,
-      start_time_local: toLocal(newSchedule.start_time),
+      schedule: {
+        ...newSchedule,
+        start_time: toLocal(newSchedule.start_time, tz),
+        end_time: toLocal(newSchedule.end_time, tz),
+      },
     },
     status: 201,
     message: "CREATE_SUCCESS",
@@ -324,8 +337,9 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   const notificationJobs = [];
   const parentRecurringId = `rec_${nanoid(10)}`;
 
+  const tz = req.timezone;
   const allDatesStart = dates.map((d) => {
-    return combineDateAndTime(d, timeStart);
+    return combineDateAndTime(d, timeStart, tz);
   });
   // Determine the overall window for the batch conflict query
   const windowStart = allDatesStart[0];
@@ -357,7 +371,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   ]);
 
   for (const date of dates) {
-    const start_time = combineDateAndTime(date, timeStart);
+    const start_time = combineDateAndTime(date, timeStart, tz);
 
     const end_time = getEndTime(start_time, type, student.plan?.sessionTime);
 
@@ -576,12 +590,18 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
     orderBy: { start_time: "asc" },
   });
 
+  const schedulesData = schedules.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
   return successResponse({
     res,
     req,
     status: 200,
     message: "FETCH_SUCCESS",
-    data: schedules,
+    data: schedulesData,
   });
 });
 
@@ -733,7 +753,9 @@ export const updateSchedule = asyncHandler(async (req, res, next) => {
 
   // If time or type changes, recalculate end time and check conflicts
   if (start_time || type) {
-    startTime = start_time ? normalizeDate(start_time) : startTime;
+    startTime = start_time
+      ? normalizeDate(start_time, req.timezone)
+      : startTime;
     sessionType = type || sessionType;
     endTime = getEndTime(
       startTime,
@@ -852,7 +874,11 @@ export const updateSchedule = asyncHandler(async (req, res, next) => {
     req,
     status: 200,
     message: "UPDATE_SUCCESS",
-    data: updatedSchedule,
+    data: {
+      ...updatedSchedule,
+      start_time: toLocal(updatedSchedule.start_time, req.timezone),
+      end_time: toLocal(updatedSchedule.end_time, req.timezone),
+    },
   });
 });
 
@@ -892,8 +918,8 @@ export const joinSession = asyncHandler(async (req, res, next) => {
       status: 400,
       message: "TOO_EARLY_TO_JOIN",
       messageParams: {
-        now: toLocal(getNowUTC()),
-        start: toLocal(session.start_time),
+        now: toLocal(getNowUTC(), req.timezone),
+        start: toLocal(session.start_time, req.timezone),
       },
     });
   }
@@ -1252,8 +1278,8 @@ async function finalizeSession(scheduleId, t) {
       data: {
         userId: session.student.user_id,
         title: t ? t("NOTIFICATION_SESSION_MISSED_TITLE") : "Session Missed",
-        message: t 
-          ? t("NOTIFICATION_SESSION_MISSED_MSG", { title: session.title }) 
+        message: t
+          ? t("NOTIFICATION_SESSION_MISSED_MSG", { title: session.title })
           : `The session ${session.title} was marked as missed.`,
         type: "session_missed",
       },

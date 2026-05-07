@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { VALID_TIMEZONE_VALUES } from "../Date/timezones.js";
 export const generalFields = {
   role_name: Joi.string().min(3).max(15).messages({
     "string.base": "Role name must be a string",
@@ -7,6 +8,14 @@ export const generalFields = {
     "string.max": "Role name must be at most {#limit} characters",
     "any.required": "Role name is required",
   }),
+  timezone: Joi.string()
+    .valid(...VALID_TIMEZONE_VALUES)
+    .messages({
+      "string.base": "Timezone must be a string",
+      "string.empty": "Timezone cannot be empty",
+      "any.only": "Timezone must be a valid IANA timezone",
+      "any.required": "Timezone is required",
+    }),
   url: Joi.string().uri(),
   platform: Joi.string().valid("zoom", "google").messages({
     "string.base": "Platform must be a string",

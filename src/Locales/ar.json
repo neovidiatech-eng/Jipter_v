@@ -165,5 +165,16 @@
   "SUBJECT_ID_EMPTY": "معرف المادة لا يمكن أن يكون فارغاً",
 
   "STUDENT": "طالب",
-  "TEACHER": "معلم"
+  "TEACHER": "معلم",
+  "ONLY_TEACHERS_CAN_SUBMIT_REPORTS": "فقط المعلمون يمكنهم تقديم التقارير الأسبوعية",
+  "WEEKLY_REPORT_CREATED": "تم تقديم التقرير الأسبوعي بنجاح",
+  "ONLY_TEACHERS_CAN_VIEW_REPORTS": "فقط المعلمون يمكنهم رؤية تقاريرهم",
+  "REPORT_NOT_FOUND": "التقرير الأسبوعي غير موجود",
+  "UNAUTHORIZED_TO_UPDATE_REPORT": "ليس لديك صلاحية لتحديث هذا التقرير",
+  "WEEKLY_REPORT_UPDATED": "تم تحديث التقرير الأسبوعي بنجاح",
+  "UNAUTHORIZED_TO_DELETE_REPORT": "ليس لديك صلاحية لحذف هذا التقرير",
+  "WEEKLY_REPORT_DELETED": "تم حذف التقرير الأسبوعي بنجاح",
+  "REPORT_ALREADY_SUBMITTED_FOR_THIS_WEEK": "تم تقديم تقرير لهذا الأسبوع بالفعل",
+  "WEEK_RANGE_REQUIRED": "تاريخ بداية ونهاية الأسبوع مطلوبان",
+  "ONLY_TEACHERS_CAN_VIEW_METRICS": "فقط المعلمون يمكنهم رؤية إحصائياتهم الأسبوعية"
 }

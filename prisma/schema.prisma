@@ -23,6 +23,7 @@ model user {
   status               String                  @default("pending")
   googleId             String?                 @unique
   provider             String                  @default("local")
+  timezone             String                  @default("Africa/Cairo")
   image                Json?
   reviewsReceived      Review[]                @relation("ReviewsReceived")
   reviewsGiven         Review[]                @relation("ReviewsGiven")
@@ -184,6 +185,28 @@ model teacher {
   user         user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   conversations Conversation[]
+  weeklyReports weekly_report[]
+}
+
+model weekly_report {
+  id                 String   @id @default(uuid())
+  teacherId          String
+  weekStarting       DateTime
+  weekEnding         DateTime
+  totalClasses       Int      @default(0)
+  studentsTaught     Int      @default(0)
+  avgSessionDuration Float    @default(0)
+  materialsUploaded  Int      @default(0)
+  teachingSummary    String?
+  studentProgress    String?
+  challenges         String?
+  overallRating      Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  teacher            teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([weekStarting])
 }
 
 model student {
@@ -492,6 +515,7 @@ model courses {
   title       String     @unique
   description String?
   rankId      String
+  image       String     @default("default_course.jpg")
   rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
   lectures    lectures[]
   createdAt   DateTime   @default(now())

@@ -1,5 +1,6 @@
 import * as db from "../database/dbService.js";
 import { errorResponse } from "./Response.js";
+
 export const destructData = ({ body, allowed }) => {
   return Object.keys(body).reduce((acc, key) => {
     if (allowed.includes(key)) {
@@ -26,7 +27,6 @@ export const checkExist = async ({ model, where, next }) => {
   return existing;
 };
 
-
 import {
   standardizeDate,
   toUTC,
@@ -52,8 +52,14 @@ export const getEndTime = (startTime, type, duration = 0) => {
   return end.toDate();
 };
 
-export const normalizeDate = (date) => {
-  return standardizeDate(date);
+/**
+ * Normalize a date string to UTC using the provided timezone.
+ * @param {string|Date} date
+ * @param {string} tz - IANA timezone (e.g. "Africa/Cairo")
+ * @returns {Date}
+ */
+export const normalizeDate = (date, tz) => {
+  return standardizeDate(date, tz);
 };
 
 export { getDatesBetweenUTC, combineDateAndTime };

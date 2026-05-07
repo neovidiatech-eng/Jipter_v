@@ -71,10 +71,14 @@ export const createCourse = async ({ req, res, next }) => {
     });
     throw error;
   }
+  let image = "";
+  if (req.file) {
+    image = req?.file?.finalPath || "";
+  }
 
   const course = await db.create({
     model: "courses",
-    data: { rankId, title, description },
+    data: { rankId, title, description, image },
   });
 
   return course;

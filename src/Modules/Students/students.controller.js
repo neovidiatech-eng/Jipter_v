@@ -6,6 +6,7 @@ import {
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, hash } from "../../Utils/Security/index.js";
+import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {
   const { search, country, plans, page = 1, limit = 10 } = req.query;
@@ -86,6 +87,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     gender,
     active,
     rankId,
+    timezone,
   } = req.body;
 
   const [
@@ -144,6 +146,9 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
   }
 
+  // Resolve timezone — use provided, or fall back to default
+  const userTimezone = timezone || DEFAULT_TIMEZONE;
+
   await db.transaction(async (tx) => {
     // 1. Create user
     const prefix = settings?.userPrefix || "jupiter";
@@ -162,6 +167,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         confirmAt: new Date(),
         gender,
         age: birth_date ? new Date().getFullYear() - new Date(birth_date).getFullYear() : null,
+        timezone: userTimezone,
         ...(studentRole && { roleId: studentRole.id }),
       },
     });
@@ -263,6 +269,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     gender,
     active,
     rankId,
+    timezone,
   } = req.body;
 
   const student = await ensureExists({
@@ -316,7 +323,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   }
 
   // Update user record if needed
-  if (name || email || phone || phone_code) {
+  if (name || email || phone || phone_code || timezone) {
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
@@ -325,6 +332,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(email && { email }),
         ...(phone && { phone }),
         ...(phone_code && { code_country: phone_code }),
+        ...(timezone && { timezone }),
       },
     });
   }

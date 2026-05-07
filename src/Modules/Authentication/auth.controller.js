@@ -32,6 +32,7 @@ export const register = asyncHandler(async (req, res, next) => {
     birth_date,
     gender,
     country,
+    timezone,
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
@@ -110,7 +111,8 @@ export const register = asyncHandler(async (req, res, next) => {
         password: hashedPassword,
         phone: encryptedPhone,
         code_country: codeCountry,
-        roleId: userRole?.id ? userRole.id : null,
+        role: { connect: { id: userRole.id } },
+        timezone,
       },
     });
 
@@ -126,6 +128,7 @@ export const register = asyncHandler(async (req, res, next) => {
         birth_date,
         gender,
         country,
+        timezone,
         user_id: user.id,
       }),
     );
@@ -135,7 +138,7 @@ export const register = asyncHandler(async (req, res, next) => {
     if (plan_id) {
       await tx.create({
         model: "subscription_requests",
-        data: {
+        data: { 
           user_id: user.id,
           planId: plan_id,
         },
@@ -173,24 +176,29 @@ export const login = asyncHandler(async (req, res, next) => {
           name: true,
         },
       },
-      subscriptionRequests: true
+      subscriptionRequests: true,
     },
   });
 
-  const subscriptionRequest=user?.subscriptionRequests?.find(
-    (request)=>request.status==="pending"
-  )
-  if(subscriptionRequest){
+  const subscriptionRequest = user?.subscriptionRequests?.find(
+    (request) => request.status === "pending",
+  );
+  if (subscriptionRequest) {
     return errorResponse({
       req,
       next,
-      message:"USER_ALREADY_HAVE_PENDING_SUBSCRIPTION_REQUEST",
-      status:400,
+      message: "USER_ALREADY_HAVE_PENDING_SUBSCRIPTION_REQUEST",
+      status: 400,
     });
   }
 
   if (!user || !user.password) {
-    return errorResponse({ req, next, message: "USER_NOT_FOUND_OR_UNCONFIRMED", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "USER_NOT_FOUND_OR_UNCONFIRMED",
+      status: 404,
+    });
   }
   const matchedPassword = await compare({ password, hash: user.password });
   if (!matchedPassword) {
@@ -351,7 +359,13 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   const text = req.t("RESET_PASSWORD_EMAIL_TEXT");
   const subject = req.t("RESET_PASSWORD_SUBJECT");
 
-  const mailResult = await sendEmail({ email, otp, subject, text, lang: req.lang });
+  const mailResult = await sendEmail({
+    email,
+    otp,
+    subject,
+    text,
+    lang: req.lang,
+  });
   if (!mailResult.success) {
     return errorResponse({
       req,
@@ -501,6 +515,7 @@ export const googleSignUp = asyncHandler(async (req, res, next) => {
       await tx.create({
         model: "subscription_requests",
         data: {
+          
           user_id: user.id,
           planId: null,
         },

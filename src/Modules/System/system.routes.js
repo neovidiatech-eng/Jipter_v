@@ -5,6 +5,7 @@ import { validation } from "../../Middlewares/Validation.js";
 import permissionsRouter from "./Permissions/permissions.routes.js";
 import * as systemController from "./system.controller.js";
 import { endpoints } from "./system.authorization.js";
+import { TIMEZONES_LIST } from "../../Utils/Date/timezones.js";
 import {
   createRoleSchema,
   deleteRoleSchema,
@@ -14,6 +15,11 @@ import {
 import stuffRouter from "./stuff/stuff.routes.js";
 
 const router = Router();
+
+// Public: list all available IANA timezones for dropdown
+router.get("/timezones", (req, res) => {
+  res.json({ data: TIMEZONES_LIST, status: 200 });
+});
 
 router.use("/permissions", permissionsRouter);
 router.use("/stuff", stuffRouter);

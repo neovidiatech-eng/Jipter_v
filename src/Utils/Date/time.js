@@ -5,7 +5,7 @@ import timezone from "dayjs/plugin/timezone.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const DEFAULT_TIMEZONE = "Africa/Cairo";
+export const DEFAULT_TIMEZONE = "Africa/Cairo";
 
 /**
  * Get the current time in UTC
@@ -14,8 +14,23 @@ const DEFAULT_TIMEZONE = "Africa/Cairo";
 export const getNowUTC = () => dayjs.utc();
 
 /**
+ * Validate if a timezone string is a valid IANA timezone
+ * @param {string} tz 
+ * @returns {boolean}
+ */
+export const isValidTimezone = (tz) => {
+  if (!tz) return false;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
  * Convert any date input to a UTC dayjs object.
- * If a string is provided without timezone info, it's assumed to be in the provided timezone (default Cairo).
+ * If a string is provided without timezone info, it's assumed to be in the provided timezone.
  * @param {string|Date} date 
  * @param {string} tz - The timezone to assume if none is provided
  * @returns {dayjs.Dayjs}
@@ -27,6 +42,10 @@ export const toUTC = (date, tz = DEFAULT_TIMEZONE) => {
   // If it's already a dayjs object
   if (dayjs.isDayjs(date)) {
     result = date.utc();
+  }
+  // If it's a JS Date object
+  else if (date instanceof Date) {
+    result = dayjs.utc(date);
   }
   // If it's a string and doesn't have a timezone offset or 'Z'
   else if (typeof date === "string" && !date.includes("Z") && !date.match(/[\+\-]\d{2}:?\d{2}$/)) {
@@ -79,7 +98,7 @@ export const isBeforeAllowedJoinTime = (startTime, windowMinutes = 5) => {
 
   const tooEarly = now.isBefore(threshold);
 
-  console.log(`[TIME_CHECK] Now (UTC): ${now.toISOString()} | Now (Cairo): ${toLocal(now)}`);
+  console.log(`[TIME_CHECK] Now (UTC): ${now.toISOString()}`);
   console.log(`[TIME_CHECK] Session Start (UTC): ${start.toISOString()} | Allowed From (UTC): ${threshold.toISOString()}`);
   console.log(`[TIME_CHECK] Is Too Early: ${tooEarly}`);
 

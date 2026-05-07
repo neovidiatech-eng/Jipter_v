@@ -168,5 +168,16 @@
   
 
   "STUDENT": "Student",
-  "TEACHER": "Teacher"
+  "TEACHER": "Teacher",
+  "ONLY_TEACHERS_CAN_SUBMIT_REPORTS": "Only teachers can submit weekly reports",
+  "WEEKLY_REPORT_CREATED": "Weekly report submitted successfully",
+  "ONLY_TEACHERS_CAN_VIEW_REPORTS": "Only teachers can view their reports",
+  "REPORT_NOT_FOUND": "Weekly report not found",
+  "UNAUTHORIZED_TO_UPDATE_REPORT": "You are not authorized to update this report",
+  "WEEKLY_REPORT_UPDATED": "Weekly report updated successfully",
+  "UNAUTHORIZED_TO_DELETE_REPORT": "You are not authorized to delete this report",
+  "WEEKLY_REPORT_DELETED": "Weekly report deleted successfully",
+  "REPORT_ALREADY_SUBMITTED_FOR_THIS_WEEK": "A report has already been submitted for this week starting date",
+  "WEEK_RANGE_REQUIRED": "Week starting and ending dates are required",
+  "ONLY_TEACHERS_CAN_VIEW_METRICS": "Only teachers can view their weekly metrics"
 }

@@ -1,6 +1,8 @@
 import multer from "multer";
 import { Prisma } from "@prisma/client";
 import { getMessage, getDir } from "./i18n.js";
+import fs from "node:fs";
+import path from "node:path";
 
 // =========================
 // 🔹 Async Wrapper
@@ -16,6 +18,44 @@ export const asyncHandler = (fn) => {
 // =========================
 export const globalErrorHandling = (err, req, res, next) => {
   const lang = req?.lang || "en";
+
+  // =========================
+  // 🗑️ Cleanup Uploaded Files on Error
+  const deletedFolders = new Set();
+
+  // single file
+  if (req.file) {
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    deletedFolders.add(path.dirname(req.file.path));
+  }
+
+  // multiple files
+  if (req.files) {
+    const files = Array.isArray(req.files)
+      ? req.files
+      : Object.values(req.files).flat();
+
+    files.forEach((file) => {
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+
+      deletedFolders.add(path.dirname(file.path));
+    });
+  }
+
+  // remove empty folders
+  deletedFolders.forEach((folderPath) => {
+    if (fs.existsSync(folderPath) && fs.readdirSync(folderPath).length === 0) {
+      fs.rmSync(folderPath, {
+        recursive: true,
+        force: true,
+      });
+    }
+  });
 
   // =========================
   // 🟡 Multer Errors
@@ -114,9 +154,9 @@ export const globalErrorHandling = (err, req, res, next) => {
     status = err.status || err.statusCode || 500;
   }
 
-  const errorText = err.isMessageKey 
-    ? getMessage(err.message, lang, err.messageParams) 
-    : (err.message || getMessage("INTERNAL_SERVER_ERROR", lang));
+  const errorText = err.isMessageKey
+    ? getMessage(err.message, lang, err.messageParams)
+    : err.message || getMessage("INTERNAL_SERVER_ERROR", lang);
 
   return res.status(status).json({
     message: "error",

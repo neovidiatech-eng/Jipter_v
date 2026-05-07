@@ -30,7 +30,6 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           student: { include: { user: true } },
         },
       },
-      teacherSubjects: { include: { subject: true } },
     },
   });
 
@@ -79,15 +78,8 @@ export const getProfile = asyncHandler(async (req, res, next) => {
     },
     stats: {
       totalStudents: students.length,
-      totalSubjects: user.teacherSubjects.length,
       totalSessions: user.schedules.length,
     },
-    subjects: user.teacherSubjects.map((ts) => ({
-      nameEn: ts.subject.name_en,
-      nameAr: ts.subject.name_ar,
-      color: ts.subject.color,
-      active: ts.subject.active,
-    })),
     schedules: user.schedules.map((s) => ({
       title: s.title,
       description: s.description,

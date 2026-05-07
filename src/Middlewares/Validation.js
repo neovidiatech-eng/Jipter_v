@@ -4,6 +4,8 @@ import { asyncHandler } from "../Utils/Response.js";
 export const validation = (schema) => {
   const handler = asyncHandler(async (req, res, next) => {
     const validationErrors = [];
+    console.log(req.body);
+    
 
     for (const key of Object.keys(schema)) {
       const validationResult = await schema[key].validate(req[key], {

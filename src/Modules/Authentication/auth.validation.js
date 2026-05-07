@@ -32,6 +32,7 @@ export const registeritonSchema = {
           }),
         }),
       }),
+      timezone: generalFields.timezone,
       plan_id: generalFields.id
         .messages({
           "string.pattern.base": "VALID_PLAN_ID",
