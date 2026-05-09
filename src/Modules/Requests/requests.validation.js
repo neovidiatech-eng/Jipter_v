@@ -5,8 +5,21 @@ export const createRequest = {
   body: Joi.object({
     sessionId: generalFields.id.optional(),
     type: Joi.string()
-      .valid("reschedule", "cancel", "absence_correction", "new_session")
+      .valid(
+        "reschedule",
+        "cancel",
+        "absence_correction",
+        "new_session",
+        "vacation",
+        "sick_leave",
+        "excuse",
+        "emergency",
+        "resign",
+        "technical_issue",
+      )
       .required(),
+    priority: Joi.string().valid("low", "medium", "high").default("medium"),
+    title: Joi.string().optional(),
     reason: Joi.string().min(5).max(500).required(),
     requestedData: Joi.object({
       new_start_time: generalFields.date.optional(),

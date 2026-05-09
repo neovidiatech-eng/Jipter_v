@@ -30,7 +30,7 @@ model user {
   subscriptions        Subscription[]
   wallet               Wallet[]
   withdrawalRequests   WithdrawalRequest[]
-  sessionRequests      session_request[]
+  sessionRequests      request[]
   student              student?
   stuff                stuff?
   subscriptionRequests subscription_requests[]
@@ -264,7 +264,7 @@ model schedule {
   student         student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
   subject         subjects          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   teacher         teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  requests        session_request[]
+  requests        request[]
 
   @@index([teacherId])
   @@index([studentId])
@@ -273,12 +273,14 @@ model schedule {
   @@index([status])
 }
 
-model session_request {
+model request {
   id            String    @id @default(uuid())
   sessionId     String?
   requesterId   String
   requesterRole String
   type          String
+  priority      String    @default("medium") // low, medium, high
+  title         String?
   status        String    @default("pending")
   reason        String?
   requestedData Json?
@@ -289,7 +291,10 @@ model session_request {
   updatedAt     DateTime  @updatedAt
   requester     user      @relation(fields: [requesterId], references: [id], onDelete: Cascade)
   schedule      schedule? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_request")
 }
+
 
 model audit_log {
   id         String   @id @default(uuid())

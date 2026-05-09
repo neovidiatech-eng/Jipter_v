@@ -7,9 +7,9 @@ import * as db from "../../database/dbService.js";
 import { normalizeDate } from "../../Utils/Helpers.js";
 import { uploadToCloudinary } from "../../Utils/Cloudinary/upload.js";
 
-// 1. Create Request (Teacher/Student)
+// 1. Create Request (Teacher/Student/Admin)
 export const createRequest = asyncHandler(async (req, res, next) => {
-  const { sessionId, type, reason, requestedData } = req.body;
+  const { sessionId, type, reason, requestedData, priority, title } = req.body;
   const requesterId = req.user.id;
   const requesterRole = req.user.role.name;
 
@@ -28,20 +28,25 @@ export const createRequest = asyncHandler(async (req, res, next) => {
       });
     }
   }
+
   // Handle attachments if any
   let attachments = [];
   if (req.files && req.files.length > 0) {
-    const uploadPromises = req.files.map(file => uploadToCloudinary(file, "attachments"));
+    const uploadPromises = req.files.map((file) =>
+      uploadToCloudinary(file, "attachments"),
+    );
     attachments = await Promise.all(uploadPromises);
   }
 
   const request = await db.create({
-    model: "session_request",
+    model: "request",
     data: {
       sessionId,
       requesterId,
       requesterRole,
       type,
+      priority: priority || "medium",
+      title: title || type.replace("_", " ").toUpperCase(),
       reason,
       requestedData,
       status: "pending",
@@ -57,7 +62,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
       entityId: request.id,
       action: "create",
       userId: requesterId,
-      changes: { type, sessionId },
+      changes: { type, sessionId, priority },
     },
   });
 
@@ -66,26 +71,29 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     req,
     data: request,
     status: 201,
-    message: "REQUEST_SUBMITTED", // You'll need to add this to en/ar.json
+    message: "REQUEST_SUBMITTED",
   });
 });
 
 // 2. Get All Requests (Admin)
 export const getAllRequests = asyncHandler(async (req, res, next) => {
-  const { status, type } = req.query;
+  const { status, type, priority } = req.query;
   const where = {};
   if (status) where.status = status;
   if (type) where.type = type;
+  if (priority) where.priority = priority;
 
   const requests = await db.findMany({
-    model: "session_request",
+    model: "request",
     where,
     include: {
       requester: {
         select: {
+          id: true,
           name: true,
           email: true,
           role: true,
+          image: true,
         },
       },
       schedule: true,
@@ -115,7 +123,7 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
   const adminId = req.user.id;
 
   const request = await db.findOne({
-    model: "session_request",
+    model: "request",
     where: { id },
     include: { schedule: true },
   });
@@ -143,18 +151,15 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
   await db.transaction(async (tx) => {
     // 1. Update Request Status
     await tx.updateOne({
-      model: "session_request",
+      model: "request",
       where: { id },
       data: { status: "approved", adminId, adminNotes },
     });
 
-    // 2. Process based on type
+    // 2. Process based on type (only for automated actions)
     if (type === "reschedule" && sessionId) {
       const oldSession = request.schedule;
-
-      if (!oldSession) {
-        throw new Error("RELATED_SESSION_NOT_FOUND");
-      }
+      if (!oldSession) throw new Error("RELATED_SESSION_NOT_FOUND");
 
       const startTime = normalizeDate(requestedData.new_start_time);
       const endTime = normalizeDate(requestedData.new_end_time);
@@ -179,12 +184,9 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         },
       });
 
-      if (teacher_conflict || student_conflict) {
-        throw new Error("SESSION_CONFLICT");
-      }
+      if (teacher_conflict || student_conflict) throw new Error("SESSION_CONFLICT");
 
-      // Create new rescheduled session
-      const newSession = await tx.create({
+      await tx.create({
         model: "schedule",
         data: {
           teacherId: oldSession.teacherId,
@@ -201,7 +203,6 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // Delete old session
       await tx.deleteOne({
         model: "schedule",
         where: { id: oldSession.id },
@@ -213,11 +214,7 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         data: { status: "cancelled" },
       });
 
-      // Refund session count to student
-      const session = await tx.findOne({
-        model: "schedule",
-        where: { id: sessionId },
-      });
+      const session = await tx.findOne({ model: "schedule", where: { id: sessionId } });
       await tx.updateOne({
         model: "student",
         where: { id: session.studentId },
@@ -229,50 +226,20 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
       const teacherId = requestedData.teacherId || request.requesterId;
       const studentId = requestedData.studentId;
 
-      // Conflict check
-      const teacher_conflict = await tx.findFirst({
-        model: "schedule",
-        where: {
-          teacherId,
-          status: { not: "cancelled" },
-          start_time: { lt: endTime },
-          end_time: { gt: startTime },
-        },
-      });
-      const student_conflict = await tx.findFirst({
-        model: "schedule",
-        where: {
-          studentId,
-          status: { not: "cancelled" },
-          start_time: { lt: endTime },
-          end_time: { gt: startTime },
-        },
-      });
-
-      if (teacher_conflict || student_conflict) {
-        throw new Error("SESSION_CONFLICT");
-      }
-
       await tx.create({
         model: "schedule",
         data: {
           teacherId,
           studentId,
           subjectId: requestedData.subjectId,
-          title: requestedData.title || req.t("NEW_SESSION_TITLE"),
-          description: req.t("SESSION_CREATED_VIA_REQUEST"),
+          title: requestedData.title || "New Session",
+          description: "Session created via request",
           link: "",
           start_time: startTime,
           end_time: endTime,
           notes: requestedData.suggested_notes,
           status: "scheduled",
         },
-      });
-    } else if (type === "absence_correction" && sessionId) {
-      await tx.updateOne({
-        model: "schedule",
-        where: { id: sessionId },
-        data: { status: requestedData.new_status },
       });
     }
 
@@ -302,7 +269,7 @@ export const rejectRequest = asyncHandler(async (req, res, next) => {
   const { adminNotes } = req.body;
   const adminId = req.user.id;
 
-  const request = await db.findOne({ model: "session_request", where: { id } });
+  const request = await db.findOne({ model: "request", where: { id } });
   if (!request) {
     return errorResponse({
       req,
@@ -322,7 +289,7 @@ export const rejectRequest = asyncHandler(async (req, res, next) => {
   }
 
   await db.updateOne({
-    model: "session_request",
+    model: "request",
     where: { id },
     data: { status: "rejected", adminId, adminNotes },
   });
@@ -334,24 +301,104 @@ export const rejectRequest = asyncHandler(async (req, res, next) => {
   });
 });
 
+// 5. Get My Requests
 export const getMyRequests = asyncHandler(async (req, res, next) => {
   const { status, type } = req.query;
-  const user = req.user.id;
+  const userId = req.user.id;
 
-  const where = {};
+  const where = { requesterId: userId };
   if (status) where.status = status;
   if (type) where.type = type;
+
   const requests = await db.findMany({
-    model: "session_request",
-    where: {
-      requesterId: user,
-      ...where,
-    },
+    model: "request",
+    where,
     include: {
       schedule: true,
-      requester: true,
+      requester: {
+        select: { name: true, email: true, image: true },
+      },
     },
+    orderBy: { createdAt: "desc" },
   });
 
   return successResponse({ res, data: requests });
+});
+
+// 6. Get Requests Dashboard (Admin/User)
+export const getRequestsDashboard = asyncHandler(async (req, res, next) => {
+  const userId = req.user.id;
+  const role = req.user.role.name;
+  const isAdmin = role === "admin" || role === "super_admin";
+
+  const where = isAdmin ? {} : { requesterId: userId };
+
+  // 1. Get counts by type
+  const typeCounts = await db.groupBy({
+    model: "request",
+    by: ["type"],
+    where,
+    _count: { id: true },
+  });
+
+  // 2. Get counts by status
+  const statusCounts = await db.groupBy({
+    model: "request",
+    by: ["status"],
+    where,
+    _count: { id: true },
+  });
+
+  // 3. Get recent pending requests
+  const pendingRequests = await db.findMany({
+    model: "request",
+    where: {
+      ...where,
+      status: "pending",
+    },
+    include: {
+      requester: {
+        select: { name: true, image: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+
+  // 4. Get recent history
+  const historyRequests = await db.findMany({
+    model: "request",
+    where: {
+      ...where,
+      status: { not: "pending" },
+    },
+    include: {
+      requester: {
+        select: { name: true, image: true },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 5,
+  });
+
+  // Formatting summary for easier consumption
+  const summary = {
+    types: typeCounts.reduce((acc, curr) => {
+      acc[curr.type] = curr._count.id;
+      return acc;
+    }, {}),
+    statuses: statusCounts.reduce((acc, curr) => {
+      acc[curr.status] = curr._count.id;
+      return acc;
+    }, {}),
+  };
+
+  return successResponse({
+    res,
+    data: {
+      summary,
+      pending: pendingRequests,
+      history: historyRequests,
+    },
+  });
 });

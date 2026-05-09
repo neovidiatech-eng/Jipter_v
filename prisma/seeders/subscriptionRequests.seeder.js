@@ -12,58 +12,45 @@ const prisma = new PrismaClient({ adapter });
 export async function seedSubscriptionRequests() {
   console.log("Start seeding subscription requests...");
 
-  const student = await prisma.student.findFirst({
-    where: { user: { email: "john.doe@jipter.com" } },
-    include: { user: true },
+  const student = await prisma.user.findFirst({
+    where: { role: { name: "student" } },
   });
 
-  const plan = await prisma.plan.findFirst({
-    where: { name: "Monthly Pro" },
-  });
+  const plan = await prisma.plan.findFirst();
 
-  if (!student || !student.user_id) {
-    console.warn(
-      "Student or associated user not found. Skipping subscription requests.",
-    );
+  if (!student || !plan) {
+    console.warn("Student or plan not found. Skipping subscription requests seeding.");
     return;
   }
 
-  if (!plan) {
-    console.warn("Plan 'Monthly Pro' not found. Skipping subscription requests.");
-    return;
-  }
+  const requests = [
+    {
+      user_id: student.id,
+      planId: plan.id,
+      status: "pending",
+    },
+    {
+      user_id: student.id,
+      planId: plan.id,
+      status: "approved",
+    },
+  ];
 
-  const existingRequest = await prisma.subscription_requests.findFirst({
-    where: { user_id: student.user_id },
-  });
+  // Clear old requests
+  await prisma.subscription_requests.deleteMany({});
 
-  if (existingRequest) {
-    await prisma.subscription_requests.update({
-      where: { id: existingRequest.id },
-      data: {
-        planId: plan.id,
-        status: "pending",
-      },
-    });
-  } else {
+  for (const data of requests) {
     await prisma.subscription_requests.create({
-      data: {
-        user_id: student.user_id,
-        planId: plan.id,
-        status: "pending",
-      },
+      data,
     });
   }
 
-  console.log("Seeded subscription requests successfully.");
+  console.log("✅ Subscription requests seeded successfully");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   seedSubscriptionRequests()
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    })
+    .catch(console.error)
     .finally(async () => {
       await prisma.$disconnect();
       await pool.end();

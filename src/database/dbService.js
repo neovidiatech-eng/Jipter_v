@@ -212,3 +212,16 @@ export const deleteOne = ({ model, where = {}, include, select }) => {
 export const count = ({ model, where = {} }) => {
   return getClient(model).count({ where });
 };
+
+export const groupBy = ({ model, by, where, _count, _sum, _avg, _min, _max }) => {
+  return getClient(model).groupBy({
+    by,
+    ...(where ? { where } : {}),
+    ...(_count ? { _count } : {}),
+    ...(_sum ? { _sum } : {}),
+    ...(_avg ? { _avg } : {}),
+    ...(_min ? { _min } : {}),
+    ...(_max ? { _max } : {}),
+  });
+};
+
