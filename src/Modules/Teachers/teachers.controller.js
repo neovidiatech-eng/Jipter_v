@@ -314,7 +314,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
   const myStudents = await db.findMany({
     model: "schedule",
     where: {
-      teacherId: teacher.id,
+      teacherId: teacher?.id,
     },
     include: {
       student: {
@@ -338,6 +338,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
       if (!acc[student.id]) {
         acc[student.id] = {
           id: student.id,
+          user_id: student.user.id,
           name: student.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,

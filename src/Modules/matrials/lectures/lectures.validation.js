@@ -24,6 +24,13 @@ export const createLectureSchema = {
         "any.required": "videoUrl is required",
       })
       .required(),
+    pdfUrl: generalFields.url
+      .messages({
+        "string.base": "pdfUrl must be a string",
+        "string.empty": "pdfUrl cannot be empty",
+        "any.required": "pdfUrl is required",
+      })
+      .required(),
     order: generalFields.number
       .messages({
         "number.base": "order must be a number",

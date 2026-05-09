@@ -21,7 +21,12 @@ router.get(
   teacherController.getAllTeachers,
 );
 
-router.get("/my-students", authentication,  teacherController.getMyStudents);
+router.get(
+  "/my-students",
+  authentication,
+  authorization({ accessRoles: ["teacher"] }),
+  teacherController.getMyStudents,
+);
 
 router.post(
   "/create",

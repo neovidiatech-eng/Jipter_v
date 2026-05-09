@@ -7,12 +7,35 @@ import * as lecturesValidation from "./lectures.validation.js";
 
 const router = Router();
 
-const adminOnly = [authentication, authorization({ accessRoles: ["admin", "super_admin"] })];
+const adminOnly = [
+  authentication,
+  authorization({ accessRoles: ["admin", "super_admin"] }),
+];
 
 router.get("/", lecturesController.getAllLectures);
-router.get("/:id", validation(lecturesValidation.lectureIdSchema), lecturesController.getLecture);
-router.post("/", adminOnly, validation(lecturesValidation.createLectureSchema), lecturesController.createLecture);
-router.patch("/:id", adminOnly, validation(lecturesValidation.updateLectureSchema), lecturesController.updateLecture);
-router.delete("/:id", adminOnly, validation(lecturesValidation.lectureIdSchema), lecturesController.deleteLecture);
+router.get(
+  "/:id",
+  validation(lecturesValidation.lectureIdSchema),
+  lecturesController.getLecture,
+);
+router.post(
+  "/",
+  adminOnly,
+  validation(lecturesValidation.createLectureSchema),
+  lecturesController.createLecture,
+);
+router.patch(
+  "/:id",
+  authentication,
+  authorization({ accessRoles: ["admin", "super_admin", "teacher"] }),
+  validation(lecturesValidation.updateLectureSchema),
+  lecturesController.updateLecture,
+);
+router.delete(
+  "/:id",
+  adminOnly,
+  validation(lecturesValidation.lectureIdSchema),
+  lecturesController.deleteLecture,
+);
 
 export default router;

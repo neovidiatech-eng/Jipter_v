@@ -5,7 +5,7 @@ import { createError } from "../../../Utils/Helpers.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title, content, videoUrl, order } = req.body;
+  const { courseId, title, content, videoUrl, pdfUrl, order } = req.body;
 
   if (!courseId) {
     const error = createError({
@@ -53,6 +53,15 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
+  if (!pdfUrl && !videoUrl) {
+    const error = createError({
+      message: "pdfUrl is required",
+      status: 400,
+      next,
+    });
+    throw error;
+  }
+
   // check course exists
   const course = await db.findFirst({
     model: "courses",
@@ -76,6 +85,7 @@ export const createLecture = async ({ req, res, next }) => {
       content,
       videoUrl,
       order,
+      pdfUrl,
     },
     include: {
       course: {
@@ -144,7 +154,7 @@ export const getLectureById = async (id) => {
 ----------------------------- */
 export const updateLecture = async ({ req, res, next }) => {
   const { id } = req.params;
-  const { courseId, title, content, videoUrl, order } = req.body;
+  const { courseId, title, content, videoUrl, order, pdfUrl } = req.body;
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
@@ -155,6 +165,7 @@ export const updateLecture = async ({ req, res, next }) => {
     content,
     videoUrl,
     order,
+    pdfUrl,
   };
   const filteredData = Object.fromEntries(
     Object.entries(data).filter(([_, value]) => value !== undefined),
