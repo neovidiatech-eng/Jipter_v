@@ -580,3 +580,28 @@ model user_rank_history {
 
   @@index([studentId])
 }
+
+model policy {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  icon        String? // e.g., "Shield", "Clock", "FileText", "AlertCircle"
+  color       String? // e.g., "blue", "green", "purple", "orange"
+  lastUpdated DateTime @default(now())
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+}
+
+model policy_notice {
+  id        String   @id @default(uuid())
+  title     String   @default("Important Notice")
+  content   String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+}

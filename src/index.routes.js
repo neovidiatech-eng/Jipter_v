@@ -23,6 +23,7 @@ import chatRouter from "./Modules/chat/chat.routes.js";
 import settingsRouter from "./Modules/Settings/settings.routes.js";
 import materialsRouter from "./Modules/matrials/matrials.routes.js";
 import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js";
+import policiesRouter from "./Modules/Policies/policies.routes.js";
 
 import timezoneMiddleware from "./Middlewares/Timezone.js";
 
@@ -51,6 +52,8 @@ rootRouter.use("/withdrawals", withdrawalsRouter);
 rootRouter.use("/chat", chatRouter);
 rootRouter.use("/settings", settingsRouter);
 rootRouter.use("/materials", materialsRouter);
+rootRouter.use("/weekly-reports", weeklyReportsRouter);
+rootRouter.use("/policies", policiesRouter);
 
  
 // Static files
