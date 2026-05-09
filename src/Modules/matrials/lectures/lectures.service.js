@@ -5,7 +5,7 @@ import { createError } from "../../../Utils/Helpers.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title, content, videoUrl, pdfUrl, order } = req.body;
+  const { courseId, title, content, videoUrl, pdfUrl, order, duration, date } = req.body;
 
   if (!courseId) {
     const error = createError({
@@ -86,6 +86,8 @@ export const createLecture = async ({ req, res, next }) => {
       videoUrl,
       order,
       pdfUrl,
+      duration,
+      date,
     },
     include: {
       course: {
@@ -154,7 +156,7 @@ export const getLectureById = async (id) => {
 ----------------------------- */
 export const updateLecture = async ({ req, res, next }) => {
   const { id } = req.params;
-  const { courseId, title, content, videoUrl, order, pdfUrl } = req.body;
+  const { courseId, title, content, videoUrl, order, pdfUrl, duration, date } = req.body;
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
@@ -166,6 +168,8 @@ export const updateLecture = async ({ req, res, next }) => {
     videoUrl,
     order,
     pdfUrl,
+    duration,
+    date,
   };
   const filteredData = Object.fromEntries(
     Object.entries(data).filter(([_, value]) => value !== undefined),
@@ -229,3 +233,50 @@ export const deleteLecture = async ({ req, res, next }) => {
     where: { id },
   });
 };
+
+/* -----------------------------
+   COMPLETE LECTURE
+----------------------------- */
+export const completeLecture = async ({ req, res, next }) => {
+  const { id } = req.params; // lectureId
+  const userId = req.user.id;
+
+  // 1. Check if lecture exists
+  const lecture = await db.findFirst({
+    model: "lectures",
+    where: { id },
+  });
+
+  if (!lecture) {
+    const error = createError({
+      message: "Lecture not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  // 2. Upsert user_lectures
+  const userLecture = await db.upsertOne({
+    model: "user_lectures",
+    where: {
+      userId_lectureId: {
+        userId,
+        lectureId: id,
+      },
+    },
+    update: {
+      status: "completed",
+      completedAt: new Date(),
+    },
+    create: {
+      userId,
+      lectureId: id,
+      status: "completed",
+      completedAt: new Date(),
+    },
+  });
+
+  return userLecture;
+};
+

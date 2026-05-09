@@ -69,6 +69,7 @@ export async function seedStudents() {
         phone: item.phone,
         code_country: item.code_country,
         roleId: role.id,
+        gender: item.gender,
       },
       create: {
         email: item.email,
@@ -80,6 +81,7 @@ export async function seedStudents() {
         status: "active",
         confirmAt: new Date(),
         roleId: role.id,
+        gender: item.gender,
       },
     });
 
@@ -88,7 +90,6 @@ export async function seedStudents() {
       where: { user_id: user.id },
       update: {
         birth_date: item.birth_date,
-        gender: item.gender,
         country: item.country,
         active: item.active,
         sessions: item.sessions,
@@ -97,7 +98,6 @@ export async function seedStudents() {
       create: {
         user_id: user.id,
         birth_date: item.birth_date,
-        gender: item.gender,
         country: item.country,
         active: item.active,
         sessions: item.sessions,

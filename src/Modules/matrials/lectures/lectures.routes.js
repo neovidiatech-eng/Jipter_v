@@ -37,5 +37,13 @@ router.delete(
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.deleteLecture,
 );
+router.post(
+  "/:id/complete",
+  authentication,
+  validation(lecturesValidation.lectureIdSchema),
+  lecturesController.completeLecture,
+);
 
 export default router;
+
+

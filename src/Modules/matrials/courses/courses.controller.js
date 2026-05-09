@@ -25,3 +25,8 @@ export const deleteCourse = asyncHandler(async (req, res, next) => {
     await coursesService.deleteCourse({req,res,next});
     return successResponse({ res, req, message: "DELETE_SUCCESS" });
 });
+
+export const getCourseLecturesForStudent = asyncHandler(async (req, res, next) => {
+    const result = await coursesService.getCourseLecturesForStudent({req,res,next});
+    return successResponse({ res, req, message: "FETCH_SUCCESS", data: result });
+});

@@ -38,13 +38,9 @@ export const createLectureSchema = {
         "any.required": "order is required",
       })
       .required(),
-    courseId: generalFields.id
-      .messages({
-        "string.base": "courseId must be a string",
-        "string.empty": "courseId cannot be empty",
-        "any.required": "courseId is required",
-      })
-      .required(),
+    courseId: generalFields.id.required(),
+    duration: Joi.string().optional(),
+    date: Joi.date().optional(),
   }).required(),
 };
 
@@ -55,6 +51,9 @@ export const updateLectureSchema = {
     videoUrl: generalFields.url,
     order: generalFields.number,
     courseId: generalFields.id,
+    duration: Joi.string().optional(),
+    date: Joi.date().optional(),
+    pdfUrl: generalFields.url.optional(),
   }).required(),
   params: Joi.object({
     id: generalFields.id.required(),

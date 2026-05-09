@@ -20,6 +20,8 @@ import { seedSessionRequests } from "./seeders/sessionRequests.seeder.js";
 import { seedMatrials } from "./seeders/matrials.seeder.js";
 import { seedSettings } from "./seeders/settings.seeder.js";
 import { seedPolicies } from "./seeders/policies.seeder.js";
+import { seedProgress } from "./seeders/progress.seeder.js";
+
 
 dotenv.config();
 
@@ -47,6 +49,7 @@ async function main() {
   await seedSystemWallet();
   await seedSessionRequests();
   await seedPolicies();
+  await seedProgress();
 
   console.log("--- Seeding Finished Successfully ---");
 }

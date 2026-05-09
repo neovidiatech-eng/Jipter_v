@@ -85,6 +85,7 @@ export async function seedTeachers() {
         phone: item.phone,
         code_country: item.code_country,
         roleId: role.id,
+        gender: item.gender,
       },
       create: {
         email: item.email,
@@ -96,6 +97,7 @@ export async function seedTeachers() {
         status: "active",
         confirmAt: new Date(),
         roleId: role.id,
+        gender: item.gender,
       },
     });
 
@@ -103,14 +105,12 @@ export async function seedTeachers() {
     await prisma.teacher.upsert({
       where: { user_id: user.id },
       update: {
-        gender: item.gender,
         hour_price: item.hour_price,
         active: item.active,
         currencyId: currency.id,
       },
       create: {
         user_id: user.id,
-        gender: item.gender,
         hour_price: item.hour_price,
         active: item.active,
         currencyId: currency.id,

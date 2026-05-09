@@ -41,3 +41,8 @@ export const deleteLecture = asyncHandler(async (req, res, next) => {
   await lecturesService.deleteLecture({ req, res, next });
   return successResponse({ res, req, message: "DELETE_SUCCESS" });
 });
+
+export const completeLecture = asyncHandler(async (req, res, next) => {
+  const result = await lecturesService.completeLecture({ req, res, next });
+  return successResponse({ res, req, message: "UPDATE_SUCCESS", data: result });
+});

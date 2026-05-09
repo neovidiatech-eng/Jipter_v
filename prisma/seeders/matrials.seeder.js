@@ -72,10 +72,17 @@ export const matrialsData = [
     ageRange: { minAge: 18, maxAge: 99 },
     courses: [
       {
-        title: "Professional Development",
-        description: "Skills for the workplace",
+        title: "Data Structures",
+        description: "Advanced Data Structures and Algorithms",
         lectures: [
-          { title: "Leadership Skills", content: "How to lead a team", order: 1, videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+          { title: "Introduction to Data Structures", content: "Overview of data structures", order: 1, duration: "1:30:00", date: new Date("2025-09-23T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture1.pdf" },
+          { title: "Session 2", content: "Arrays and Linked Lists", order: 2, duration: "1:30:00", date: new Date("2025-09-24T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture2.pdf" },
+          { title: "Session 3", content: "Stacks and Queues", order: 3, duration: "1:30:00", date: new Date("2025-09-25T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture3.pdf" },
+          { title: "Session 4", content: "Trees and Graphs", order: 4, duration: "1:30:00", date: new Date("2025-09-26T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture4.pdf" },
+          { title: "Session 5", content: "Hashing", order: 5, duration: "1:30:00", date: new Date("2025-09-27T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture5.pdf" },
+          { title: "Session 6", content: "Sorting Algorithms", order: 6, duration: "1:30:00", date: new Date("2025-09-28T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture6.pdf" },
+          { title: "Session 7", content: "Searching Algorithms", order: 7, duration: "1:30:00", date: new Date("2025-09-29T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture7.pdf" },
+          { title: "Session 8", content: "Advanced Topics", order: 8, duration: "1:30:00", date: new Date("2025-09-30T10:00:00Z"), videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", pdfUrl: "https://example.com/lecture8.pdf" },
         ],
       },
     ],
@@ -131,6 +138,9 @@ export async function seedMatrials() {
             title: lecture.title,
             content: lecture.content,
             videoUrl: lecture.videoUrl,
+            pdfUrl: lecture.pdfUrl,
+            duration: lecture.duration,
+            date: lecture.date,
           },
           create: {
             ...lecture,

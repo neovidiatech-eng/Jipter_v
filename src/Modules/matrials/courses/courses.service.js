@@ -210,3 +210,64 @@ export const deleteCourse = async ({ req, res, next }) => {
     where: { id },
   });
 };
+
+/* -----------------------------
+   GET COURSE LECTURES FOR STUDENT
+----------------------------- */
+export const getCourseLecturesForStudent = async ({ req, res, next }) => {
+  const { id } = req.params; // courseId
+  const userId = req.user.id;
+
+  // 1. Get course and lectures
+  const course = await db.findFirst({
+    model: "courses",
+    where: { id },
+    include: {
+      lectures: {
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  if (!course) {
+    const error = createError({
+      message: "Course not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  // 2. Get user's progress for these lectures
+  const userLectures = await db.findMany({
+    model: "user_lectures",
+    where: {
+      userId,
+      lectureId: { in: course.lectures.map((l) => l.id) },
+    },
+  });
+
+  // 3. Map lectures to include status
+  let foundFirstNonCompleted = false;
+  const lecturesWithStatus = course.lectures.map((lecture) => {
+    const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
+    let status = "Locked";
+
+    if (userLecture && userLecture.status === "completed") {
+      status = "Completed";
+    } else if (!foundFirstNonCompleted) {
+      status = "Pending";
+      foundFirstNonCompleted = true;
+    }
+
+    return {
+      ...lecture,
+      status,
+    };
+  });
+
+  return {
+    ...course,
+    lectures: lecturesWithStatus,
+  };
+};

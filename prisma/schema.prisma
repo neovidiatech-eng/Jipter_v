@@ -530,9 +530,11 @@ model lectures {
   content   String?
   videoUrl  String?
   pdfUrl    String?
+  date      DateTime?
   order     Int
   courseId  String
   course    courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  duration  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

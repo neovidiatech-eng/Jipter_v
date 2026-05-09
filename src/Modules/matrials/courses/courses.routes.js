@@ -22,6 +22,13 @@ router.get(
   validation(coursesValidation.courseIdSchema),
   coursesController.getCourse,
 ); //done
+router.get(
+  "/:id/student-progress",
+  authentication,
+  validation(coursesValidation.courseIdSchema),
+  coursesController.getCourseLecturesForStudent,
+);
+
 router.post(
   "/",
   localMulterUpload({
