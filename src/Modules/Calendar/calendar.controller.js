@@ -1,4 +1,8 @@
-import { asyncHandler, successResponse, errorResponse } from "../../Utils/Response.js";
+import {
+  asyncHandler,
+  successResponse,
+  errorResponse,
+} from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { getNowUTC, toUTC } from "../../Utils/Date/time.js";
 
@@ -21,7 +25,7 @@ export const getCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
     db.findMany({
-      model: "schedule",  
+      model: "schedule",
     }),
     db.findMany({
       model: "schedule",
@@ -47,7 +51,12 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
   const now = getNowUTC();
   const id = user.student?.id;
   if (!id) {
-    return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "STUDENT_NOT_FOUND",
+      status: 404,
+    });
   }
   // Day boundaries in UTC
   const startOfDay = now.startOf("day").toDate();
@@ -238,7 +247,12 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
   const now = getNowUTC();
   const id = user.teacher?.id;
   if (!id) {
-    return errorResponse({ req, next, message: "TEACHER_NOT_FOUND", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "TEACHER_NOT_FOUND",
+      status: 404,
+    });
   }
 
   // Day boundaries in UTC
@@ -434,7 +448,6 @@ export const getTeachersCalendar = asyncHandler(async (req, res, next) => {
     select: {
       id: true,
       hour_price: true,
-      gender: true,
       schedules: {
         where: {
           start_time: {
@@ -452,6 +465,7 @@ export const getTeachersCalendar = asyncHandler(async (req, res, next) => {
         select: {
           name: true,
           email: true,
+          gender: true,
           role: {
             select: {
               name: true,
