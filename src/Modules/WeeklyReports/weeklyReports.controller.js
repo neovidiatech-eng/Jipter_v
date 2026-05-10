@@ -264,6 +264,7 @@ export const updateReport = asyncHandler(async (req, res, next) => {
 export const deleteReport = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const teacherId = req.user.teacher?.id;
+  console.log();
 
   const report = await db.findOne({
     model: "weekly_report",
@@ -278,8 +279,10 @@ export const deleteReport = asyncHandler(async (req, res, next) => {
       message: "REPORT_NOT_FOUND",
     });
   }
+  const allowedRoles = ["admin", "super_admin"];
+  const roleName = typeof req.user.role === 'object' ? req.user.role.name : req.user.role;
 
-  if (req.user.role.name !== "admin"||req.user.role.name !== "super_admin" ) {
+  if (!allowedRoles.includes(roleName)) {
     return errorResponse({
       req,
       next,
@@ -288,10 +291,10 @@ export const deleteReport = asyncHandler(async (req, res, next) => {
     });
   }
 
-  await db.deleteOne({
+  /*   await db.deleteOne({
     model: "weekly_report",
     where: { id },
-  });
+  }); */
 
   return successResponse({ res, req, message: "WEEKLY_REPORT_DELETED" });
 });
