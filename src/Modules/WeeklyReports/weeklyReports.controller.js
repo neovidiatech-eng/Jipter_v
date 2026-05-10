@@ -291,10 +291,10 @@ export const deleteReport = asyncHandler(async (req, res, next) => {
     });
   }
 
-  /*   await db.deleteOne({
+  await db.deleteOne({
     model: "weekly_report",
     where: { id },
-  }); */
+  });
 
   return successResponse({ res, req, message: "WEEKLY_REPORT_DELETED" });
 });
