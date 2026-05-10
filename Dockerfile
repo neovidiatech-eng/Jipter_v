@@ -21,19 +21,21 @@ WORKDIR /app
 
 # Non-root user for security
 RUN addgroup -S nodejs && adduser -S jipter -G nodejs
-USER jipter
-
 # Copy only what is needed from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
+
 # Required by Prisma CLI (migrate deploy) at runtime to resolve DATABASE_URL
 COPY --from=builder /app/prisma.config.ts ./
 
-# Install runtime dependencies
-USER root
-RUN apk add --no-cache openssl
+# Install runtime dependencies and setup permissions
+RUN apk add --no-cache openssl && \
+    mkdir -p /app/src/uploads && \
+    chown -R jipter:nodejs /app/src/uploads && \
+    chown -R jipter:nodejs /app/node_modules /app/prisma /app/src
+
 USER jipter
 
 # Ensure production environment
