@@ -264,7 +264,6 @@ export const updateReport = asyncHandler(async (req, res, next) => {
 export const deleteReport = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const teacherId = req.user.teacher?.id;
-  console.log();
 
   const report = await db.findOne({
     model: "weekly_report",

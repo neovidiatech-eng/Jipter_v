@@ -12,7 +12,6 @@ export const encryptText = ({ text }) => {
 };
 
 export const decryptText = async({ text }) => {
-  console.log(text);
   
   try {
     if (!text) return null;

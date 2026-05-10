@@ -11,7 +11,6 @@ export const googleVerify = async (token) => {
     const payload = ticket.getPayload();
     return payload;
   } catch (error) {
-    console.log(error);
     return null;
   }
 };

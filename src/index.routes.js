@@ -24,6 +24,7 @@ import settingsRouter from "./Modules/Settings/settings.routes.js";
 import materialsRouter from "./Modules/matrials/matrials.routes.js";
 import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js";
 import policiesRouter from "./Modules/Policies/policies.routes.js";
+import supportRouter from "./Modules/Support/support.routes.js";
 
 import timezoneMiddleware from "./Middlewares/Timezone.js";
 
@@ -54,8 +55,8 @@ rootRouter.use("/settings", settingsRouter);
 rootRouter.use("/materials", materialsRouter);
 rootRouter.use("/weekly-reports", weeklyReportsRouter);
 rootRouter.use("/policies", policiesRouter);
+rootRouter.use("/support", supportRouter);
 
- 
 // Static files
 rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));
 

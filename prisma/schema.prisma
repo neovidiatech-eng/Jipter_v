@@ -256,14 +256,14 @@ model schedule {
   subjectId           String   @default("null")
   rescheduledFromId   String?  @unique
 
-  rescheduledToId String?           @unique
+  rescheduledToId String?      @unique
   reviews         Review[]
   scheduleLogs    ScheduleLog?
-  rescheduledTo   schedule?         @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
-  rescheduledFrom schedule?         @relation("RescheduleHistory")
-  student         student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject         subjects          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  teacher         teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  rescheduledTo   schedule?    @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
+  rescheduledFrom schedule?    @relation("RescheduleHistory")
+  student         student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject         subjects     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacher         teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   requests        request[]
 
   @@index([teacherId])
@@ -294,7 +294,6 @@ model request {
 
   @@map("session_request")
 }
-
 
 model audit_log {
   id         String   @id @default(uuid())
@@ -530,7 +529,7 @@ model courses {
 }
 
 model lectures {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   title     String
   content   String?
   videoUrl  String?
@@ -538,10 +537,10 @@ model lectures {
   date      DateTime?
   order     Int
   courseId  String
-  course    courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course    courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   duration  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   userLectures user_lectures[]
 
@@ -610,6 +609,32 @@ model policy_notice {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([active])
+}
+
+model support {
+  id           String           @id @default(uuid())
+  title        String
+  url          String
+  description  String
+  category     support_category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId   String
+  readingCount Int              @default(0)
+  active       Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([active])
+}
+
+model support_category {
+  id        String    @id @default(uuid())
+  title     String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  supports  support[]
 
   @@index([active])
 }

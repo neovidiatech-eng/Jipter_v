@@ -213,7 +213,7 @@ export const count = ({ model, where = {} }) => {
   return getClient(model).count({ where });
 };
 
-export const groupBy = ({ model, by, where, _count, _sum, _avg, _min, _max }) => {
+export const groupBy = ({ model, by, where, _count, _sum, _avg, _min, _max ,se}) => {
   return getClient(model).groupBy({
     by,
     ...(where ? { where } : {}),

@@ -21,6 +21,7 @@ import { seedMatrials } from "./seeders/matrials.seeder.js";
 import { seedSettings } from "./seeders/settings.seeder.js";
 import { seedPolicies } from "./seeders/policies.seeder.js";
 import { seedProgress } from "./seeders/progress.seeder.js";
+import { seedSupport } from "./seeders/support.seeder.js";
 
 
 dotenv.config();
@@ -50,6 +51,7 @@ async function main() {
   await seedRequests();
   await seedPolicies();
   await seedProgress();
+  await seedSupport();
 
   console.log("--- Seeding Finished Successfully ---");
 }
