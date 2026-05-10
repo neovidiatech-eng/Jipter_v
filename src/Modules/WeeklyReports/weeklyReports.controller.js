@@ -279,7 +279,7 @@ export const deleteReport = asyncHandler(async (req, res, next) => {
     });
   }
 
-  if (req.user.role.name !== "admin" && report.teacherId !== teacherId) {
+  if (req.user.role.name !== "admin"||req.user.role.name !== "super_admin" ) {
     return errorResponse({
       req,
       next,

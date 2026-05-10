@@ -17,7 +17,16 @@ export const getDashboard = async ({ req, res, next }) => {
       sessions_remaining: true,
       avgRating: true,
       totalReviews: true,
-      rank: true,
+      rank: {
+        select: {
+          courses: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
       user: {
         select: {
           name: true,
