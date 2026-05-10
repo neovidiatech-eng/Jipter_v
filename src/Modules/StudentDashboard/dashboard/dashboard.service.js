@@ -19,12 +19,9 @@ export const getDashboard = async ({ req, res, next }) => {
       totalReviews: true,
       rank: {
         select: {
-          courses: {
-            select: {
-              id: true,
-              title: true,
-            },
-          },
+          id: true,
+          name: true,
+          courses: true,
         },
       },
       user: {
