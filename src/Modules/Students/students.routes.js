@@ -16,7 +16,7 @@ router.get("/", authentication, studentController.getAllStudents);
 router.post(
   "/create",
   authentication,
-  authorization({ accessRoles: endpoints.createStudent }),
+  authorization({ permissions: endpoints.createStudent }),
   validation(createStudentSchema),
   studentController.createStudent,
 );
@@ -24,7 +24,7 @@ router.post(
 router.get(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.getStudent }),
+  authorization({ permissions: endpoints.getStudent }),
   validation(studentIdSchema),
   studentController.getStudentById,
 );
@@ -32,7 +32,7 @@ router.get(
 router.patch(
   "/update/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updateStudent }),
+  authorization({ permissions: endpoints.updateStudent }),
   validation(updateStudentSchema),
   studentController.updateStudent,
 );
@@ -40,7 +40,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deleteStudent }),
+  authorization({ permissions: endpoints.deleteStudent }),
   validation(studentIdSchema),
   studentController.deleteStudent,
 );

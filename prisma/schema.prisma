@@ -60,9 +60,9 @@ model role {
 model permission {
   id              String           @id @default(uuid())
   name            String           @unique
+  code            String           @unique
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  code            String           @unique
   rolePermissions rolePermission[]
 
   @@index([name])

@@ -10,7 +10,7 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getProfile }), 
+  authorization({ permissions: endpoints.getProfile }), 
   profileController.getProfile,
 );
 export default router;

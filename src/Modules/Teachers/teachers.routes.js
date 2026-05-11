@@ -11,12 +11,13 @@ import {
   deleteTeacherSchema,
 } from "./teachers.validation.js";
 import subjectsRouter from "./subjects/subjects.routes.js";
+import { endpoints } from "./teachers.authorization.js";
 const router = Router();
 router.use("/subjects", authentication, subjectsRouter);
 router.get(
   "/",
   authentication,
-  /*   authorization({ accessRoles: [] }) ,*/
+  authorization({ permissions: endpoints.GET_ALL_TEACHERS }),
   validation(getAllTeachersSchema),
   teacherController.getAllTeachers,
 );
@@ -24,7 +25,7 @@ router.get(
 router.get(
   "/my-students",
   authentication,
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: endpoints.GET_MY_STUDENTS }),
   teacherController.getMyStudents,
 );
 

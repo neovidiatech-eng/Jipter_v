@@ -1,11 +1,13 @@
 import { Router } from "express";
 import * as chatController from "./chat.controller.js";
 import authentication from "../../Middlewares/Authentication.js";
+import { authorization } from "../../Middlewares/Authorization.js";
 
 const chatRouter = Router();
 
-// All chat routes require authentication
+// All chat routes require authentication and actor role
 chatRouter.use(authentication);
+chatRouter.use(authorization({ roles: ["student", "teacher"] }));
 
 /**
  * POST /api/chat/conversations

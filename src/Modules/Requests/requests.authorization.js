@@ -1,6 +1,8 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  createRequest: ["teacher", "student"], // Only these can request
-  handleRequest: ["admin", "super_admin"], // Only admin can approve/reject
-  getAllRequests: ["admin", "super_admin"],
-  getMyRequests: ["teacher", "student"],
+  createRequest: [PERMISSIONS.REQUEST_CREATE],
+  handleRequest: [PERMISSIONS.REQUEST_HANDLE],
+  getAllRequests: [PERMISSIONS.REQUEST_ALL_READ],
+  getMyRequests: [PERMISSIONS.REQUEST_OWN_READ],
 };

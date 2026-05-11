@@ -11,14 +11,14 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: auth.getRank }),
+  authorization({ permissions: auth.getRank }),
   controller.getRanks,
 );
 
 router.get(
   "/:id",
   authentication,
-  authorization({ accessRoles: auth.getRank }),
+  authorization({ permissions: auth.getRank }),
   validation(schema.getRank),
   controller.getRank,
 );
@@ -26,7 +26,7 @@ router.get(
 router.post(
   "/create",
   authentication,
-  authorization({ accessRoles: auth.createRank }),
+  authorization({ permissions: auth.createRank }),
   validation(schema.createRank),
   controller.addRank,
 );
@@ -34,7 +34,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
-  authorization({ accessRoles: auth.updateRank }),
+  authorization({ permissions: auth.updateRank }),
   validation(schema.updateRank),
   controller.updateRank,
 );
@@ -42,7 +42,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ accessRoles: auth.deleteRank }),
+  authorization({ permissions: auth.deleteRank }),
   validation(schema.deleteRank),
   controller.deleteRank,
 );

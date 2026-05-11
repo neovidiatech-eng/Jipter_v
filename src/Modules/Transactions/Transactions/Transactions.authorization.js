@@ -1,3 +1,5 @@
+import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  getTransactions: ["admin", "stuff","super_admin"],
+  getTransactions: [PERMISSIONS.TRANSACTION_READ],
 };

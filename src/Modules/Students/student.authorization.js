@@ -1,6 +1,8 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  createStudent: ["admin", "super_admin"],
-  getStudent: ["admin", "super_admin"],
-  updateStudent: ["admin", "super_admin"],
-  deleteStudent: ["admin", "super_admin"],
+  createStudent: [PERMISSIONS.STUDENT_CREATE],
+  getStudent: [PERMISSIONS.STUDENT_READ],
+  updateStudent: [PERMISSIONS.STUDENT_UPDATE],
+  deleteStudent: [PERMISSIONS.STUDENT_DELETE],
 };

@@ -1,8 +1,10 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  createExam: ["teacher", "admin", "super_admin"],
-  updateExam: ["teacher", "admin", "super_admin"],
-  deleteExam: ["teacher", "admin", "super_admin"],
-  getExam: ["teacher", "admin", "super_admin", "student"],
-  getStudentExam: ["student","teacher", "admin", "super_admin"],
-  getAllExams: [ "admin", "super_admin"],
+  createExam: [PERMISSIONS.EXAM_CREATE],
+  updateExam: [PERMISSIONS.EXAM_UPDATE],
+  deleteExam: [PERMISSIONS.EXAM_DELETE],
+  getExam: [PERMISSIONS.EXAM_READ],
+  getStudentExam: [PERMISSIONS.EXAM_READ],
+  getAllExams: [PERMISSIONS.EXAM_ALL_READ],
 };

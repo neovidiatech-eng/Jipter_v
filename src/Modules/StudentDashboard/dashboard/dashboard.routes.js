@@ -8,7 +8,7 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getDashboard }),
+  authorization({ permissions: endpoints.getDashboard }),
   controller.getDashboard,
 );
 

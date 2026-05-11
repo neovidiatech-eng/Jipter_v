@@ -6,29 +6,33 @@ import * as schema from "./calendar.validation.js";
 import { endpoints } from "./calender.authoraization.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 const router = Router();
+const adminRoles = ["admin", "super_admin"];
+
 router.get(
   "/",
   authentication,
+  authorization({ roles: ["student", "teacher", ...adminRoles] }),
   validation(schema.getCalendar),
   calendarController.getCalendar,
 );
 router.get(
   "/student",
   authentication,
-  authorization({ accessRoles: endpoints.getStudentCalendar }),
+  authorization({ roles: ["student"], permissions: endpoints.getStudentCalendar }),
   validation(schema.getStudentCalendar),
   calendarController.getStudentCalendar,
 );
 router.get(
   "/teacher",
   authentication,
-  authorization({ accessRoles: endpoints.getTeacherCalendar }),
+  authorization({ roles: ["teacher"], permissions: endpoints.getTeacherCalendar }),
   validation(schema.getTeacherCalendar),
   calendarController.getTeacherCalendar,
 );
 router.get(
   "/teachers",
   authentication,
+  authorization({ roles: adminRoles }),
   validation(schema.getTeachersCalendar),
   calendarController.getTeachersCalendar,
 );

@@ -5,6 +5,8 @@ import authentication from "../../Middlewares/Authentication.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import { validation } from "../../Middlewares/Validation.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 // All routes require authentication
@@ -13,20 +15,20 @@ router.use(authentication);
 // Teacher routes
 router.post(
   "/",
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_CREATE] }),
   validation(weeklyReportsValidation.createReportSchema),
   weeklyReportsController.createReport
 );
 
 router.get(
   "/my-reports",
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ] }),
   weeklyReportsController.getMyReports
 );
 
 router.get(
   "/metrics",
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ] }),
   validation(weeklyReportsValidation.getMetricsSchema),
   weeklyReportsController.getWeeklyMetrics
 );
@@ -34,21 +36,21 @@ router.get(
 // Admin and Teacher shared routes
 router.get(
   "/:id",
-  authorization({ accessRoles: ["admin", "super_admin", "teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ, PERMISSIONS.WEEKLY_REPORT_ALL_READ] }),
   validation(weeklyReportsValidation.reportIdSchema),
   weeklyReportsController.getReport
 );
 
 router.patch(
   "/:id",
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_UPDATE] }),
   validation(weeklyReportsValidation.updateReportSchema),
   weeklyReportsController.updateReport
 );
 
 router.delete(
   "/:id",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_DELETE] }),
   validation(weeklyReportsValidation.reportIdSchema),
   weeklyReportsController.deleteReport
 );
@@ -56,7 +58,7 @@ router.delete(
 // Admin only routes
 router.get(
   "/",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_ALL_READ] }),
   weeklyReportsController.getAllReports
 );
 

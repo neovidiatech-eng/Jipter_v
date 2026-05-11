@@ -5,13 +5,15 @@ import authentication from "../../Middlewares/Authentication.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import * as sub from "./subscription.controller.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 const router = Router();
 router.use("/plans", plansRouter);
 router.use("/requests", subscriptionsRequestsRouter);
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.SUBSCRIPTION_MANAGE] }),
   sub.getallSubscriptions,
 );
 

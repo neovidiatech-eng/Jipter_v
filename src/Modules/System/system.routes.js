@@ -27,14 +27,14 @@ router.use("/stuff", stuffRouter);
 router.get(
   "/roles",
   authentication,
-  authorization({ accessRoles: endpoints.getAllRoles }),
+  authorization({ permissions: endpoints.getAllRoles }),
   systemController.getAllRoles,
 );
 
 router.post(
   "/roles/create",
   authentication,
-  authorization({ accessRoles: endpoints.createRoles }),
+  authorization({ permissions: endpoints.createRoles }),
   validation(createRoleSchema),
   systemController.createRole,
 );
@@ -42,7 +42,7 @@ router.post(
 router.post(
   "/roles/assign/:user_id",
   authentication,
-  authorization({ accessRoles: endpoints.assignRole }),
+  authorization({ permissions: endpoints.assignRole }),
   validation(assignRoleSchema),
   systemController.assignRoleToUser,
 );
@@ -50,7 +50,7 @@ router.post(
 router.patch(
   "/roles/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updateRole }),
+  authorization({ permissions: endpoints.updateRole }),
   validation(updateRoleSchema),
   systemController.updateRole,
 );
@@ -58,7 +58,7 @@ router.patch(
 router.delete(
   "/roles/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deleteRole }),
+  authorization({ permissions: endpoints.deleteRole }),
   validation(deleteRoleSchema),
   systemController.deleteRole,
 );

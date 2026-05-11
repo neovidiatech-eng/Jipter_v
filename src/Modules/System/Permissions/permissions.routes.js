@@ -15,14 +15,14 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getAllPermissions }),
+  authorization({ permissions: endpoints.getAllPermissions }),
   permissionsController.getAllPermissions,
 );
 
 router.post(
   "/create",
   authentication,
-  authorization({ accessRoles: endpoints.createPermission }),
+  authorization({ permissions: endpoints.createPermission }),
   validation(createPermissionSchema),
   permissionsController.createPermission,
 );
@@ -30,7 +30,7 @@ router.post(
 router.patch(
   "/update/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updatePermission }),
+  authorization({ permissions: endpoints.updatePermission }),
   validation(updatePermissionSchema),
   permissionsController.updatePermission,
 );
@@ -38,7 +38,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deletePermission }),
+  authorization({ permissions: endpoints.deletePermission }),
   validation(deletePermissionSchema),
   permissionsController.deletePermission,
 );

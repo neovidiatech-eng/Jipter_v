@@ -1,19 +1,46 @@
 import { asyncHandler } from "../Utils/Response.js";
-import { findFirst } from "../database/dbService.js";
+import { hasAnyPermission } from "../Utils/Permissions/permissions.js";
 
-export const authorization = ({ accessRoles = [] }) => {
+/**
+ * Permission and Role-based authorization middleware.
+ *
+ * @param {string[]} permissions - One or more permission codes required (OR logic).
+ * @param {string[]} roles - One or more role names required (Strict context check).
+ *
+ * Usage:
+ *   authorization({ 
+ *     roles: ["student"], 
+ *     permissions: [PERMISSIONS.STUDENT_PROFILE_READ] 
+ *   })
+ */
+export const authorization = ({ permissions = [], roles = [] }) => {
   return asyncHandler(async (req, res, next) => {
-    const userRole = req.user.role;
-
-
-    if (!userRole) {
-      return next(new Error("Unauthorized: Role not found", { cause: 401 }));
+    // 1. Role Context Check (Strict)
+    // If specific roles are required, the user MUST have one of those roles.
+    if (roles.length > 0) {
+      const userRoleName = req.user?.role?.name;
+      if (!roles.includes(userRoleName)) {
+        return next(
+          new Error(
+            `Forbidden: This endpoint is restricted to ${roles.join(", ")} context.`,
+            { cause: 403 },
+          ),
+        );
+      }
     }
 
-    if (!accessRoles.includes(userRole.name)) {
-      return next(new Error("Forbidden: You do not have permission", { cause: 403 }));
+    // 2. Permission Check
+    // If permissions are specified, check if the user has AT LEAST ONE.
+    if (permissions.length > 0) {
+      const hasPermission = hasAnyPermission(req.user, permissions);
+
+      if (!hasPermission) {
+        return next(
+          new Error("Forbidden: Insufficient permissions", { cause: 403 }),
+        );
+      }
     }
-    
+
     next();
   });
 };

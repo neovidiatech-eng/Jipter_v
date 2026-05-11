@@ -9,11 +9,13 @@ import {
   localMulterUpload,
 } from "../../../Utils/Multer/local.multer.js";
 
+import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 const adminOnly = [
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.COURSE_MANAGE] }),
 ];
 
 router.get("/", coursesController.getAllCourses); // done

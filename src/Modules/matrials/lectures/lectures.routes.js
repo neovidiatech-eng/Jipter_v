@@ -5,11 +5,13 @@ import authentication from "../../../Middlewares/Authentication.js";
 import { authorization } from "../../../Middlewares/Authorization.js";
 import * as lecturesValidation from "./lectures.validation.js";
 
+import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 const adminOnly = [
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.LECTURE_MANAGE] }),
 ];
 
 router.get("/", lecturesController.getAllLectures);
@@ -27,7 +29,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin", "teacher"] }),
+  authorization({ permissions: [PERMISSIONS.LECTURE_MANAGE, PERMISSIONS.LECTURE_READ] }),
   validation(lecturesValidation.updateLectureSchema),
   lecturesController.updateLecture,
 );

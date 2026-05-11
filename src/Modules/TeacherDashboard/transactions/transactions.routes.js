@@ -10,7 +10,7 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getTransactions }), 
+  authorization({ permissions: endpoints.getTransactions }), 
   transactionsController.getTeacherTransactions,
 );
 export default router;

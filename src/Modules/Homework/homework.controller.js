@@ -5,10 +5,15 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const createHomework = asyncHandler(async (req, res, next) => {
   const { title, description, dueDate, studentId, subjectId, status } =
     req.body;
-  // Assuming user role is teacher, check logic if admin creates it for a teacher.
+  
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_DELETE) || req.user.hasPermission(PERMISSIONS.HOMEWORK_UPDATE); // Admin-like
+  
   const teacher = req.user.teacher;
   const student = await db.findOne({
     model: "student",
@@ -17,22 +22,15 @@ export const createHomework = asyncHandler(async (req, res, next) => {
     },
   });
 
-  if (!teacher || !student) {
-    return errorResponse({
-      req,
-      next,
-      message: "TEACHER_OR_STUDENT_NOT_FOUND",
-      status: 404,
-    });
+  if (!student) {
+    return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
   }
-  if (
-    !teacher &&
-    !["admin", "super_admin", "teacher"].includes(req.user.role?.name)
-  ) {
+
+  if (!isTeacher && !isManagement) {
     return errorResponse({ req, next, message: "ONLY_TEACHERS_ADMINS_CREATE", status: 403 });
   }
 
-  // If teacher, assign automatically, if admin we might need teacherId passed. Let's use user's teacher id or if not, get it from body if admin.
+  // If teacher, assign automatically, if admin we might need teacherId passed.
   const assignedTeacherId = teacher?.id || req.body.teacherId;
 
   if (!assignedTeacherId) {
@@ -69,9 +67,13 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "HOMEWORK_NOT_FOUND", status: 404 });
   }
 
+  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_UPDATE);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+
   // Check permissions: Teacher can update only their own homework.
   if (
-    req.user.role?.name === "teacher" &&
+    isTeacher &&
+    !isManagement &&
     homeworkExists.teacherId !== req.user.teacher?.id
   ) {
     return errorResponse({ req, next, message: "UNAUTHORIZED_UPDATE", status: 403 });
@@ -110,9 +112,13 @@ export const deleteHomework = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "HOMEWORK_NOT_FOUND", status: 404 });
   }
 
+  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_DELETE);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+
   // Teacher can only delete their own homework; admin/super_admin can delete any
   if (
-    req.user.role?.name === "teacher" &&
+    isTeacher &&
+    !isManagement &&
     homeworkExists.teacherId !== req.user.teacher?.id
   ) {
     return errorResponse({ req, next, message: "UNAUTHORIZED_DELETE", status: 403 });
@@ -184,10 +190,14 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
+  const isStudent = req.user.hasPermission(PERMISSIONS.STUDENT_PROFILE_READ);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_READ) && !isStudent && !isTeacher; // Or something similar
+
   // Role based filtering
-  if (req.user.role?.name === "student") {
+  if (isStudent && !isManagement) {
     condition.studentId = req.user.student?.id;
-  } else if (req.user.role?.name === "teacher" && !teacherId) {
+  } else if (isTeacher && !isManagement && !teacherId) {
     condition.teacherId = req.user.teacher?.id;
   }
 

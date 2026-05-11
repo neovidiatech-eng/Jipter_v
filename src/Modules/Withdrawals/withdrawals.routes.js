@@ -5,6 +5,8 @@ import { authorization } from "../../Middlewares/Authorization.js";
 import * as withdrawalController from "./withdrawals.controller.js";
 import * as schema from "./withdrawals.validation.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 /**
@@ -15,20 +17,20 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_READ] }),
   withdrawalController.getWithdrawals
 );
 router.get(
   "/all",
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_READ] }),
   withdrawalController.getAllWithdrawals
 );
 router.post(
   "/request",
   authentication,
   // Assuming 'Teacher' is the role name in DB
-  authorization({ accessRoles: ["teacher"] }),
+  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_CREATE] }),
   validation(schema.requestWithdrawal),
   withdrawalController.requestWithdrawal
 );
@@ -42,7 +44,7 @@ router.patch(
   "/:id/approve",
   authentication,
   // Assuming 'Admin' or 'SuperAdmin'
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_APPROVE] }),
   validation(schema.processWithdrawal),
   withdrawalController.approveWithdrawal
 );
@@ -55,7 +57,7 @@ router.patch(
 router.patch(
   "/:id/reject",
   authentication,
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_APPROVE] }),
   validation(schema.processWithdrawal),
   withdrawalController.rejectWithdrawal
 );

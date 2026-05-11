@@ -2,6 +2,7 @@ import { asyncHandler } from "../Utils/Response.js";
 import { verifyToken } from "../Utils/Token/token.js";
 import * as db from "../database/dbService.js";
 import { redis } from "../Utils/Radis/Connection.js";
+import { hasPermission } from "../Utils/Permissions/permissions.js";
 
 const authentication = asyncHandler(async (req, res, next) => {
   const { authorization } = req.headers;
@@ -39,7 +40,17 @@ const authentication = asyncHandler(async (req, res, next) => {
         id: decoded.id,
         confirmAt: { not: null },
       },
-      include: { role: true, student: true, teacher: true },
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              include: { permission: true },
+            },
+          },
+        },
+        student: true,
+        teacher: true,
+      },
     });
 
     if (user) {
@@ -57,6 +68,9 @@ const authentication = asyncHandler(async (req, res, next) => {
       new Error("Unauthorized or Account Not Confirmed", { cause: 401 }),
     );
   }
+
+  // Attach helper method to check permissions
+  user.hasPermission = (permissionCode) => hasPermission(user, permissionCode);
 
   req.user = user;
   next();

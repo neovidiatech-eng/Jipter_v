@@ -8,7 +8,7 @@ import {
   deleteSubjectSchema,
 } from "./subjects.validation.js";
 import { authorization } from "../../../Middlewares/Authorization.js";
-import { accessRoles } from "./subjects.authorization.js";
+import { endpoints } from "./subjects.authorization.js";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ router.post(
   "/create",
   authentication,
   authorization({
-    accessRoles: accessRoles.create,
+    permissions: endpoints.create,
   }),
   validation(createSubjectSchema),
   subjectsController.createSubject,
@@ -27,7 +27,7 @@ router.patch(
   "/update/:id",
   authentication,
   authorization({
-    accessRoles: accessRoles.update,
+    permissions: endpoints.update,
   }),
   validation(updateSubjectSchema),
   subjectsController.updateSubject,
@@ -37,7 +37,7 @@ router.delete(
   "/delete/:id",
   authentication,
   authorization({
-    accessRoles: accessRoles.delete,
+    permissions: endpoints.delete,
   }),
   validation(deleteSubjectSchema),
   subjectsController.deleteSubject,

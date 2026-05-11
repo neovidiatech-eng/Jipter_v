@@ -1,7 +1,8 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  createHomework: ["teacher", "admin", "super_admin"],
-  updateHomework: ["teacher", "admin", "super_admin"],
-  deleteHomework: ["teacher", "admin", "super_admin"],
-  getHomework: ["teacher", "admin", "super_admin", "student"],
-  getStudentHomework: ["student"],
+  createHomework: [PERMISSIONS.HOMEWORK_CREATE],
+  updateHomework: [PERMISSIONS.HOMEWORK_UPDATE],
+  deleteHomework: [PERMISSIONS.HOMEWORK_DELETE],
+  getHomework: [PERMISSIONS.HOMEWORK_READ],
 };

@@ -76,7 +76,14 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       rank: true,
     },
   });
-
+  if (!user) {
+    const error = createError({
+      message: "Student not found",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
   const phone = await decryptText({ text: user.user.phone });
   const userDecrypted = {
     ...user,

@@ -8,12 +8,14 @@ import { endpoints } from "./requests.authorization.js";
 import { cloudinaryMulterUpload, fileValidation } from "../../Utils/Multer/index.js";
 
 const router = Router();
+const actorRoles = ["student", "teacher"];
+const adminRoles = ["admin", "super_admin"];
 
 // Create Request
 router.post(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.createRequest }),
+  authorization({ roles: actorRoles, permissions: endpoints.createRequest }),
   cloudinaryMulterUpload({ validation: [...fileValidation.image, ...fileValidation.document] }).array("attachments", 5),
     validation(requestsValidation.createRequest),
     requestsController.createRequest,
@@ -23,19 +25,20 @@ router.post(
   router.get(
     "/all",
     authentication,
-    authorization({ accessRoles: endpoints.getAllRequests }),
+    authorization({ roles: adminRoles, permissions: endpoints.getAllRequests }),
     requestsController.getAllRequests,
   );
   router.get(
     "/my-requests",
     authentication,
-    authorization({ accessRoles: endpoints.getMyRequests }),
+    authorization({ roles: actorRoles, permissions: endpoints.getMyRequests }),
     requestsController.getMyRequests,
   );
   
   router.get(
     "/dashboard",
     authentication,
+    authorization({ roles: ["student", "teacher", ...adminRoles] }),
     // Accessible to anyone who can see their own or all requests
     requestsController.getRequestsDashboard,
   );
@@ -45,7 +48,7 @@ router.post(
   router.patch(
     "/:id/approve",
     authentication,
-    authorization({ accessRoles: endpoints.handleRequest }),
+    authorization({ roles: adminRoles, permissions: endpoints.handleRequest }),
     validation(requestsValidation.handleRequest),
     requestsController.approveRequest,
   );
@@ -54,7 +57,7 @@ router.post(
   router.patch(
     "/:id/reject",
     authentication,
-    authorization({ accessRoles: endpoints.handleRequest }),
+    authorization({ roles: adminRoles, permissions: endpoints.handleRequest }),
     validation(requestsValidation.handleRequest),
     requestsController.rejectRequest,
   );

@@ -7,11 +7,12 @@ import * as schema from "./homework.validation.js";
 import { endpoints } from "./homework.authorization.js";
 
 const router = Router();
+const adminRoles = ["admin", "super_admin"];
 
 router.post(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.createHomework }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.createHomework }),
   validation(schema.createHomework),
   homeworkController.createHomework,
 );
@@ -19,7 +20,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updateHomework }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.updateHomework }),
   validation(schema.updateHomework),
   homeworkController.updateHomework,
 );
@@ -27,7 +28,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deleteHomework }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.deleteHomework }),
   validation(schema.deleteHomework),
   homeworkController.deleteHomework,
 );
@@ -35,21 +36,21 @@ router.delete(
 router.get(
   "/student/:id",
   authentication,
-  authorization({ accessRoles: endpoints.getHomework }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.getHomework }),
   validation(schema.getHomework),
   homeworkController.getHomework,
 );
 router.get(
   "/student-homework",
   authentication,
-  authorization({ accessRoles: endpoints.getHomework }),
+  authorization({ roles: ["student"], permissions: endpoints.getHomework }),
   homeworkController.getStudentHomework,
 );
 
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getHomework }), // Sharing getHomework roles for list as well
+  authorization({ roles: adminRoles, permissions: endpoints.getHomework }), 
   validation(schema.getAllHomework),
   homeworkController.getAllHomework,
 );

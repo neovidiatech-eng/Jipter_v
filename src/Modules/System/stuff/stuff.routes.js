@@ -9,31 +9,31 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getAllStuff }),
+  authorization({ permissions: endpoints.getAllStuff }),
   stuffController.getAllStuff,
 );
 router.get(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.getStuffById }),
+  authorization({ permissions: endpoints.getStuffById }),
   stuffController.getStuffById,
 );
 router.post(
   "/create",
   authentication,
-  authorization({ accessRoles: endpoints.createStuffUser }),
+  authorization({ permissions: endpoints.createStuffUser }),
   stuffController.createStuffUser,
 );
 router.patch(
   "/update/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updateStuffUser }),
+  authorization({ permissions: endpoints.updateStuffUser }),
   stuffController.updateStuffUser,
 );
 router.delete(
   "/delete/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deleteStuffUser }),
+  authorization({ permissions: endpoints.deleteStuffUser }),
   stuffController.deleteStuffUser,
 );
 

@@ -7,38 +7,45 @@ import * as schema from "./exams.validation.js";
 import { endpoints } from "./exams.authorization.js";
 
 const router = Router();
-//done
+const actorRoles = ["student", "teacher"];
+const adminRoles = ["admin", "super_admin"];
+const allRoles = [...actorRoles, ...adminRoles];
+
 router.post(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.createExam }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.createExam }),
   validation(schema.createExam),
   examsController.createExam,
 );
+
 router.delete(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.deleteExam }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.deleteExam }),
   validation(schema.deleteExam),
   examsController.deleteExam,
 );
+
 router.get(
   "/exam/:id",
   authentication,
-  authorization({ accessRoles: endpoints.getExam }),
+  authorization({ roles: allRoles, permissions: endpoints.getExam }),
   validation(schema.getExam),
   examsController.getExam,
 );
+
 router.get(
   "/user-exams",
   authentication,
-  authorization({ accessRoles: endpoints.getStudentExam }),
+  authorization({ roles: actorRoles, permissions: endpoints.getStudentExam }),
   examsController.getStudentExams,
 );
+
 router.patch(
   "/:id",
   authentication,
-  authorization({ accessRoles: endpoints.updateHomework }),
+  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.updateHomework }),
   validation(schema.updateHomework),
   examsController.updateExam,
 );
@@ -46,7 +53,7 @@ router.patch(
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getAllExams }), // Sharing getHomework roles for list as well
+  authorization({ roles: adminRoles, permissions: endpoints.getAllExams }), 
   validation(schema.getAllExams),
   examsController.getAllExams,
 );

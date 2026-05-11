@@ -11,14 +11,14 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ accessRoles: endpoints.getProfile }), 
+  authorization({ permissions: endpoints.getProfile }), 
   profileController.getProfile,
 );
 
 router.patch(
   "/update-profile",
   authentication,
-  authorization({ accessRoles: endpoints.updateProfile }), 
+  authorization({ permissions: endpoints.updateProfile }), 
   validation(schema.updateProfileSchema),
   profileController.updateProfile,
 );

@@ -1,6 +1,8 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-    getCalendar: ["super_admin","admin"],
-    getStudentCalendar: ["student"],
-    getTeachersCalendar: ["admin","super_admin"],
-    getTeacherCalendar: ["teacher"],
-}
+  getCalendar: [PERMISSIONS.CALENDAR_READ],
+  getStudentCalendar: [PERMISSIONS.CALENDAR_READ],
+  getTeachersCalendar: [PERMISSIONS.CALENDAR_READ],
+  getTeacherCalendar: [PERMISSIONS.CALENDAR_READ],
+};

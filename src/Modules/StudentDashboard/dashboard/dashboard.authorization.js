@@ -1,3 +1,5 @@
+import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-    getDashboard: ["student"],
+  getDashboard: [PERMISSIONS.STUDENT_DASHBOARD_READ],
 };

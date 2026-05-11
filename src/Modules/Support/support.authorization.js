@@ -1,4 +1,6 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  getSupport: ["admin", "super_admin", "student", "teacher"],
-  manageSupport: ["admin", "super_admin"],
+  getSupport: [PERMISSIONS.SUPPORT_READ],
+  manageSupport: [PERMISSIONS.SUPPORT_MANAGE],
 };

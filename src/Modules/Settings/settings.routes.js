@@ -10,6 +10,8 @@ import { validation } from "../../Middlewares/Validation.js";
 import { updateSettingsSchema } from "./settings.validation.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 router.get("/", settingsController.getSettings);
@@ -17,7 +19,7 @@ router.get("/", settingsController.getSettings);
 router.patch(
   "/",
   authentication,
-  authorization({ accessRoles: ["super_admin", "admin"] }),
+  authorization({ permissions: [PERMISSIONS.SETTINGS_UPDATE] }),
   validation(updateSettingsSchema),
   settingsController.updateSettings,
 );

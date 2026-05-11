@@ -1,7 +1,9 @@
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  getAllRoles: ["admin", "super_admin"],
-  createRoles: ["super_admin"],
-  updateRole: ["super_admin"],
-  deleteRole: ["super_admin"],
-  assignRole: ["super_admin"],
+  getAllRoles: [PERMISSIONS.ROLE_READ],
+  createRoles: [PERMISSIONS.ROLE_CREATE],
+  updateRole: [PERMISSIONS.ROLE_UPDATE],
+  deleteRole: [PERMISSIONS.ROLE_DELETE],
+  assignRole: [PERMISSIONS.ROLE_ASSIGN],
 };

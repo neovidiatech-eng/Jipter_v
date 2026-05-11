@@ -5,6 +5,8 @@ import authentication from "../../Middlewares/Authentication.js";
 import { authorization } from "../../Middlewares/Authorization.js";
 import { validation } from "../../Middlewares/Validation.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 const router = Router();
 
 // Publicly available for authenticated users
@@ -17,21 +19,21 @@ router.get("/notice", policiesController.getActiveNotice);
 // Admin only routes for managing policies
 router.post(
   "/",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
   validation(policiesValidation.createPolicySchema),
   policiesController.createPolicy
 );
 
 router.patch(
   "/:id",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
   validation(policiesValidation.updatePolicySchema),
   policiesController.updatePolicy
 );
 
 router.delete(
   "/:id",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
   validation(policiesValidation.policyIdSchema),
   policiesController.deletePolicy
 );
@@ -39,7 +41,7 @@ router.delete(
 // Admin only routes for managing notice
 router.post(
   "/notice",
-  authorization({ accessRoles: ["admin", "super_admin"] }),
+  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
   validation(policiesValidation.createNoticeSchema),
   policiesController.upsertNotice
 );

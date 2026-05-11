@@ -5,10 +5,15 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 
+import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+
 export const createExam = asyncHandler(async (req, res, next) => {
   const { title, totalMarks, studentId, subjectId, status, dueDate, duration } =
     req.body;
-  // Assuming user role is teacher, check logic if admin creates it for a teacher.
+  
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ); // Or another appropriate teacher-only permission
+  const isManagement = req.user.hasPermission(PERMISSIONS.EXAM_ALL_READ);
+  
   const teacher = req.user.teacher;
   const student = await db.findOne({
     model: "student",
@@ -17,22 +22,15 @@ export const createExam = asyncHandler(async (req, res, next) => {
     },
   });
 
-  if (!teacher || !student) {
-    return errorResponse({
-      req,
-      next,
-      message: "TEACHER_OR_STUDENT_NOT_FOUND",
-      status: 404,
-    });
+  if (!student) {
+     return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
   }
-  if (
-    !teacher &&
-    !["admin", "super_admin", "teacher"].includes(req.user.role?.name)
-  ) {
+
+  if (!isTeacher && !isManagement) {
     return errorResponse({ req, next, message: "ONLY_TEACHERS_ADMINS_CREATE", status: 403 });
   }
 
-  // If teacher, assign automatically, if admin we might need teacherId passed. Let's use user's teacher id or if not, get it from body if admin.
+  // If teacher, assign automatically, if admin we might need teacherId passed.
   const assignedTeacherId = teacher?.id || req.body.teacherId;
 
   if (!assignedTeacherId) {
@@ -78,8 +76,12 @@ export const updateExam = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "EXAM_NOT_FOUND", status: 404 });
   }
 
+  const isManagement = req.user.hasPermission(PERMISSIONS.EXAM_ALL_READ);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+
   if (
-    req.user.role?.name === "teacher" &&
+    isTeacher && 
+    !isManagement &&
     examExists.teacherId !== req.user.teacher?.id
   ) {
     return errorResponse({ req, next, message: "UNAUTHORIZED_UPDATE", status: 403 });
@@ -114,9 +116,13 @@ export const deleteExam = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "EXAM_NOT_FOUND", status: 404 });
   }
 
+  const isManagement = req.user.hasPermission(PERMISSIONS.EXAM_ALL_READ);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+
   // Teacher can only delete their own exams
   if (
-    req.user.role?.name === "teacher" &&
+    isTeacher &&
+    !isManagement &&
     examExists.teacherId !== req.user.teacher?.id
   ) {
     return errorResponse({ req, next, message: "UNAUTHORIZED_DELETE", status: 403 });
@@ -157,13 +163,18 @@ export const getExam = asyncHandler(async (req, res, next) => {
 export const getStudentExams = asyncHandler(async (req, res, next) => {
   const user = req.user.student || req.user.teacher;
   if (!user) {
-    return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
+    return errorResponse({ req, next, message: "STUDENT_OR_TEACHER_NOT_FOUND", status: 404 });
   }
+
+  
   const where = {};
-  if (req.user.role?.name === "student") {
-    where.studentId = user?.id;
-  } else if (req.user.role?.name === "teacher") {
-    where.teacherId = user?.id;
+  const isStudent = req.user.hasPermission(PERMISSIONS.STUDENT_PROFILE_READ);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+
+  if (isStudent) {
+    where.studentId = req.user.student?.id;
+  } else if (isTeacher) {
+    where.teacherId = req.user.teacher?.id;
   }
 
   const exams = await db.findMany({
@@ -193,10 +204,14 @@ export const getAllExams = asyncHandler(async (req, res, next) => {
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
+  const isStudent = req.user.hasPermission(PERMISSIONS.STUDENT_PROFILE_READ);
+  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+  const isManagement = req.user.hasPermission(PERMISSIONS.EXAM_ALL_READ);
+
   // Role based filtering
-  if (req.user.role?.name === "student") {
+  if (isStudent && !isManagement) {
     condition.studentId = req.user.student?.id;
-  } else if (req.user.role?.name === "teacher" && !teacherId) {
+  } else if (isTeacher && !isManagement && !teacherId) {
     condition.teacherId = req.user.teacher?.id;
   }
 

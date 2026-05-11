@@ -14,39 +14,39 @@ router.use(authentication);
 // --- Support Routes ---
 router.get(
   "/",
-  authorization({ accessRoles: endpoints.getSupport }),
+  authorization({ permissions: endpoints.getSupport }),
   controller.getSupport
 );
 router.get(
   "/teacher",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   controller.getTeacherSupport
 );
 
 router.get(
   "/:id",
-  authorization({ accessRoles: endpoints.getSupport }),
+  authorization({ permissions: endpoints.getSupport }),
   validation(schema.supportIdSchema),
   controller.getSupportById
 );
 
 router.post(
   "/",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.createSupport),
   controller.createSupport
 );
 
 router.patch(
   "/:id",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.updateSupport),
   controller.updateSupport
 );
 
 router.delete(
   "/:id",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.supportIdSchema),
   controller.deleteSupport
 );
@@ -55,27 +55,27 @@ router.delete(
 // --- Category Routes ---
 router.get(
   "/categories",
-  authorization({ accessRoles: endpoints.getSupport }),
+  authorization({ permissions: endpoints.getSupport }),
   controller.getCategories
 );
 
 router.post(
   "/categories",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.createCategory),
   controller.createCategory
 );
 
 router.patch(
   "/categories/:id",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.updateCategory),
   controller.updateCategory
 );
 
 router.delete(
   "/categories/:id",
-  authorization({ accessRoles: endpoints.manageSupport }),
+  authorization({ permissions: endpoints.manageSupport }),
   validation(schema.categoryIdSchema),
   controller.deleteCategory
 );

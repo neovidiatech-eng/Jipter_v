@@ -1,7 +1,9 @@
+import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+
 export const endpoints = {
-  getAllStuff: ["super_admin", "admin"],
-  getStuffById: ["super_admin", "admin"],
-  createStuffUser: ["super_admin", "admin"],
-  updateStuffUser: ["super_admin", "admin"],
-  deleteStuffUser: ["super_admin", "admin"],
+  getAllStuff: [PERMISSIONS.STAFF_READ],
+  getStuffById: [PERMISSIONS.STAFF_READ],
+  createStuffUser: [PERMISSIONS.STAFF_CREATE],
+  updateStuffUser: [PERMISSIONS.STAFF_UPDATE],
+  deleteStuffUser: [PERMISSIONS.STAFF_DELETE],
 };

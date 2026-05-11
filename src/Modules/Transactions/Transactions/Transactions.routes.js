@@ -7,7 +7,7 @@ import { endpoints } from "./Transactions.authorization.js";
 const router = Router();
 router.get("/",
   authentication,
-  authorization({ accessRoles: endpoints.getTransactions }),
+  authorization({ permissions: endpoints.getTransactions }),
   TransactionsController.getTransactions,
 )
 
