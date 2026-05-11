@@ -15,69 +15,74 @@ router.use(authentication);
 router.get(
   "/",
   authorization({ permissions: endpoints.getSupport }),
-  controller.getSupport
+  controller.getSupport,
 );
 router.get(
   "/teacher",
   authorization({ permissions: endpoints.manageSupport }),
-  controller.getTeacherSupport
+  controller.getTeacherSupport,
+);
+
+router.get(
+  "/categories",
+  authorization({ permissions: endpoints.getSupport }),
+  controller.getCategories,
 );
 
 router.get(
   "/:id",
   authorization({ permissions: endpoints.getSupport }),
   validation(schema.supportIdSchema),
-  controller.getSupportById
+  controller.getSupportById,
 );
 
 router.post(
   "/",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.createSupport),
-  controller.createSupport
+  controller.createSupport,
 );
 
 router.patch(
   "/:id",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.updateSupport),
-  controller.updateSupport
+  controller.updateSupport,
 );
 
 router.delete(
   "/:id",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.supportIdSchema),
-  controller.deleteSupport
+  controller.deleteSupport,
 );
-
 
 // --- Category Routes ---
 router.get(
   "/categories",
   authorization({ permissions: endpoints.getSupport }),
-  controller.getCategories
+  controller.getCategories,
 );
 
 router.post(
   "/categories",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.createCategory),
-  controller.createCategory
+  controller.createCategory,
 );
 
 router.patch(
   "/categories/:id",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.updateCategory),
-  controller.updateCategory
+  controller.updateCategory,
 );
 
 router.delete(
   "/categories/:id",
   authorization({ permissions: endpoints.manageSupport }),
   validation(schema.categoryIdSchema),
-  controller.deleteCategory
+  controller.deleteCategory,
 );
 
 export default router;
