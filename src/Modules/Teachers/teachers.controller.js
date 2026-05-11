@@ -322,7 +322,6 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           user: true,
         },
       },
-      subject: true,
       teacher: {
         include: {
           user: true,
@@ -343,10 +342,6 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
           phone: `${student.user.code_country}${student.user.phone}`,
-          subject: {
-            name: item.subject.name_en,
-            code: `SUB-${item.subject.id.slice(0, 3)}`,
-          },
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
       }

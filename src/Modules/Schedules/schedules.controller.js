@@ -647,7 +647,6 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
           },
         },
       },
-      subject: true,
     },
     orderBy: { start_time: "asc" },
   });

@@ -26,7 +26,6 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       schedules: {
         include: {
           teacher: true,
-          subject: true,
           student: { include: { user: true } },
         },
       },
