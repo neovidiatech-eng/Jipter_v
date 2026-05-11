@@ -1,4 +1,8 @@
-import { asyncHandler, errorResponse, successResponse } from "../../../Utils/Response.js";
+import {
+  asyncHandler,
+  errorResponse,
+  successResponse,
+} from "../../../Utils/Response.js";
 import { decryptText, encryptText } from "../../../Utils/Security/index.js";
 import * as db from "../../../database/dbService.js";
 import { createError } from "../../../Utils/Helpers.js";
@@ -69,6 +73,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           },
         },
       },
+      rank: true,
     },
   });
 
@@ -91,11 +96,14 @@ export const getProfile = asyncHandler(async (req, res, next) => {
 
 export const updateProfile = asyncHandler(async (req, res, next) => {
   const user = req.user;
-  const { name, email, age, } = req.body;
+  const { name, email, age } = req.body;
   const student = await db.findFirst({
     model: "student",
     where: {
       user_id: user.id,
+    },
+    select: {
+      id: true,
     },
   });
 
@@ -108,9 +116,11 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     throw error;
   }
 
-  const settings = await db.findFirst({model: "settings"})
+  const settings = await db.findFirst({ model: "settings" });
   const prefix = settings?.userPrefix || "jupiter";
-  const user_name_db = name ? name.toLowerCase().replace(/\s+/g, "-") + "_" + prefix : undefined;  
+  const user_name_db = name
+    ? name.toLowerCase().replace(/\s+/g, "-") + "_" + prefix
+    : undefined;
 
   // Check if email already exists
   if (email && email !== user.email) {
@@ -129,9 +139,14 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
       where: { username: user_name_db },
     });
     if (existingUsername)
-      return errorResponse({ req, message: "USERNAME_EXISTS", next, status: 400 });
+      return errorResponse({
+        req,
+        message: "USERNAME_EXISTS",
+        next,
+        status: 400,
+      });
   }
-  
+
   const user_updated = await db.updateOne({
     model: "user",
     where: {
@@ -154,7 +169,6 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     throw error;
   }
 
-
   return successResponse({
     res,
     req,
@@ -162,5 +176,4 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     status: 200,
     message: "UPDATED_SUCCESS",
   });
-  
 });

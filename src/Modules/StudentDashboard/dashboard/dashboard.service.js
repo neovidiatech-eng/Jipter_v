@@ -31,6 +31,7 @@ export const getDashboard = async ({ req, res, next }) => {
           phone: true,
           gender: true,
           age: true,
+          reviewsReceived: true,
         },
       },
       plan: {
