@@ -98,8 +98,12 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     settings,
     rank,
   ] = await Promise.all([
-    db.findOne({ model: "user", where: { email } }),
-    db.findFirst({ model: "user", where: { phone } }),
+    email
+      ? db.findOne({ model: "user", where: { email } })
+      : Promise.resolve(null),
+    phone
+      ? db.findFirst({ model: "user", where: { phone } })
+      : Promise.resolve(null),
     db.findOne({ model: "plan", where: { id: planId } }),
     db.findFirst({
       model: "role",
@@ -158,15 +162,17 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       model: "user",
       data: {
         name,
-        email,
+        email: email || undefined,
         username,
-        phone,
+        phone: phone || undefined,
         password: hashedPassword,
         code_country: phone_code,
         status: "active",
         confirmAt: new Date(),
         gender,
-        age: birth_date ? new Date().getFullYear() - new Date(birth_date).getFullYear() : null,
+        age: birth_date
+          ? new Date().getFullYear() - new Date(birth_date).getFullYear()
+          : null,
         timezone: userTimezone,
         ...(studentRole && { roleId: studentRole.id }),
       },
