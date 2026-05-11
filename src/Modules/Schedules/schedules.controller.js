@@ -93,7 +93,7 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: true,
+      
       },
     });
   const scheduleData = await Promise.all(
