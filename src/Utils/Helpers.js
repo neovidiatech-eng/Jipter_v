@@ -10,10 +10,11 @@ export const destructData = ({ body, allowed }) => {
   }, {});
 };
 
-export const checkExist = async ({ model, where, next }) => {
+export const checkExist = async ({ model, where, next, include }) => {
   const existing = await db.findOne({
     model,
     where,
+    include,
   });
 
   if (!existing) {

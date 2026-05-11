@@ -27,11 +27,12 @@ export async function seedSchedules() {
   const student = await prisma.student.findFirst({
     where: { user: { email: "john.doe@jipter.com" } },
   });
-  const subject = await prisma.subjects.findFirst({ where: { name: "Math" } });
+  const subject = await prisma.subjects.findFirst({ where: { name: "Mathematics" } });
+  const course = await prisma.courses.findFirst({ include: { lectures: true } });
 
-  if (!teacher || !student || !subject) {
+  if (!teacher || !student || !subject || !course) {
     console.warn(
-      "Teacher, student, or subject not found. Skipping schedule seeding.",
+      "Teacher, student, subject, or course not found. Skipping schedule seeding.",
     );
     return;
   }
@@ -102,15 +103,22 @@ export async function seedSchedules() {
     where: { studentId: student.id },
   });
 
-  for (const item of schedules) {
+  for (let i = 0; i < schedules.length; i++) {
+    const item = schedules[i];
+    const lecture = course.lectures[i % (course.lectures.length || 1)];
+
     await prisma.schedule.create({
       data: {
         teacherId: teacher.id,
         studentId: student.id,
+        courseId: course.id,
+        lecturesId: lecture?.id || null,
+        videoUrl: lecture?.videoUrl || null,
         title: item.title,
         description: item.title,
         status: item.status,
-        subjectId: subject.id,
+        type: "half",
+        language: "en",
 
         // 🔥 الأهم
         start_time: createDateTime(baseDate, item.start),

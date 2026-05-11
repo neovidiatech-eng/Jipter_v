@@ -105,11 +105,30 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
       };
     }),
   );
+  const now = getNowUTC();
+  const nowTime = now.toDate().getTime();
+  const tz = req.timezone;
+
+  const previousSchedule = scheduleData.filter((s) => {
+    return new Date(s.end_time).getTime() < nowTime;
+  });
+
+  const upcomingSchedule = scheduleData.filter((s) => {
+    return new Date(s.start_time).getTime() > nowTime;
+  });
+
+  const todayStr = now.tz(tz).format("YYYY-MM-DD");
+  const toDaySchedule = scheduleData.filter((s) => {
+    return s.start_time.split(" ")[0] === todayStr;
+  });
 
   return successResponse({
     res,
     req,
-    data: { schedule: scheduleData, pagination },
+    data: {
+      schedule: { upcomingSchedule, toDaySchedule, previousSchedule },
+      pagination,
+    },
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -118,7 +137,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
   const {
     studentId,
     teacherId,
-    subject_id,
+    courseId,
     title,
     description,
     link,
@@ -128,16 +147,24 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     start_time,
     platform,
     type,
+    language,
+    videoUrl,
+    slidesUrl,
   } = req.body;
   /* check if student and teacher exist */
-  const [student, teacher, subject] = await Promise.all([
+  const [student, teacher, course] = await Promise.all([
     db.findOne({
       model: "student",
       where: { id: studentId },
       include: { plan: true },
     }),
     checkExist({ model: "teacher", where: { id: teacherId }, next }),
-    checkExist({ model: "subjects", where: { id: subject_id }, next }),
+    checkExist({
+      model: "courses",
+      where: { id: courseId },
+      next,
+      include: { lectures: true },
+    }),
   ]);
 
   if (!student) {
@@ -146,6 +173,22 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
       next,
       status: 404,
       message: "STUDENT_NOT_FOUND",
+    });
+  }
+  if (!course) {
+    return errorResponse({
+      req,
+      next,
+      status: 404,
+      message: "COURSE_NOT_FOUND",
+    });
+  }
+  if (!teacher) {
+    return errorResponse({
+      req,
+      next,
+      status: 403,
+      message: "TEACHER_NOT_FOUND",
     });
   }
 
@@ -220,10 +263,14 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         description,
         link,
         notes,
-        subjectId: subject_id,
+        courseId,
         start_time: startTime,
+        lecturesId: course.lectures[0]?.id || null,
         end_time: endTime,
         type,
+        language,
+        videoUrl: videoUrl || course.lectures[0]?.videoUrl || null,
+        slidesUrl,
       },
     });
 
@@ -279,7 +326,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   const {
     studentId,
     teacherId,
-    subject_id,
+    courseId,
     title,
     description,
     link,
@@ -290,19 +337,27 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
     startDate, // "2026-03-26"
     endDate, // "2026-04-26"
     notification_Time,
+    language,
+    videoUrl,
+    slidesUrl,
   } = req.body;
   const skipedSchedules = [];
   const perSessionUnits = 1;
 
   /* check exist student, teacher, subject */
-  const [student, teacher, subject] = await Promise.all([
+  const [student, teacher, course] = await Promise.all([
     db.findOne({
       model: "student",
       where: { id: studentId },
       include: { plan: true },
     }),
     checkExist({ model: "teacher", where: { id: teacherId }, next }),
-    checkExist({ model: "subjects", where: { id: subject_id }, next }),
+    checkExist({
+      model: "courses",
+      where: { id: courseId },
+      next,
+      include: { lectures: true },
+    }),
   ]);
 
   if (!student) {
@@ -400,6 +455,9 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       continue;
     }
 
+    const lectureIndex = schedulesToCreate.length % (course.lectures.length || 1);
+    const currentLecture = course.lectures[lectureIndex];
+
     schedulesToCreate.push({
       studentId,
       teacherId,
@@ -409,10 +467,14 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       notes,
       start_time,
       end_time,
-      subjectId: subject_id,
+      courseId,
+      lecturesId: currentLecture?.id || null,
       is_recurring: true,
       day_of_week: date.toLocaleDateString("en-US", { weekday: "long" }),
       parent_recurring_id: parentRecurringId,
+      language,
+      videoUrl: currentLecture?.videoUrl || videoUrl || null,
+      slidesUrl,
     });
 
     notificationJobs.push({ start_time, notification_Time });
@@ -596,12 +658,29 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
     end_time: toLocal(s.end_time, req.timezone),
   }));
 
+  const now = getNowUTC();
+  const nowTime = now.toDate().getTime();
+  const tz = req.timezone;
+
+  const previousSchedule = schedulesData.filter((s) => {
+    return new Date(s.end_time).getTime() < nowTime;
+  });
+
+  const upcomingSchedule = schedulesData.filter((s) => {
+    return new Date(s.start_time).getTime() > nowTime;
+  });
+
+  const todayStr = now.tz(tz).format("YYYY-MM-DD");
+  const toDaySchedule = schedulesData.filter((s) => {
+    return s.start_time.split(" ")[0] === todayStr;
+  });
+
   return successResponse({
     res,
     req,
     status: 200,
     message: "FETCH_SUCCESS",
-    data: schedulesData,
+    data: { upcomingSchedule, toDaySchedule, previousSchedule },
   });
 });
 
@@ -1324,3 +1403,4 @@ async function updateAverageRating(userId) {
     }
   }
 }
+``

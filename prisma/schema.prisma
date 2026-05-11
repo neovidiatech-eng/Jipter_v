@@ -135,7 +135,6 @@ model subjects {
   rank      ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
   exams     exam[]
   homeworks homework[]
-  schedules schedule[]
 
   @@unique([name, rankId], name: "name_rankId")
   @@index([name])
@@ -236,35 +235,39 @@ model student {
 }
 
 model schedule {
-  id                  String   @id @default(uuid())
+  id                  String       @id @default(uuid())
   teacherId           String
   studentId           String
-  status              String   @default("scheduled")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  courseId            String
+  status              String       @default("scheduled")
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
   notes               String?
   description         String
+  videoUrl            String?
+  slidesUrl           String?
   link                String
   title               String
-  platform            String?  @default("zoom")
-  type                String   @default("half")
+  platform            String?      @default("zoom")
+  type                String       @default("half")
+  language            String       @default("en")
   end_time            DateTime
   start_time          DateTime
   day_of_week         String?
-  is_recurring        Boolean  @default(false)
+  is_recurring        Boolean      @default(false)
   parent_recurring_id String?
-  subjectId           String   @default("null")
-  rescheduledFromId   String?  @unique
-
-  rescheduledToId String?      @unique
-  reviews         Review[]
-  scheduleLogs    ScheduleLog?
-  rescheduledTo   schedule?    @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
-  rescheduledFrom schedule?    @relation("RescheduleHistory")
-  student         student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject         subjects     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  teacher         teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  requests        request[]
+  rescheduledFromId   String?      @unique
+  rescheduledToId     String?      @unique
+  reviews             Review[]
+  scheduleLogs        ScheduleLog?
+  rescheduledTo       schedule?    @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
+  rescheduledFrom     schedule?    @relation("RescheduleHistory")
+  student             student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course              courses      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher             teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  requests            request[]
+  lectures            lectures?    @relation(fields: [lecturesId], references: [id])
+  lecturesId          String?
 
   @@index([teacherId])
   @@index([studentId])
@@ -524,6 +527,7 @@ model courses {
   lectures    lectures[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  schedules   schedule[]
 
   @@index([rankId])
 }
@@ -543,6 +547,7 @@ model lectures {
   updatedAt DateTime  @updatedAt
 
   userLectures user_lectures[]
+  schedules    schedule[]
 
   @@unique([courseId, order])
   @@index([courseId])

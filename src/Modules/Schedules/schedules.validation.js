@@ -1,6 +1,7 @@
 import Joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
 import { notificationType } from "../../Utils/Enums/sessions.js";
+import dayjs from "dayjs";
 
 export const createSchedule = {
   body: Joi.object()
@@ -20,11 +21,11 @@ export const createSchedule = {
           "string.pattern.base": "TEACHER_ID_INVALID",
         })
         .required(),
-      subject_id: generalFields.id
+      courseId: generalFields.id
         .messages({
-          "string.empty": "SUBJECT_ID_REQUIRED",
-          "any.required": "SUBJECT_ID_REQUIRED",
-          "string.pattern.base": "SUBJECT_ID_INVALID",
+          "string.empty": "COURSE_ID_REQUIRED",
+          "any.required": "COURSE_ID_REQUIRED",
+          "string.pattern.base": "COURSE_ID_INVALID",
         })
         .required(),
       title: generalFields.name
@@ -54,12 +55,23 @@ export const createSchedule = {
         "string.pattern.base": "NOTES_INVALID",
       }),
 
-      start_time: generalFields.date.greater("now").messages({
-        "string.empty": "START_TIME_REQUIRED",
-        "any.required": "START_TIME_REQUIRED",
-        "string.pattern.base": "START_TIME_INVALID",
-      }),
+      start_time: generalFields.date
+        .messages({
+          "string.empty": "START_TIME_REQUIRED",
+          "any.required": "START_TIME_REQUIRED",
+          "string.pattern.base": "START_TIME_INVALID",
+        })
+        .custom((value) => {
+          if (dayjs(value).isBefore(dayjs())) {
+            return dayjs(value).isAfter(dayjs().subtract(1, "day"));
+          }
+          return value;
+        })
+        .required(),
       type: generalFields.type.required(),
+      language: Joi.string().valid("en", "ar", "fr").default("en"),
+      videoUrl: Joi.string().uri().allow(null, ""),
+      slidesUrl: Joi.string().uri().allow(null, ""),
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required()
@@ -77,7 +89,7 @@ export const createRecurringSchedule = {
     .keys({
       studentId: generalFields.id.required(),
       teacherId: generalFields.id.required(),
-      subject_id: generalFields.id.required(),
+      courseId: generalFields.id.required(),
       title: generalFields.name.required(),
       description: generalFields.description.required(),
       link: generalFields.url.required(),
@@ -107,7 +119,8 @@ export const createRecurringSchedule = {
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required(),
-      type: generalFields.type.required(),
+      language: Joi.string().valid("en", "ar", "fr").default("en"),
+      videoUrl: Joi.string().uri().allow(null, ""),
     })
     .required(),
 };
@@ -122,6 +135,9 @@ export const updateSchedule = {
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
       start_time: Joi.date().greater("now"),
       type: generalFields.type,
+      language: Joi.string().valid("en", "ar", "fr"),
+      videoUrl: Joi.string().uri().allow(null, ""),
+      slidesUrl: Joi.string().uri().allow(null, ""),
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
     })
     .min(1)
