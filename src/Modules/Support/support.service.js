@@ -211,7 +211,6 @@ const randomRows = await db.findMany({
   const result = groupedData.map((item) => ({
     ...item,
     popular: randomRows,
-
     category: categories.find((category) => category.id === item.categoryId),
   }));
   return result;

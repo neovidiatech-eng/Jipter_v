@@ -7,7 +7,7 @@ export const getSupport = asyncHandler(async (req, res, next) => {
   return successResponse({ res, req, data, message: "FETCH_SUCCESS", status: 200 });
 });
 
-export const getSupportById = asyncHandler(async (req, res, next) => {
+export const  getSupportById = asyncHandler(async (req, res, next) => {
   const data = await service.getSupportById({ req, res, next });
   return successResponse({ res, req, data, message: "FETCH_SUCCESS", status: 200 });
 });
