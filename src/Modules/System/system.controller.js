@@ -13,13 +13,29 @@ export const getAllRoles = asyncHandler(async (req, res, next) => {
       contains: search,
     };
   }
-  const roles = await db.findMany({ model: "role", where });
+  const roles = await db.findMany({
+    model: "role",
+    where,
+    include: {
+      rolePermissions: {
+        include: {
+          permission: true,
+        },
+      },
+    },
+  });
+
+  const rolePermissions = roles.map((role) => ({
+    id: role.id,
+    name: role.name,
+    permissions: role.rolePermissions.map((rolePermission) => rolePermission.permission),
+  }));
   return successResponse({
     res,
     req,
     status: 200,
     message: "FETCH_SUCCESS",
-    data: roles,
+    data: rolePermissions,
   });
 });
 export const createRole = asyncHandler(async (req, res, next) => {

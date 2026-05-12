@@ -1,39 +1,41 @@
 import { Router } from "express";
 import * as stuffController from "./stuff.controller.js";
 import authentication from "../../../Middlewares/Authentication.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
-import { endpoints } from "./stuff.authorization.js";
+import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
 const router = Router();
+const stuffResource = "users"; // Staff are users with specific roles
+
+router.use(authentication);
 
 router.get(
   "/",
-  authentication,
-  authorization({ permissions: endpoints.getAllStuff }),
+  authorizeResource(stuffResource),
   stuffController.getAllStuff,
 );
+
 router.get(
   "/:id",
-  authentication,
-  authorization({ permissions: endpoints.getStuffById }),
+  authorizeResource(stuffResource),
   stuffController.getStuffById,
 );
+
 router.post(
   "/create",
-  authentication,
-  authorization({ permissions: endpoints.createStuffUser }),
+  authorizeResource(stuffResource),
   stuffController.createStuffUser,
 );
+
 router.patch(
   "/update/:id",
-  authentication,
-  authorization({ permissions: endpoints.updateStuffUser }),
+  authorizeResource(stuffResource),
   stuffController.updateStuffUser,
 );
+
 router.delete(
   "/delete/:id",
-  authentication,
-  authorization({ permissions: endpoints.deleteStuffUser }),
+  authorizeResource(stuffResource),
   stuffController.deleteStuffUser,
 );
 

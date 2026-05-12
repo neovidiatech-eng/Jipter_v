@@ -1,20 +1,21 @@
 import { Router } from "express";
-import plansRouter from "./Plans/plans.routes.js";
-import subscriptionsRequestsRouter from "./SubscriptionRequests/subscriptionRequests.routes.js";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
-import * as sub from "./subscription.controller.js";
-
-import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+import { authorize } from "../../Middlewares/Authorize.js";
+import * as controller from "./subscription.controller.js";
+import plansRouter from "./Plans/plans.routes.js";
+import requestsRouter from "./SubscriptionRequests/subscriptionRequests.routes.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
+
 router.use("/plans", plansRouter);
-router.use("/requests", subscriptionsRequestsRouter);
+router.use("/requests", requestsRouter);
+
 router.get(
-  "/",
+  "/my-subscription",
   authentication,
-  authorization({ permissions: [PERMISSIONS.SUBSCRIPTION_MANAGE] }),
-  sub.getallSubscriptions,
+  authorize(PERMISSIONS_V2.SUBSCRIPTIONS.READ),
+  controller.getMySubscription,
 );
 
 export default router;

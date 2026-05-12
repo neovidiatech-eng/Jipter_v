@@ -4,15 +4,14 @@ import {
   successResponse,
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
-
-import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 export const createHomework = asyncHandler(async (req, res, next) => {
   const { title, description, dueDate, studentId, status } =
     req.body;
   
-  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
-  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_DELETE) || req.user.hasPermission(PERMISSIONS.HOMEWORK_UPDATE); // Admin-like
+  const isTeacher = !!req.user.teacher;
+  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
   
   const teacher = req.user.teacher;
   const student = await db.findOne({
@@ -24,10 +23,6 @@ export const createHomework = asyncHandler(async (req, res, next) => {
 
   if (!student) {
     return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
-  }
-
-  if (!isTeacher && !isManagement) {
-    return errorResponse({ req, next, message: "ONLY_TEACHERS_ADMINS_CREATE", status: 403 });
   }
 
   // If teacher, assign automatically, if admin we might need teacherId passed.
@@ -66,8 +61,8 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "HOMEWORK_NOT_FOUND", status: 404 });
   }
 
-  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_UPDATE);
-  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
+  const isTeacher = !!req.user.teacher;
 
   // Check permissions: Teacher can update only their own homework.
   if (
@@ -110,8 +105,8 @@ export const deleteHomework = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "HOMEWORK_NOT_FOUND", status: 404 });
   }
 
-  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_DELETE);
-  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
+  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
+  const isTeacher = !!req.user.teacher;
 
   // Teacher can only delete their own homework; admin/super_admin can delete any
   if (
@@ -153,6 +148,7 @@ export const getHomework = asyncHandler(async (req, res, next) => {
 
   return successResponse({ res, req, message: "FETCH_SUCCESS", data: homework, status: 200 });
 });
+
 export const getStudentHomework = asyncHandler(async (req, res, next) => {
   const student = req.user.student;
   if(!student){
@@ -160,7 +156,6 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
   }
 
   const homework = await db.findMany({
-
     model: "homework",
     where: { studentId: student?.id },
     include: {
@@ -185,15 +180,14 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
-  const isStudent = req.user.hasPermission(PERMISSIONS.STUDENT_PROFILE_READ);
-  const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
-  const isManagement = req.user.hasPermission(PERMISSIONS.HOMEWORK_READ) && !isStudent && !isTeacher; // Or something similar
+  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
 
-  // Role based filtering
-  if (isStudent && !isManagement) {
-    condition.studentId = req.user.student?.id;
-  } else if (isTeacher && !isManagement && !teacherId) {
-    condition.teacherId = req.user.teacher?.id;
+  if (!isManagement) {
+    if (req.user.student) {
+      condition.studentId = req.user.student.id;
+    } else if (req.user.teacher) {
+      condition.teacherId = req.user.teacher.id;
+    }
   }
 
   const { items, pagination } = await db.findManyWithPaginationAndCount({

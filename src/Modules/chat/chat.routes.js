@@ -1,30 +1,35 @@
 import { Router } from "express";
-import * as chatController from "./chat.controller.js";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorize } from "../../Middlewares/Authorize.js";
+import * as chatController from "./chat.controller.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
-const chatRouter = Router();
+const router = Router();
 
-// All chat routes require authentication and actor role
-chatRouter.use(authentication);
-chatRouter.use(authorization({ roles: ["student", "teacher"] }));
+router.use(authentication);
 
-/**
- * POST /api/chat/conversations
- * Create or get a conversation between student and teacher
- */
-chatRouter.post("/conversations", chatController.createConversation);
+router.get(
+  "/",
+  authorize(PERMISSIONS_V2.CHAT.READ),
+  chatController.getConversations,
+);
 
-/**
- * GET /api/chat/conversations
- * List user's conversations
- */
-chatRouter.get("/conversations", chatController.getConversations);
+router.post(
+  "/",
+  authorize(PERMISSIONS_V2.CHAT.CREATE),
+  chatController.createConversation,
+);
 
-/**
- * GET /api/chat/conversations/:id/messages
- * Get paginated messages for a conversation
- */
-chatRouter.get("/conversations/:id/messages", chatController.getMessages);
+router.get(
+  "/:id/messages",
+  authorize(PERMISSIONS_V2.CHAT.READ),
+  chatController.getMessages,
+);
 
-export default chatRouter;
+router.post(
+  "/:id/messages",
+  authorize(PERMISSIONS_V2.CHAT.CREATE),
+  chatController.sendMessage,
+);
+
+export default router;

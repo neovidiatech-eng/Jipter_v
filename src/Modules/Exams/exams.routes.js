@@ -1,20 +1,19 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
 import { validation } from "../../Middlewares/Validation.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import * as examsController from "./exams.controller.js";
 import * as schema from "./exams.validation.js";
-import { endpoints } from "./exams.authorization.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
-const actorRoles = ["student", "teacher"];
-const adminRoles = ["admin", "super_admin"];
-const allRoles = [...actorRoles, ...adminRoles];
+const examsResource = "exams";
 
 router.post(
   "/",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.createExam }),
+  authorizeResource(examsResource),
   validation(schema.createExam),
   examsController.createExam,
 );
@@ -22,7 +21,7 @@ router.post(
 router.delete(
   "/:id",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.deleteExam }),
+  authorizeResource(examsResource),
   validation(schema.deleteExam),
   examsController.deleteExam,
 );
@@ -30,7 +29,7 @@ router.delete(
 router.get(
   "/exam/:id",
   authentication,
-  authorization({ roles: allRoles, permissions: endpoints.getExam }),
+  authorize(PERMISSIONS_V2.EXAMS.READ),
   validation(schema.getExam),
   examsController.getExam,
 );
@@ -38,22 +37,22 @@ router.get(
 router.get(
   "/user-exams",
   authentication,
-  authorization({ roles: actorRoles, permissions: endpoints.getStudentExam }),
+  authorize(PERMISSIONS_V2.EXAMS.READ),
   examsController.getStudentExams,
 );
 
 router.patch(
   "/:id",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.updateHomework }),
-  validation(schema.updateHomework),
+  authorizeResource(examsResource),
+  validation(schema.updateHomework), // Note: reusing updateHomework schema if identical, or should be updateExam
   examsController.updateExam,
 );
 
 router.get(
   "/",
   authentication,
-  authorization({ roles: adminRoles, permissions: endpoints.getAllExams }), 
+  authorizeResource(examsResource),
   validation(schema.getAllExams),
   examsController.getAllExams,
 );

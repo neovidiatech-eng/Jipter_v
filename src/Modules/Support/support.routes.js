@@ -1,86 +1,81 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import { validation } from "../../Middlewares/Validation.js";
 import * as controller from "./support.controller.js";
 import * as schema from "./support.validation.js";
-import { endpoints } from "./support.authorization.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
+const supportResource = "support";
 
-// Publicly available for authenticated users (Students, Teachers, Admins)
 router.use(authentication);
 
-// --- Support Routes ---
 router.get(
   "/",
-  authorization({ permissions: endpoints.getSupport }),
+  authorizeResource(supportResource),
   controller.getSupport,
 );
+
 router.get(
   "/teacher",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   controller.getTeacherSupport,
 );
 
 router.get(
   "/categories",
-  authorization({ permissions: endpoints.getSupport }),
+  authorizeResource(supportResource),
   controller.getCategories,
 );
 
 router.get(
   "/:id",
-  authorization({ permissions: endpoints.getSupport }),
+  authorizeResource(supportResource),
   validation(schema.supportIdSchema),
   controller.getSupportById,
 );
 
 router.post(
   "/",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.createSupport),
   controller.createSupport,
 );
 
 router.patch(
   "/:id",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.updateSupport),
   controller.updateSupport,
 );
 
 router.delete(
   "/:id",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.supportIdSchema),
   controller.deleteSupport,
 );
 
 // --- Category Routes ---
-router.get(
-  "/categories",
-  authorization({ permissions: endpoints.getSupport }),
-  controller.getCategories,
-);
-
 router.post(
   "/categories",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.createCategory),
   controller.createCategory,
 );
 
 router.patch(
   "/categories/:id",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.updateCategory),
   controller.updateCategory,
 );
 
 router.delete(
   "/categories/:id",
-  authorization({ permissions: endpoints.manageSupport }),
+  authorizeResource(supportResource),
   validation(schema.categoryIdSchema),
   controller.deleteCategory,
 );

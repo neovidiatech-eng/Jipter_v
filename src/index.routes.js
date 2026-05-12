@@ -31,6 +31,8 @@ import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js
 import policiesRouter from "./Modules/Policies/policies.routes.js";
 import supportRouter from "./Modules/Support/support.routes.js";
 
+import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
+
 const rootRouter = Router();
 
 // Apply timezone middleware globally
@@ -41,8 +43,8 @@ rootRouter.use("/auth", authRouter);
 rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));
 
 // ─── 2. Actor Dashboards (Prefix Protected) ──────────────────────────────────
-rootRouter.use("/student", authentication, authorization({ roles: ["student"] }), studentDashboardRouter);
-rootRouter.use("/teacher", authentication, authorization({ roles: ["teacher"] }), teacherDashboardRouter);
+rootRouter.use("/student", authentication, authorization({ roles: [ROLES.STUDENT] }), studentDashboardRouter);
+rootRouter.use("/teacher", authentication, authorization({ roles: [ROLES.TEACHER] }), teacherDashboardRouter);
 
 // ─── 3. Shared Features (Root Level for Frontend) ───────────────────────────
 // These routers will handle their own internal role-based authorization
@@ -54,20 +56,19 @@ rootRouter.use("/schedules", authentication, schedulesRouter);
 rootRouter.use("/chat", authentication, chatRouter);
 
 // ─── 4. Management Routes (Admin Protected) ─────────────────────────────────
-const adminRoles = ["admin", "super_admin"];
-rootRouter.use("/system", authentication, authorization({ roles: adminRoles }), systemRouter);
-rootRouter.use("/students", authentication, authorization({ roles: adminRoles }), studentRouter);
-rootRouter.use("/teachers", authentication, authorization({ roles: adminRoles }), teacherRouter);
-rootRouter.use("/finances", authentication, authorization({ roles: adminRoles }), financesRouter);
-rootRouter.use("/materials", authentication, authorization({ roles: adminRoles }), materialsRouter);
-rootRouter.use("/weekly-reports", authentication, authorization({ roles: adminRoles }), weeklyReportsRouter);
-rootRouter.use("/policies", authentication, authorization({ roles: adminRoles }), policiesRouter);
-rootRouter.use("/support", authentication, authorization({ roles: adminRoles }), supportRouter);
-rootRouter.use("/withdrawals", authentication, authorization({ roles: adminRoles }), withdrawalsRouter);
-rootRouter.use("/transactions", authentication, authorization({ roles: adminRoles }), transactionsRouter);
-rootRouter.use("/transactions/currency", authentication, authorization({ roles: adminRoles }), currencyRouter);
-rootRouter.use("/settings", authentication, authorization({ roles: adminRoles }), settingsRouter);
-rootRouter.use("/subscription", authentication, authorization({ roles: adminRoles }), subscriptionRouter);
+rootRouter.use("/system", authentication, authorization({ roles: ADMIN_ROLES }), systemRouter);
+rootRouter.use("/students", authentication, authorization({ roles: ADMIN_ROLES }), studentRouter);
+rootRouter.use("/teachers", authentication, authorization({ roles: ADMIN_ROLES }), teacherRouter);
+rootRouter.use("/finances", authentication, authorization({ roles: ADMIN_ROLES }), financesRouter);
+rootRouter.use("/materials", authentication, authorization({ roles: ADMIN_ROLES }), materialsRouter);
+rootRouter.use("/weekly-reports", authentication, authorization({ roles: ADMIN_ROLES }), weeklyReportsRouter);
+rootRouter.use("/policies", authentication, authorization({ roles: ADMIN_ROLES }), policiesRouter);
+rootRouter.use("/support", authentication, supportRouter);
+rootRouter.use("/withdrawals", authentication, authorization({ roles: ADMIN_ROLES }), withdrawalsRouter);
+rootRouter.use("/transactions", authentication, authorization({ roles: ADMIN_ROLES }), transactionsRouter);
+rootRouter.use("/transactions/currency", authentication, authorization({ roles: ADMIN_ROLES }), currencyRouter);
+rootRouter.use("/settings", authentication, authorization({ roles: ADMIN_ROLES }), settingsRouter);
+rootRouter.use("/subscription", authentication, authorization({ roles: ADMIN_ROLES }), subscriptionRouter);
 
 // Root health check
 rootRouter.get("/", (req, res) => {

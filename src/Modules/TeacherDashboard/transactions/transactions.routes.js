@@ -1,16 +1,16 @@
 import { Router } from "express";
 import authentication from "../../../Middlewares/Authentication.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
-import { endpoints } from "./transactions.authorization.js";
+import { authorize } from "../../../Middlewares/Authorize.js";
 import * as transactionsController from "./transactions.controller.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
 const router = Router();
-
 
 router.get(
   "/",
   authentication,
-  authorization({ permissions: endpoints.getTransactions }), 
+  authorize(PERMISSIONS_V2.FINANCES.READ), 
   transactionsController.getTeacherTransactions,
 );
+
 export default router;

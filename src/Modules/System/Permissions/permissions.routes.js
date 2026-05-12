@@ -1,29 +1,31 @@
 import { Router } from "express";
 import authentication from "../../../Middlewares/Authentication.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../../Middlewares/Authorize.js";
 import { validation } from "../../../Middlewares/Validation.js";
 import * as permissionsController from "./permissions.controller.js";
-import { endpoints } from "./permissions.authorization.js";
 import {
   createPermissionSchema,
   deletePermissionSchema,
   updatePermissionSchema,
   addPermissionsToRoleSchema,
 } from "./permissions.validation.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
 const router = Router();
+const permissionsResource = "permissions";
 
 router.get(
   "/",
   authentication,
-  authorization({ permissions: endpoints.getAllPermissions }),
+  authorizeResource(permissionsResource),
   permissionsController.getAllPermissions,
 );
 
 router.post(
   "/create",
   authentication,
-  authorization({ permissions: endpoints.createPermission }),
+  authorizeResource(permissionsResource),
   validation(createPermissionSchema),
   permissionsController.createPermission,
 );
@@ -31,7 +33,7 @@ router.post(
 router.patch(
   "/update/:id",
   authentication,
-  authorization({ permissions: endpoints.updatePermission }),
+  authorizeResource(permissionsResource),
   validation(updatePermissionSchema),
   permissionsController.updatePermission,
 );
@@ -39,7 +41,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ permissions: endpoints.deletePermission }),
+  authorizeResource(permissionsResource),
   validation(deletePermissionSchema),
   permissionsController.deletePermission,
 );
@@ -47,10 +49,9 @@ router.delete(
 router.patch(
   "/add-permissions-to-role/:roleId",
   authentication,
-  authorization({
-    permissions: endpoints.addPermissionsToRole,
-  }),
+  authorize(PERMISSIONS_V2.ROLES.UPDATE), // Updating a role's permissions is a role update
   validation(addPermissionsToRoleSchema),
   permissionsController.addPermissionsToRole,
 );
+
 export default router;

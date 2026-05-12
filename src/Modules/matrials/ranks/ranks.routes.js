@@ -2,23 +2,25 @@ import { Router } from "express";
 import * as controller from "./ranks.controller.js";
 import authentication from "../../../Middlewares/Authentication.js";
 import { validation } from "../../../Middlewares/Validation.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../../Middlewares/Authorize.js";
 import * as schema from "./ranks.validation.js";
-import { auth } from "./ranks.authorizations.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
 const router = Router();
+const ranksResource = "ranks";
 
 router.get(
   "/",
   authentication,
-  authorization({ permissions: auth.getRank }),
+  authorize(PERMISSIONS_V2.COURSES.READ), // Ranks often tied to course access
   controller.getRanks,
 );
 
 router.get(
   "/:id",
   authentication,
-  authorization({ permissions: auth.getRank }),
+  authorize(PERMISSIONS_V2.COURSES.READ),
   validation(schema.getRank),
   controller.getRank,
 );
@@ -26,7 +28,7 @@ router.get(
 router.post(
   "/create",
   authentication,
-  authorization({ permissions: auth.createRank }),
+  authorizeResource(ranksResource),
   validation(schema.createRank),
   controller.addRank,
 );
@@ -34,7 +36,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
-  authorization({ permissions: auth.updateRank }),
+  authorizeResource(ranksResource),
   validation(schema.updateRank),
   controller.updateRank,
 );
@@ -42,7 +44,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ permissions: auth.deleteRank }),
+  authorizeResource(ranksResource),
   validation(schema.deleteRank),
   controller.deleteRank,
 );

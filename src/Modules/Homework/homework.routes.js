@@ -1,18 +1,19 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
 import { validation } from "../../Middlewares/Validation.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import * as homeworkController from "./homework.controller.js";
 import * as schema from "./homework.validation.js";
-import { endpoints } from "./homework.authorization.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
-const adminRoles = ["admin", "super_admin"];
+const homeworkResource = "homework";
 
 router.post(
   "/",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.createHomework }),
+  authorizeResource(homeworkResource),
   validation(schema.createHomework),
   homeworkController.createHomework,
 );
@@ -20,7 +21,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.updateHomework }),
+  authorizeResource(homeworkResource),
   validation(schema.updateHomework),
   homeworkController.updateHomework,
 );
@@ -28,7 +29,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.deleteHomework }),
+  authorizeResource(homeworkResource),
   validation(schema.deleteHomework),
   homeworkController.deleteHomework,
 );
@@ -36,21 +37,22 @@ router.delete(
 router.get(
   "/student/:id",
   authentication,
-  authorization({ roles: ["teacher", ...adminRoles], permissions: endpoints.getHomework }),
+  authorize(PERMISSIONS_V2.HOMEWORK.READ),
   validation(schema.getHomework),
   homeworkController.getHomework,
 );
+
 router.get(
   "/student-homework",
   authentication,
-  authorization({ roles: ["student"], permissions: endpoints.getHomework }),
+  authorize(PERMISSIONS_V2.HOMEWORK.READ),
   homeworkController.getStudentHomework,
 );
 
 router.get(
   "/",
   authentication,
-  authorization({ roles: adminRoles, permissions: endpoints.getHomework }), 
+  authorizeResource(homeworkResource),
   validation(schema.getAllHomework),
   homeworkController.getAllHomework,
 );

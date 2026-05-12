@@ -18,12 +18,14 @@ export const getAllPermissions = asyncHandler(async (req, res, next) => {
     model: "permission",
     where,
   });
+
+  const resourcePermissions = groupPermissionsByResource(permissions);
   return successResponse({
     res,
     req,
     message: "FETCH_SUCCESS",
     status: 200,
-    data: permissions,
+    data: resourcePermissions,
   });
 });
 
@@ -241,3 +243,22 @@ export const addPermissionsToRole = asyncHandler(async (req, res, next) => {
     data: updatedRole,
   });
 });
+
+const groupPermissionsByResource = (permissions) => {
+  return permissions.reduce((acc, permission) => {
+    const [resource, action] = permission.code.split(":");
+
+    if (!acc[resource]) {
+      acc[resource] = [];
+    }
+
+    acc[resource].push({
+      id: permission.id,
+      name: permission.name,
+      code: permission.code,
+      action,
+    });
+
+    return acc;
+  }, {});
+};

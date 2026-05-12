@@ -15,7 +15,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
 
   const subscriptionsData = await Promise.all(
     subscriptions.map(async (subscription) => {
-      const phone = await decryptText({ text: subscription.user.phone });
+      const phone = subscription.user?.phone ? await decryptText({ text: subscription.user.phone }) : "";
       return {
         id: subscription.id,
         status: subscription.status,
@@ -24,41 +24,106 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
         startDate: subscription.startDate,
         paidAt: subscription.paidAt,
         user: {
-          name: subscription.user.name,
-          email: subscription.user.email,
-          code_country: subscription.user.code_country,
-          status: subscription.user.status,
+          name: subscription.user?.name,
+          email: subscription.user?.email,
+          code_country: subscription.user?.code_country,
+          status: subscription.user?.status,
           phone: phone,
         },
         plan: {
-          id: subscription.plan.id,
-          name: subscription.plan.name,
-          description: subscription.plan.description,
-          price: subscription.plan.price,
-          duration: subscription.plan.duration,
+          id: subscription.plan?.id,
+          name: subscription.plan?.name,
+          description: subscription.plan?.description,
+          price: subscription.plan?.price,
+          duration: subscription.plan?.duration,
           features: [
             "Access to all courses",
             "Priority support",
             "Certificate of completion",
           ],
-          currencyId: subscription.plan.currencyId,
-          createdAt: subscription.plan.createdAt,
-          updatedAt: subscription.plan.updatedAt,
-          active: subscription.plan.active,
-          sessionsCount: subscription.plan.sessionsCount,
+          currencyId: subscription.plan?.currencyId,
+          createdAt: subscription.plan?.createdAt,
+          updatedAt: subscription.plan?.updatedAt,
+          active: subscription.plan?.active,
+          sessionsCount: subscription.plan?.sessionsCount,
         },
         currency: {
-          id: subscription.currency.id,
-          name_en: subscription.currency.name_en,
-          name_ar: subscription.currency.name_ar,
-          symbol: subscription.currency.symbol,
-          code: subscription.currency.code,
-          default: subscription.currency.default,
-          exchangeRate: subscription.currency.exchangeRate,
+          id: subscription.currency?.id,
+          name_en: subscription.currency?.name_en,
+          name_ar: subscription.currency?.name_ar,
+          symbol: subscription.currency?.symbol,
+          code: subscription.currency?.code,
+          default: subscription.currency?.default,
+          exchangeRate: subscription.currency?.exchangeRate,
         },
       };
     }),
   );
 
   return res.status(200).json({ success: true, data: subscriptionsData });
+});
+
+
+export const getMySubscription = asyncHandler(async (req, res, next) => {
+  const subscription = await db.findFirst({
+    model: "Subscription",
+    include: {
+      user: true,
+      plan: true,
+      currency: true,
+    },
+    where: {
+      userId: req.user.id, // Usually linked to user.id
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  if (!subscription) {
+    return res.status(200).json({ success: true, data: null });
+  }
+
+  const phone = subscription.user?.phone ? await decryptText({ text: subscription.user.phone }) : "";
+  const subscriptionData = {
+    id: subscription.id,
+    status: subscription.status,
+    amount: subscription.amount,
+    currencyId: subscription.currencyId,
+    startDate: subscription.startDate,
+    paidAt: subscription.paidAt,
+    user: {
+      name: subscription.user?.name,
+      email: subscription.user?.email,
+      code_country: subscription.user?.code_country,
+      status: subscription.user?.status,
+      phone: phone,
+    },
+    plan: {
+      id: subscription.plan?.id,
+      name: subscription.plan?.name,
+      description: subscription.plan?.description,
+      price: subscription.plan?.price,
+      duration: subscription.plan?.duration,
+      features: [
+        "Access to all courses",
+        "Priority support",
+        "Certificate of completion",
+      ],
+      currencyId: subscription.plan?.currencyId,
+      createdAt: subscription.plan?.createdAt,
+      updatedAt: subscription.plan?.updatedAt,
+      active: subscription.plan?.active,
+      sessionsCount: subscription.plan?.sessionsCount,
+    },
+    currency: {
+      id: subscription.currency?.id,
+      name_en: subscription.currency?.name_en,
+      name_ar: subscription.currency?.name_ar,
+      symbol: subscription.currency?.symbol,
+      code: subscription.currency?.code,
+      default: subscription.currency?.default,
+      exchangeRate: subscription.currency?.exchangeRate,
+    },
+  };
+
+  return res.status(200).json({ success: true, data: subscriptionData });
 });

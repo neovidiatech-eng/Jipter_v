@@ -3,37 +3,41 @@ import authentication from "../../Middlewares/Authentication.js";
 import { validation } from "../../Middlewares/Validation.js";
 import * as scheduleController from "./schedules.controller.js";
 import * as schema from "./schedules.validation.js";
-import { authorization } from "../../Middlewares/Authorization.js";
-import { ROLES } from "../../Utils/Permissions/permissions.js";
-import { endpoints } from "./schedules.authorization.js";
-
-
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
 
-// Admin: Create multiple sessions for a student with a teacher
+// Base Resource: sessions
+const sessionsResource = "sessions";
+
 router.get(
   "/", 
   authentication,
-  authorization({ permissions: endpoints.GET_ALL_SCHEDULES,  }),
-  scheduleController.getAllSchedules);
+  authorizeResource(sessionsResource),
+  scheduleController.getAllSchedules
+);
+
 router.get(
   "/user/schedules",
   authentication,
-  authorization({ permissions: endpoints.GET_ALL_SCHEDULES, roles: [ROLES.STUDENT,ROLES.TEACHER] }),
+  authorize(PERMISSIONS_V2.SESSIONS.READ),
   scheduleController.getUserSchedules,
 );
+
 router.post(
   "/create-one",
   authentication,
-  authorization({ permissions: endpoints.CREATE_SCHEDULE, roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }),
+  authorize(PERMISSIONS_V2.SESSIONS.CREATE),
   validation(schema.createSchedule),
   scheduleController.createSchedule,
 );
+
 router.post(
   "/create-recurring",
   authentication,
-  authorization({ permissions: endpoints.CREATE_SCHEDULE, roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }),
+  authorize(PERMISSIONS_V2.SESSIONS.CREATE),
   validation(schema.createRecurringSchedule),
   scheduleController.createRecurringSchedule,
 );
@@ -41,7 +45,7 @@ router.post(
 router.delete(
   "/:id",
   authentication,
-  authorization({ permissions: endpoints.DELETE_SCHEDULE, roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }),
+  authorizeResource(sessionsResource),
   validation(schema.deleteSchedule),
   scheduleController.deleteSchedule,
 );
@@ -49,7 +53,7 @@ router.delete(
 router.delete(
   "/group/:parent_recurring_id",
   authentication,
-  authorization({ permissions: endpoints.DELETE_SCHEDULE, roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }),
+  authorize(PERMISSIONS_V2.SESSIONS.DELETE),
   validation(schema.deleteRecurringGroup),
   scheduleController.deleteRecurringGroup,
 );
@@ -57,7 +61,7 @@ router.delete(
 router.patch(
   "/:id",
   authentication,
-  authorization({ permissions: endpoints.UPDATE_SCHEDULE, roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }),
+  authorizeResource(sessionsResource),
   validation(schema.updateSchedule),
   scheduleController.updateSchedule,
 );
@@ -65,30 +69,23 @@ router.patch(
 router.post(
   "/:id/join",
   authentication,
-  authorization({
-    roles: [ROLES.STUDENT,ROLES.TEACHER],
-    permissions: endpoints.JOIN_SCHEDULE,
-  }),
+  authorize(PERMISSIONS_V2.SESSIONS.JOIN),
   validation(schema.joinSession),
   scheduleController.joinSession,
 );
+
 router.post(
   "/:id/leave",
   authentication,
-  authorization({
-    roles: [ROLES.STUDENT,ROLES.TEACHER],
-    permissions: endpoints.LEAVE_SCHEDULE,
-  }),
+  authorize(PERMISSIONS_V2.SESSIONS.LEAVE),
   validation(schema.leaveSession),
   scheduleController.leaveSession,
 );
+
 router.post(
   "/:id/review",
   authentication,
-  authorization({
-    roles: [ROLES.STUDENT,ROLES.TEACHER],
-    permissions: endpoints.SUBMIT_REVIEW,
-  }),
+  authorize(PERMISSIONS_V2.SESSIONS.JOIN), // Assuming join permission allows review, or use a specific one
   validation(schema.submitReview),
   scheduleController.submitReview,
 );

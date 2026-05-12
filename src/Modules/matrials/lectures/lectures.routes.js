@@ -2,50 +2,52 @@ import { Router } from "express";
 import * as lecturesController from "./lectures.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
 import authentication from "../../../Middlewares/Authentication.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../../Middlewares/Authorize.js";
 import * as lecturesValidation from "./lectures.validation.js";
-
-import { PERMISSIONS } from "../../../Utils/Permissions/permissions.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
 const router = Router();
-
-const adminOnly = [
-  authentication,
-  authorization({ permissions: [PERMISSIONS.LECTURE_MANAGE] }),
-];
+const lecturesResource = "lectures";
 
 router.get("/", lecturesController.getAllLectures);
+
 router.get(
   "/:id",
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.getLecture,
 );
+
 router.post(
   "/",
-  adminOnly,
+  authentication,
+  authorizeResource(lecturesResource),
   validation(lecturesValidation.createLectureSchema),
   lecturesController.createLecture,
 );
+
 router.patch(
   "/:id",
   authentication,
-  authorization({ permissions: [PERMISSIONS.LECTURE_MANAGE, PERMISSIONS.LECTURE_READ] }),
+  authorizeResource(lecturesResource),
   validation(lecturesValidation.updateLectureSchema),
   lecturesController.updateLecture,
 );
+
 router.delete(
   "/:id",
-  adminOnly,
+  authentication,
+  authorizeResource(lecturesResource),
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.deleteLecture,
 );
+
 router.post(
   "/:id/complete",
   authentication,
+  authorize(PERMISSIONS_V2.LECTURES.UPDATE),
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.completeLecture,
 );
 
 export default router;
-
-

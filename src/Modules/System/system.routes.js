@@ -1,10 +1,10 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import { validation } from "../../Middlewares/Validation.js";
 import permissionsRouter from "./Permissions/permissions.routes.js";
 import * as systemController from "./system.controller.js";
-import { endpoints } from "./system.authorization.js";
 import { TIMEZONES_LIST } from "../../Utils/Date/timezones.js";
 import {
   createRoleSchema,
@@ -13,8 +13,10 @@ import {
   assignRoleSchema,
 } from "./system.validation.js";
 import stuffRouter from "./stuff/stuff.routes.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
+const rolesResource = "roles";
 
 // Public: list all available IANA timezones for dropdown
 router.get("/timezones", (req, res) => {
@@ -27,14 +29,14 @@ router.use("/stuff", stuffRouter);
 router.get(
   "/roles",
   authentication,
-  authorization({ permissions: endpoints.getAllRoles }),
+  authorizeResource(rolesResource),
   systemController.getAllRoles,
 );
 
 router.post(
   "/roles/create",
   authentication,
-  authorization({ permissions: endpoints.createRoles }),
+  authorizeResource(rolesResource),
   validation(createRoleSchema),
   systemController.createRole,
 );
@@ -42,7 +44,7 @@ router.post(
 router.post(
   "/roles/assign/:user_id",
   authentication,
-  authorization({ permissions: endpoints.assignRole }),
+  authorize(PERMISSIONS_V2.ROLES.ASSIGN),
   validation(assignRoleSchema),
   systemController.assignRoleToUser,
 );
@@ -50,7 +52,7 @@ router.post(
 router.patch(
   "/roles/:id",
   authentication,
-  authorization({ permissions: endpoints.updateRole }),
+  authorizeResource(rolesResource),
   validation(updateRoleSchema),
   systemController.updateRole,
 );
@@ -58,7 +60,7 @@ router.patch(
 router.delete(
   "/roles/:id",
   authentication,
-  authorization({ permissions: endpoints.deleteRole }),
+  authorizeResource(rolesResource),
   validation(deleteRoleSchema),
   systemController.deleteRole,
 );

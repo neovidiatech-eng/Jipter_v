@@ -1,14 +1,15 @@
 import { Router } from "express";
 import authentication from "../../../Middlewares/Authentication.js";
-import { authorization } from "../../../Middlewares/Authorization.js";
-import { endpoints } from "./dashboard.authorization.js";
-import * as controller from "./dashboard.controller.js"
+import { authorize } from "../../../Middlewares/Authorize.js";
+import * as controller from "./dashboard.controller.js";
+import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
+
 const router = Router();
 
 router.get(
   "/",
   authentication,
-  authorization({ permissions: endpoints.getDashboard }),
+  authorize(PERMISSIONS_V2.DASHBOARD.READ),
   controller.getDashboard,
 );
 

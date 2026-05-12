@@ -138,7 +138,7 @@ export const register = asyncHandler(async (req, res, next) => {
     if (plan_id) {
       await tx.create({
         model: "subscription_requests",
-        data: { 
+        data: {
           user_id: user.id,
           planId: plan_id,
         },
@@ -509,13 +509,13 @@ export const googleSignUp = asyncHandler(async (req, res, next) => {
           googleId: verify.sub,
           confirmAt: new Date().toISOString(),
           status: "pending",
+          ...(studentRole && { roleId: studentRole.id }),
         },
       });
 
       await tx.create({
         model: "subscription_requests",
         data: {
-          
           user_id: user.id,
           planId: null,
         },

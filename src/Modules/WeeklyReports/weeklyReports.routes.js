@@ -2,63 +2,60 @@ import { Router } from "express";
 import * as weeklyReportsController from "./weeklyReports.controller.js";
 import * as weeklyReportsValidation from "./weeklyReports.validation.js";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import { validation } from "../../Middlewares/Validation.js";
-
-import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
+const weeklyReportsResource = "weekly_reports";
 
-// All routes require authentication
 router.use(authentication);
 
-// Teacher routes
 router.post(
   "/",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_CREATE] }),
+  authorize(PERMISSIONS_V2.WEEKLY_REPORTS.CREATE),
   validation(weeklyReportsValidation.createReportSchema),
   weeklyReportsController.createReport
 );
 
 router.get(
   "/my-reports",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ] }),
+  authorize(PERMISSIONS_V2.WEEKLY_REPORTS.READ),
   weeklyReportsController.getMyReports
 );
 
 router.get(
   "/metrics",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ] }),
+  authorize(PERMISSIONS_V2.WEEKLY_REPORTS.READ),
   validation(weeklyReportsValidation.getMetricsSchema),
   weeklyReportsController.getWeeklyMetrics
 );
 
-// Admin and Teacher shared routes
 router.get(
   "/:id",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_READ, PERMISSIONS.WEEKLY_REPORT_ALL_READ] }),
+  authorize(PERMISSIONS_V2.WEEKLY_REPORTS.READ),
   validation(weeklyReportsValidation.reportIdSchema),
   weeklyReportsController.getReport
 );
 
 router.patch(
   "/:id",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_UPDATE] }),
+  authorizeResource(weeklyReportsResource),
   validation(weeklyReportsValidation.updateReportSchema),
   weeklyReportsController.updateReport
 );
 
 router.delete(
   "/:id",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_DELETE] }),
+  authorizeResource(weeklyReportsResource),
   validation(weeklyReportsValidation.reportIdSchema),
   weeklyReportsController.deleteReport
 );
 
-// Admin only routes
 router.get(
   "/",
-  authorization({ permissions: [PERMISSIONS.WEEKLY_REPORT_ALL_READ] }),
+  authorize(PERMISSIONS_V2.WEEKLY_REPORTS.READ),
   weeklyReportsController.getAllReports
 );
 

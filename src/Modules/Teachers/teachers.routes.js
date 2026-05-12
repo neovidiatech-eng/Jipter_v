@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import * as teacherController from "./teachers.controller.js";
 import { validation } from "../../Middlewares/Validation.js";
 import {
@@ -10,12 +11,15 @@ import {
   updateTeacherSchema,
   deleteTeacherSchema,
 } from "./teachers.validation.js";
-import { endpoints } from "./teachers.authorization.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+
 const router = Router();
+const teacherResource = "users"; // Teachers are users
+
 router.get(
   "/",
   authentication,
-  authorization({ permissions: endpoints.GET_ALL_TEACHERS }),
+  authorizeResource(teacherResource),
   validation(getAllTeachersSchema),
   teacherController.getAllTeachers,
 );
@@ -23,13 +27,13 @@ router.get(
 router.get(
   "/my-students",
   authentication,
-  authorization({ permissions: endpoints.GET_MY_STUDENTS }),
+  authorize(PERMISSIONS_V2.USERS.READ),
   teacherController.getMyStudents,
 );
 
 router.post(
   "/create",
-  /*  authentication, */
+  /*  authentication, */ // Public registration?
   validation(createTeacherSchema),
   teacherController.createTeacher,
 );
@@ -37,6 +41,7 @@ router.post(
 router.get(
   "/:id",
   authentication,
+  authorizeResource(teacherResource),
   validation(getTeacherSchema),
   teacherController.getTeacher,
 );
@@ -44,6 +49,7 @@ router.get(
 router.patch(
   "/update/:id",
   authentication,
+  authorizeResource(teacherResource),
   validation(updateTeacherSchema),
   teacherController.updateTeacher,
 );
@@ -51,6 +57,7 @@ router.patch(
 router.delete(
   "/delete/:id",
   authentication,
+  authorizeResource(teacherResource),
   validation(deleteTeacherSchema),
   teacherController.deleteTeacher,
 );

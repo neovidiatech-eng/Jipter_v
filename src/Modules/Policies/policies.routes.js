@@ -2,10 +2,9 @@ import { Router } from "express";
 import * as policiesController from "./policies.controller.js";
 import * as policiesValidation from "./policies.validation.js";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorization } from "../../Middlewares/Authorization.js";
+import { authorize } from "../../Middlewares/Authorize.js";
 import { validation } from "../../Middlewares/Validation.js";
-
-import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
 
@@ -19,21 +18,21 @@ router.get("/notice", policiesController.getActiveNotice);
 // Admin only routes for managing policies
 router.post(
   "/",
-  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
+  authorize(PERMISSIONS_V2.POLICIES.MANAGE),
   validation(policiesValidation.createPolicySchema),
   policiesController.createPolicy
 );
 
 router.patch(
   "/:id",
-  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
+  authorize(PERMISSIONS_V2.POLICIES.MANAGE),
   validation(policiesValidation.updatePolicySchema),
   policiesController.updatePolicy
 );
 
 router.delete(
   "/:id",
-  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
+  authorize(PERMISSIONS_V2.POLICIES.MANAGE),
   validation(policiesValidation.policyIdSchema),
   policiesController.deletePolicy
 );
@@ -41,7 +40,7 @@ router.delete(
 // Admin only routes for managing notice
 router.post(
   "/notice",
-  authorization({ permissions: [PERMISSIONS.POLICY_MANAGE] }),
+  authorize(PERMISSIONS_V2.POLICIES.MANAGE),
   validation(policiesValidation.createNoticeSchema),
   policiesController.upsertNotice
 );
