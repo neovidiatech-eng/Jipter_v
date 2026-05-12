@@ -5,7 +5,7 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
-import { hash } from "../../Utils/Security/index.js";
+import { decryptText, hash } from "../../Utils/Security/index.js";
 
 export const getAllTeachers = asyncHandler(async (req, res, next) => {
   const { search, page = 1, limit = 10, active } = req.query;
