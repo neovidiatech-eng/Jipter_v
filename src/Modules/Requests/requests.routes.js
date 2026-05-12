@@ -31,13 +31,13 @@ router.post(
   requestsController.createRequest,
 );
 
-router.post(
+router.patch(
   "/:id/approve",
   authorize(PERMISSIONS_V2.REQUESTS.HANDLE),
   requestsController.approveRequest,
 );
 
-router.post(
+router.patch(
   "/:id/reject",
   authorize(PERMISSIONS_V2.REQUESTS.HANDLE),
   requestsController.rejectRequest,
