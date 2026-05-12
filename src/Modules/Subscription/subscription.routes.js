@@ -9,7 +9,7 @@ import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 const router = Router();
 
 router.use("/plans", plansRouter);
-router.use("/requests", requestsRouter);
+router.use("/requests", authentication, requestsRouter);
 
 router.get(
   "/my-subscription",

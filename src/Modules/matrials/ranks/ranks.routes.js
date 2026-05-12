@@ -12,22 +12,22 @@ const ranksResource = "ranks";
 
 router.get(
   "/",
-  authentication,
-  authorize(PERMISSIONS_V2.COURSES.READ), // Ranks often tied to course access
+  
+  authorizeResource(ranksResource),
   controller.getRanks,
 );
 
 router.get(
   "/:id",
-  authentication,
-  authorize(PERMISSIONS_V2.COURSES.READ),
+  
+  authorizeResource(ranksResource),
   validation(schema.getRank),
   controller.getRank,
 );
 
 router.post(
   "/create",
-  authentication,
+  
   authorizeResource(ranksResource),
   validation(schema.createRank),
   controller.addRank,
@@ -35,7 +35,7 @@ router.post(
 
 router.patch(
   "/:id",
-  authentication,
+  
   authorizeResource(ranksResource),
   validation(schema.updateRank),
   controller.updateRank,
@@ -43,7 +43,7 @@ router.patch(
 
 router.delete(
   "/:id",
-  authentication,
+  
   authorizeResource(ranksResource),
   validation(schema.deleteRank),
   controller.deleteRank,

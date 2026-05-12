@@ -56,19 +56,19 @@ rootRouter.use("/schedules", authentication, schedulesRouter);
 rootRouter.use("/chat", authentication, chatRouter);
 
 // ─── 4. Management Routes (Admin Protected) ─────────────────────────────────
-rootRouter.use("/system", authentication, authorization({ roles: ADMIN_ROLES }), systemRouter);
-rootRouter.use("/students", authentication, authorization({ roles: ADMIN_ROLES }), studentRouter);
-rootRouter.use("/teachers", authentication, authorization({ roles: ADMIN_ROLES }), teacherRouter);
-rootRouter.use("/finances", authentication, authorization({ roles: ADMIN_ROLES }), financesRouter);
-rootRouter.use("/materials", authentication, authorization({ roles: ADMIN_ROLES }), materialsRouter);
-rootRouter.use("/weekly-reports", authentication, authorization({ roles: ADMIN_ROLES }), weeklyReportsRouter);
-rootRouter.use("/policies", authentication, authorization({ roles: ADMIN_ROLES }), policiesRouter);
+rootRouter.use("/system", authentication, systemRouter);
+rootRouter.use("/students", authentication, studentRouter);
+rootRouter.use("/teachers", authentication, teacherRouter);
+rootRouter.use("/finances", authentication, financesRouter);
+rootRouter.use("/materials", authentication, materialsRouter);
+rootRouter.use("/weekly-reports", authentication, weeklyReportsRouter);
+rootRouter.use("/policies", authentication, policiesRouter);
 rootRouter.use("/support", authentication, supportRouter);
-rootRouter.use("/withdrawals", authentication, authorization({ roles: ADMIN_ROLES }), withdrawalsRouter);
-rootRouter.use("/transactions", authentication, authorization({ roles: ADMIN_ROLES }), transactionsRouter);
-rootRouter.use("/transactions/currency", authentication, authorization({ roles: ADMIN_ROLES }), currencyRouter);
-rootRouter.use("/settings", authentication, authorization({ roles: ADMIN_ROLES }), settingsRouter);
-rootRouter.use("/subscription", authentication, authorization({ roles: ADMIN_ROLES }), subscriptionRouter);
+rootRouter.use("/withdrawals", authentication, withdrawalsRouter);
+rootRouter.use("/transactions", authentication, transactionsRouter);
+rootRouter.use("/transactions/currency", authentication, currencyRouter);
+rootRouter.use("/settings", authentication, settingsRouter);
+rootRouter.use("/subscription", subscriptionRouter);
 
 // Root health check
 rootRouter.get("/", (req, res) => {
