@@ -11,6 +11,7 @@ import {
   normalizeDate,
 } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
+import { decryptText } from "../../Utils/Security/index.js";
 
 import * as db from "../../database/dbService.js";
 import { notificationType } from "../../Utils/Enums/sessions.js";
@@ -93,12 +94,18 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
             },
           },
         },
-      
       },
     });
   const scheduleData = await Promise.all(
-    schedule.map(async (schedule) => {
+    schedule.map(async (schedule, index) => {
+      if (schedule.student?.user?.phone) {
+        schedule.student.user.phone = await decryptText({ text: schedule.student.user.phone });
+      }
+      if (schedule.teacher?.user?.phone) {
+        schedule.teacher.user.phone = await decryptText({ text: schedule.teacher.user.phone });
+      }
       return {
+        order: index + 1,
         ...schedule,
         start_time: toLocal(schedule.start_time, req.timezone),
         end_time: toLocal(schedule.end_time, req.timezone),
@@ -128,6 +135,67 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
     data: {
       schedule: { upcomingSchedule, toDaySchedule, previousSchedule },
       pagination,
+    },
+    status: 200,
+    message: "FETCH_SUCCESS",
+  });
+});
+export const getScheduleById = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const schedule = await db.findOne({
+    model: "schedule",
+    where: { id },
+    include: {
+      student: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              code_country: true,
+            },
+          },
+        },
+      },
+      teacher: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              code_country: true,
+            },
+          },
+        },
+      },
+      scheduleLogs: true,
+    },
+  });
+  console.log({ schedule });
+
+  if (schedule?.student?.user?.phone) {
+    schedule.student.user.phone = await decryptText({ text: schedule.student.user.phone });
+  }
+  if (schedule?.teacher?.user?.phone) {
+    schedule.teacher.user.phone = await decryptText({ text: schedule.teacher.user.phone });
+  }
+
+  const scheduleData = {
+    ...schedule,
+    start_time: toLocal(schedule?.start_time, req.timezone),
+    end_time: toLocal(schedule?.end_time, req.timezone),
+  };
+
+  return successResponse({
+    res,
+    req,
+    data: {
+      schedule: scheduleData,
     },
     status: 200,
     message: "FETCH_SUCCESS",
@@ -455,7 +523,8 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       continue;
     }
 
-    const lectureIndex = schedulesToCreate.length % (course.lectures.length || 1);
+    const lectureIndex =
+      schedulesToCreate.length % (course.lectures.length || 1);
     const currentLecture = course.lectures[lectureIndex];
 
     schedulesToCreate.push({
@@ -651,11 +720,21 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
     orderBy: { start_time: "asc" },
   });
 
-  const schedulesData = schedules.map((s) => ({
-    ...s,
-    start_time: toLocal(s.start_time, req.timezone),
-    end_time: toLocal(s.end_time, req.timezone),
-  }));
+  const schedulesData = await Promise.all(
+    schedules.map(async (s) => {
+      if (s.student?.user?.phone) {
+        s.student.user.phone = await decryptText({ text: s.student.user.phone });
+      }
+      if (s.teacher?.user?.phone) {
+        s.teacher.user.phone = await decryptText({ text: s.teacher.user.phone });
+      }
+      return {
+        ...s,
+        start_time: toLocal(s.start_time, req.timezone),
+        end_time: toLocal(s.end_time, req.timezone),
+      };
+    }),
+  );
 
   const now = getNowUTC();
   const nowTime = now.toDate().getTime();
@@ -1402,4 +1481,4 @@ async function updateAverageRating(userId) {
     }
   }
 }
-``
+``;

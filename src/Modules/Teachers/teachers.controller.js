@@ -35,6 +35,12 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
       },
     });
 
+  for (const teacher of teachers) {
+    if (teacher.user && teacher.user.phone) {
+      teacher.user.phone = await decryptText({ text: teacher.user.phone });
+    }
+  }
+
   const activeCount = await db.count({
     model: "teacher",
     where: { active: true },
@@ -67,14 +73,27 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     active,
   } = req.body;
 
-  const [checkUserByEmail, checkUserByPhone, checkCurrency, getrole, settings] =
+  const [checkUserByEmail, allUsers, checkCurrency, getrole, settings] =
     await Promise.all([
       db.findOne({ model: "user", where: { email } }),
-      db.findFirst({ model: "user", where: { phone } }),
+      db.findMany({ model: "user" }),
       db.findOne({ model: "currency", where: { id: currency_id } }),
       db.findFirst({ model: "role", where: { name: "teacher" } }),
       db.findFirst({ model: "settings" }),
     ]);
+
+  let checkUserByPhone = null;
+  if (phone) {
+    for (const u of allUsers) {
+      if (u.phone) {
+        const decrypted = await decryptText({ text: u.phone });
+        if (decrypted === phone) {
+          checkUserByPhone = u;
+          break;
+        }
+      }
+    }
+  }
 
   if (!getrole)
     return errorResponse({ req, message: "ROLE_NOT_FOUND", next, status: 404 });
@@ -107,7 +126,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         email,
         username,
         password: hashedPassword,
-        phone,
+        phone: phone ? encryptText({ text: phone }) : undefined,
         code_country,
         roleId: getrole.id,
         confirmAt: new Date(),
@@ -183,6 +202,10 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
     message: "TEACHER_NOT_FOUND",
   });
 
+  if (teacher.user && teacher.user.phone) {
+    teacher.user.phone = await decryptText({ text: teacher.user.phone });
+  }
+
   return successResponse({
     res,
     req,
@@ -229,8 +252,18 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
       });
   }
 
-  if (phone && phone !== teacher.user.phone) {
-    const existing = await db.findFirst({ model: "user", where: { phone } });
+  if (phone) {
+    const allUsers = await db.findMany({ model: "user" });
+    let existing = null;
+    for (const u of allUsers) {
+      if (u.phone) {
+        const decrypted = await decryptText({ text: u.phone });
+        if (decrypted === phone && u.id !== teacher.user_id) {
+          existing = u;
+          break;
+        }
+      }
+    }
     if (existing)
       return errorResponse({
         req,
@@ -249,7 +282,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
         ...(name && { name }),
         ...(email && { email }),
         ...(hashedPassword && { password: hashedPassword }),
-        ...(phone && { phone }),
+        ...(phone && { phone: encryptText({ text: phone }) }),
         ...(code_country && { code_country }),
         ...(gender && { gender }),
         ...(age && { age: parseInt(age) }),
@@ -271,6 +304,10 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
       currency: true,
     },
   });
+
+  if (updatedTeacher.user && updatedTeacher.user.phone) {
+    updatedTeacher.user.phone = await decryptText({ text: updatedTeacher.user.phone });
+  }
 
   return successResponse({
     res,
@@ -331,7 +368,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           name: student.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${student.user.phone}`,
+          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
       }

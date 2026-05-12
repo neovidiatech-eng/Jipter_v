@@ -36,11 +36,22 @@ export const register = asyncHandler(async (req, res, next) => {
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, checkUserByPhone, settings] = await Promise.all([
+  const [checkUserByEmail, allUsers, settings] = await Promise.all([
     db.findFirst({ model: "user", where: { email } }),
-    db.findFirst({ model: "user", where: { phone } }),
+    db.findMany({ model: "user" }),
     db.findFirst({ model: "settings" }),
   ]);
+
+  let checkUserByPhone = null;
+  for (const u of allUsers) {
+    if (u.phone) {
+      const decrypted = await decryptText({ text: u.phone });
+      if (decrypted === phone) {
+        checkUserByPhone = u;
+        break;
+      }
+    }
+  }
 
   const userRole = await db.findFirst({
     model: "role",
@@ -218,7 +229,7 @@ export const login = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const decryptedPhone = decryptText({ text: user.phone });
+  const decryptedPhone = await decryptText({ text: user.phone });
   user.phone = decryptedPhone;
   const accessToken = generateToken({ user, tokenType: "access" });
   const refreshToken = generateToken({ user, tokenType: "refresh" });
@@ -568,6 +579,10 @@ export const googlelogin = asyncHandler(async (req, res, next) => {
       message: "INVALID_CREDENTIALS",
       status: 401,
     });
+  }
+
+  if (user.phone) {
+    user.phone = await decryptText({ text: user.phone });
   }
 
   const accessToken = generateToken({ user, tokenType: "access" });

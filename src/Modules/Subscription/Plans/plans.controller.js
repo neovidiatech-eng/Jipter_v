@@ -44,6 +44,7 @@ export const createPlan = asyncHandler(async (req, res, next) => {
     active,
     features,
     currencyId,
+    type,
   } = req.body;
 
   // 🔥 parallel queries
@@ -74,8 +75,10 @@ export const createPlan = asyncHandler(async (req, res, next) => {
     model: "plan",
     data: {
       name,
+      type,
       description,
-      price: String(price), // ⚠️ لو غيرت الموديل لـ Float شيل String()
+      price: String(price),
+      // ⚠️ لو غيرت الموديل لـ Float شيل String()
       duration,
       sessionsCount: sessionsCount ?? 0,
       rescheduleCount: rescheduleCount ?? 0,

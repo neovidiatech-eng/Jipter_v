@@ -18,6 +18,12 @@ router.get(
   authorizeResource(sessionsResource),
   scheduleController.getAllSchedules
 );
+router.get(
+  "/:id", 
+  authentication,
+  authorizeResource(sessionsResource),
+  scheduleController.getScheduleById
+);
 
 router.get(
   "/user/schedules",

@@ -92,7 +92,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   const [
     checkUserByEmail,
-    checkUserByPhone,
+    allUsers,
     checkPlan,
     studentRole,
     settings,
@@ -101,9 +101,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     email
       ? db.findOne({ model: "user", where: { email } })
       : Promise.resolve(null),
-    phone
-      ? db.findFirst({ model: "user", where: { phone } })
-      : Promise.resolve(null),
+    db.findMany({ model: "user" }),
     db.findOne({ model: "plan", where: { id: planId } }),
     db.findFirst({
       model: "role",
@@ -112,6 +110,19 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     db.findFirst({ model: "settings" }),
     db.findOne({ model: "ranks", where: { id: rankId } }),
   ]);
+
+  let checkUserByPhone = null;
+  if (phone) {
+    for (const u of allUsers) {
+      if (u.phone) {
+        const decrypted = await decryptText({ text: u.phone });
+        if (decrypted === phone) {
+          checkUserByPhone = u;
+          break;
+        }
+      }
+    }
+  }
 
   if (checkUserByEmail)
     return errorResponse({
@@ -159,13 +170,14 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     const prefix = settings?.userPrefix || "jupiter";
     const username = `${name.trim().replace(/\s+/g, "-")}_${prefix}`;
 
+    const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     const user = await tx.create({
       model: "user",
       data: {
         name,
         email: email || undefined,
         username,
-        phone: phone || undefined,
+        phone: encryptedPhone,
         password: hashedPassword,
         code_country: phone_code,
         status: "active",
@@ -254,6 +266,8 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     message: "STUDENT_NOT_FOUND",
   });
 
+  student.user.phone = await decryptText({ text: student.user.phone });
+
   return successResponse({
     res,
     req,
@@ -297,8 +311,18 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
-  if (phone && phone !== student.user.phone) {
-    const existing = await db.findFirst({ model: "user", where: { phone } });
+  if (phone) {
+    const allUsers = await db.findMany({ model: "user" });
+    let existing = null;
+    for (const u of allUsers) {
+      if (u.phone) {
+        const decrypted = await decryptText({ text: u.phone });
+        if (decrypted === phone && u.id !== student.user_id) {
+          existing = u;
+          break;
+        }
+      }
+    }
     if (existing)
       return errorResponse({
         req,
@@ -331,13 +355,14 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
 
   // Update user record if needed
   if (name || email || phone || phone_code || timezone) {
+    const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
       data: {
         ...(name && { name }),
         ...(email && { email }),
-        ...(phone && { phone }),
+        ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
         ...(timezone && { timezone }),
       },
@@ -357,6 +382,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     },
     include: { user: true, plan: true },
   });
+
+  updatedStudent.user.phone = await decryptText({ text: updatedStudent.user.phone });
 
   return successResponse({
     res,

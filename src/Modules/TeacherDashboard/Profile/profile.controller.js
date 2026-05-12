@@ -43,7 +43,8 @@ export const getProfile = asyncHandler(async (req, res, next) => {
   }
 
   const students = Object.values(
-    user.schedules.reduce((acc, item) => {
+    await user.schedules.reduce(async (accPromise, item) => {
+      const acc = await accPromise;
       const student = item.student;
       if (!acc[student?.id]) {
         acc[student.id] = {
@@ -51,7 +52,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           name: student?.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${student.user.phone}`,
+          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
           course: {
             title: item.course.title,
             id: item.course.id,
@@ -60,7 +61,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
         };
       }
       return acc;
-    }, {}),
+    }, Promise.resolve({})),
   );
 
   const mapped = {
@@ -69,7 +70,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       user_id: user.user_id,
       name: user.user.name,
       email: user.user.email,
-      phone: `${user.user.code_country} ${user.user.phone}`, // ✅ استخدم الـ decrypted phone
+      phone: `${user.user.code_country} ${await decryptText({ text: user.user.phone })}`, // ✅ استخدم الـ decrypted phone
       gender: user.gender,
       hourPrice: user.hour_price,
       status: user.user.status,
@@ -143,7 +144,8 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
   
 
   const students = Object.values(
-    myStudents.reduce((acc, item) => {
+    await myStudents.reduce(async (accPromise, item) => {
+      const acc = await accPromise;
       const student = item.student;
 
       if (!acc[student.id]) {
@@ -153,13 +155,13 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           name: student.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${student.user.phone}`,
+          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
       }
 
       return acc;
-    }, {}),
+    }, Promise.resolve({})),
   );
   return successResponse({
     res,

@@ -38,11 +38,11 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     });
 
   // Decrypt phone numbers for display
-  subscriptionRequests.forEach((s) => {
+  for (const s of subscriptionRequests) {
     if (s.user && s.user.phone && s.user.phone !== "null") {
-      s.user.phone = decryptText({ text: s.user.phone });
+      s.user.phone = await decryptText({ text: s.user.phone });
     }
-  });
+  }
 
   return successResponse({
     res,

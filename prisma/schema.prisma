@@ -112,6 +112,7 @@ model plan {
   features             Json
   sessionsCount        Int                     @default(0)
   rescheduleCount      Int                     @default(0)
+  type                 String                  @default("quarterly") // annual or monthly
   currencyId           String
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
@@ -123,7 +124,6 @@ model plan {
 
   @@index([name])
 }
-
 
 model subscription_requests {
   id        String   @id @default(uuid())
