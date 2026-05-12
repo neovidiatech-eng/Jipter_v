@@ -9,25 +9,25 @@ const router = Router();
 router.use(authentication);
 
 router.get(
-  "/",
+  "/conversations",
   authorize(PERMISSIONS_V2.CHAT.READ),
   chatController.getConversations,
 );
 
 router.post(
-  "/",
+  "/conversations",
   authorize(PERMISSIONS_V2.CHAT.CREATE),
   chatController.createConversation,
 );
 
 router.get(
-  "/:id/messages",
+  "/conversations/:id/messages",
   authorize(PERMISSIONS_V2.CHAT.READ),
   chatController.getMessages,
 );
 
 router.post(
-  "/:id/messages",
+  "/conversations/:id/messages",
   authorize(PERMISSIONS_V2.CHAT.CREATE),
   chatController.sendMessage,
 );
