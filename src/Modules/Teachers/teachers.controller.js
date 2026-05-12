@@ -358,7 +358,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
   });
 
   const students = Object.values(
-    myStudents.reduce((acc, item) => {
+    myStudents.reduce(async (acc, item) => {
       const student = item.student;
 
       if (!acc[student.id]) {

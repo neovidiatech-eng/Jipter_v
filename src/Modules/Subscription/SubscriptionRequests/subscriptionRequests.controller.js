@@ -122,7 +122,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         model: "user",
         where: { id: subscriptionRequest.user_id },
         data: {
-          gender: parsedStudentData.gender,
           status: status === "approved" ? "active" : "rejected",
           ...(status === "approved" &&
             studentRole && { roleId: studentRole.id }),
