@@ -127,8 +127,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       message: "PHONE_EXISTS",
       status: 400,
     });
-    console.log(checkPlan);
-    
+  
   if (!checkPlan)
     return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
 
