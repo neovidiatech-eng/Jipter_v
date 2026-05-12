@@ -20,7 +20,7 @@ export const addCurrencySchema = {
   body: Joi.object()
     .keys({
       name_en: generalFields.name_en.required(),
-      name_ar: generalFields.name_ar.required(),
+      name_ar: generalFields.name_ar.optional(),
       symbol: generalFields.symbol.required(),
       code: generalFields.code.required(),
       exchangeRate: generalFields.exchangeRate.required(),

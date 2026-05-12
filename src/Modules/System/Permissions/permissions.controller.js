@@ -188,9 +188,7 @@ export const addPermissionsToRole = asyncHandler(async (req, res, next) => {
       next,
       req,
       status: 409,
-      message: `role already have this ${rolePermissions
-        .map((r) => r.permission.name)
-        .join(", ")}  permission`,
+      message: "ROLE_ALREADY_HAS_PERMISSIONS",
     });
   }
 

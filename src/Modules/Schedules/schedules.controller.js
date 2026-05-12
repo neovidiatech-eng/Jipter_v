@@ -510,7 +510,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       skipedSchedules.push({
         date: date.toISOString().split("T")[0],
         title: student_conflict.title,
-        conflict: "STUDENT_NOT_AVAILABLE",
+        conflict: "STUDENT_CONFLICT",
       });
       continue;
     }
@@ -518,7 +518,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       skipedSchedules.push({
         date: date.toISOString().split("T")[0],
         title: teacher_conflict.title,
-        conflict: "TEACHER_NOT_AVAILABLE",
+        conflict: "TEACHER_CONFLICT",
       });
       continue;
     }

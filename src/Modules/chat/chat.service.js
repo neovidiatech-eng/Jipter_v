@@ -35,7 +35,9 @@ export const createConversation = async (teacherId, studentId, currentUser) => {
     ]);
 
     if (!teacher || !student) {
-      throw new Error("Teacher or Student not found");
+      const error = new Error("TEACHER_OR_STUDENT_NOT_FOUND");
+      error.isMessageKey = true;
+      throw error;
     }
 
     // 2. Validate relationship via schedule
@@ -48,7 +50,9 @@ export const createConversation = async (teacherId, studentId, currentUser) => {
     });
 
     if (scheduleCount === 0) {
-      throw new Error("No scheduled sessions found between these parties");
+      const error = new Error("NO_SCHEDULED_SESSIONS_FOUND");
+      error.isMessageKey = true;
+      throw error;
     }
 
     // 3. Check if conversation already exists
@@ -116,7 +120,9 @@ export const getConversations = async (userId, role) => {
     } else if (role === "admin") {
       whereClause = {}; // Admin sees all
     } else {
-      throw new Error("Unauthorized role");
+      const error = new Error("UNAUTHORIZED_ROLE");
+      error.isMessageKey = true;
+      throw error;
     }
 
     const conversations = await db.findMany({
@@ -235,10 +241,14 @@ export const saveMessage = async (conversationId, senderId, content) => {
   try {
     // 1. Validation
     if (!content || content.trim().length === 0) {
-      throw new Error("Message content cannot be empty");
+      const error = new Error("MESSAGE_EMPTY");
+      error.isMessageKey = true;
+      throw error;
     }
     if (content.length > 1000) {
-      throw new Error("Message content cannot exceed 1000 characters");
+      const error = new Error("MESSAGE_TOO_LONG");
+      error.isMessageKey = true;
+      throw error;
     }
 
     // 2. Save to DB

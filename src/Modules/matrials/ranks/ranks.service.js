@@ -51,8 +51,9 @@ export const addRank = async (req, res, next) => {
   });
 
   if (check) {
-    const error = new Error("Rank already exists");
+    const error = new Error("RANK_EXISTS");
     error.status = 400;
+    error.isMessageKey = true;
     throw error;
   }
 
@@ -74,8 +75,9 @@ export const getRank = async (req, res, next) => {
   });
 
   if (!rank) {
-    const error = new Error("Rank not found");
+    const error = new Error("RANK_NOT_FOUND");
     error.status = 404;
+    error.isMessageKey = true;
     throw error;
   }
 
@@ -95,8 +97,9 @@ export const updateRank = async (req, res, next) => {
   });
 
   if (!rank) {
-    const error = new Error("Rank not found");
+    const error = new Error("RANK_NOT_FOUND");
     error.status = 404;
+    error.isMessageKey = true;
     throw error;
   }
 
@@ -116,8 +119,9 @@ export const updateRank = async (req, res, next) => {
     });
 
     if (check) {
-      const error = new Error("Rank name or slug already exists");
+      const error = new Error("RANK_EXISTS");
       error.status = 400;
+      error.isMessageKey = true;
       throw error;
     }
 
@@ -147,8 +151,9 @@ export const deleteRank = async (req, res, next) => {
   });
 
   if (!rank) {
-    const error = new Error("Rank not found");
+    const error = new Error("RANK_NOT_FOUND");
     error.status = 404;
+    error.isMessageKey = true;
     throw error;
   }
 

@@ -161,7 +161,6 @@ export const globalErrorHandling = (err, req, res, next) => {
   return res.status(status).json({
     message: "error",
     status,
-    lang: getDir(lang),
     error: errorText,
     ...(err.details && { details: err.details }),
     ...(process.env.NODE_ENV !== "production" && {
@@ -203,7 +202,6 @@ export const successResponse = ({
   return res.status(status).json({
     message: translatedMessage,
     status,
-    lang: getDir(lang),
     data,
   });
 };

@@ -145,7 +145,9 @@ export const approveWithdrawal = asyncHandler(async (req, res, next) => {
     });
 
     if (!wallet || wallet.balance < request.amount) {
-      throw new Error("INSUFFICIENT_BALANCE");
+      const error = new Error("INSUFFICIENT_BALANCE");
+      error.isMessageKey = true;
+      throw error;
     }
 
     // 2.b Deduct Balance

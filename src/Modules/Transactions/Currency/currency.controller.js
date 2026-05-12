@@ -20,7 +20,6 @@ export const getCurrencies = asyncHandler(async (req, res, next) => {
       where: {
         OR: [
           { name_en: { contains: search } },
-          { name_ar: { contains: search } },
           { symbol: { contains: search } },
           { code: { contains: search } },
         ],
@@ -41,6 +40,15 @@ export const getCurrencies = asyncHandler(async (req, res, next) => {
   const currencies = await db.findMany({
     model: "currency",
   });
+
+  const formattedCurrencies = currencies.map(c => ({
+    ...c,
+    name: c.name_en,
+  }));
+  
+  if (defaultCur) {
+      defaultCur.name = defaultCur.name_en;
+  }
   return successResponse({
     res,
     req,
@@ -49,7 +57,7 @@ export const getCurrencies = asyncHandler(async (req, res, next) => {
     data: {
       count: count,
       default: defaultCur,
-      currencies,
+      currencies: formattedCurrencies,
     },
   });
 });
@@ -111,7 +119,7 @@ export const addCurrency = asyncHandler(async (req, res, next) => {
     model: "currency",
     data: {
       name_en,
-      name_ar,
+      name_ar: name_ar || name_en,
       symbol,
       code,
       exchangeRate,
@@ -176,7 +184,7 @@ export const updateCurrency = asyncHandler(async (req, res, next) => {
     where: { id },
     data: {
       name_en,
-      name_ar,
+      name_ar: name_ar || name_en,
       symbol,
       code,
       exchangeRate,

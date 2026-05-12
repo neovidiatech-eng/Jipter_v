@@ -26,7 +26,7 @@ export const createCourse = async ({ req, res, next }) => {
 
   if (!rankId) {
     const error = createError({
-      message: "rankId is required",
+      message: "RANK_ID_REQUIRED",
       status: 400,
       next,
     });
@@ -35,7 +35,7 @@ export const createCourse = async ({ req, res, next }) => {
 
   if (!title) {
     const error = createError({
-      message: "title is required",
+      message: "TITLE_REQUIRED",
       status: 400,
       next,
     });
@@ -50,7 +50,7 @@ export const createCourse = async ({ req, res, next }) => {
 
   if (!rank) {
     const error = createError({
-      message: "Rank not found",
+      message: "RANK_NOT_FOUND",
       status: 404,
       next,
     });
@@ -65,7 +65,7 @@ export const createCourse = async ({ req, res, next }) => {
 
   if (courseTitle) {
     const error = createError({
-      message: "Title already exists",
+      message: "TITLE_EXISTS",
       status: 409,
       next,
     });
@@ -118,7 +118,9 @@ export const getCourseById = async (id) => {
   });
 
   if (!course) {
-    throw new Error("Course not found");
+    const error = new Error("COURSE_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
   }
 
   return course;
@@ -140,7 +142,7 @@ export const updateCourse = async ({ req, res, next }) => {
 
     if (courseTitle) {
       const error = createError({
-        message: "Title already exists",
+        message: "TITLE_EXISTS",
         status: 409,
         next,
       });
@@ -155,7 +157,7 @@ export const updateCourse = async ({ req, res, next }) => {
 
   if (!course) {
     const error = createError({
-      message: "Course not found",
+      message: "COURSE_NOT_FOUND",
       status: 404,
       next,
     });
@@ -171,7 +173,7 @@ export const updateCourse = async ({ req, res, next }) => {
 
     if (!rank) {
       const error = createError({
-        message: "New rank not found",
+        message: "RANK_NOT_FOUND",
         status: 404,
         next,
       });
@@ -198,7 +200,7 @@ export const deleteCourse = async ({ req, res, next }) => {
 
   if (!course) {
     const error = createError({
-      message: "Course not found",
+      message: "COURSE_NOT_FOUND",
       status: 404,
       next,
     });
@@ -231,7 +233,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
 
   if (!course) {
     const error = createError({
-      message: "Course not found",
+      message: "COURSE_NOT_FOUND",
       status: 404,
       next,
     });

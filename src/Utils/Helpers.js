@@ -21,7 +21,7 @@ export const checkExist = async ({ model, where, next, include }) => {
     return errorResponse({
       next,
       status: 404,
-      message: `${model} not found`,
+      message: `${model.toUpperCase()}_NOT_FOUND`,
     });
   }
 
@@ -82,6 +82,7 @@ export const getImageUrl = (image, req) => {
 export const createError = ({ message, status, next }) => {
   const error = new Error(message);
   error.status = status;
+  error.isMessageKey = true;
 
   return error;
 };

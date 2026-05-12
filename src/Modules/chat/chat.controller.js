@@ -21,7 +21,7 @@ export const createConversation = async (req, res, next) => {
         req,
         next,
         status: 403,
-        message: "You can only create conversations for yourself",
+        message: "CONVERSATION_CREATE_SELF_ONLY",
       });
     }
     if (currentUser.role.name === "teacher" && currentUser.teacher?.id !== teacherId) {
@@ -29,7 +29,7 @@ export const createConversation = async (req, res, next) => {
         req,
         next,
         status: 403,
-        message: "You can only create conversations for yourself",
+        message: "CONVERSATION_CREATE_SELF_ONLY",
       });
     }
 
@@ -38,7 +38,7 @@ export const createConversation = async (req, res, next) => {
       res,
       req,
       status: 201,
-      message: "Conversation created successfully",
+      message: "CONVERSATION_CREATED",
       data: conversation,
     });
   } catch (error) {
@@ -47,7 +47,7 @@ export const createConversation = async (req, res, next) => {
       req,
       next,
       status: 500,
-      message: error.message || "Internal Server Error",
+      message: error.message || "INTERNAL_SERVER_ERROR",
     });
   }
 };
@@ -66,7 +66,7 @@ export const getConversations = async (req, res, next) => {
       res,
       req,
       status: 200,
-      message: "Conversations fetched successfully",
+      message: "CONVERSATIONS_FETCHED",
       data: conversations,
     });
   } catch (error) {
@@ -75,7 +75,7 @@ export const getConversations = async (req, res, next) => {
       req,
       next,
       status: 500,
-      message: "Internal Server Error",
+      message: "INTERNAL_SERVER_ERROR",
     });
   }
 };
@@ -98,7 +98,7 @@ export const getMessages = async (req, res, next) => {
         req,
         next,
         status: 403,
-        message: "Unauthorized access to this conversation",
+        message: "CONVERSATION_UNAUTHORIZED",
       });
     }
 
@@ -113,7 +113,7 @@ export const getMessages = async (req, res, next) => {
       res,
       req,
       status: 200,
-      message: "Messages fetched successfully",
+      message: "MESSAGES_FETCHED",
       data: messages,
     });
   } catch (error) {
@@ -122,7 +122,7 @@ export const getMessages = async (req, res, next) => {
       req,
       next,
       status: 500,
-      message: "Internal Server Error",
+      message: "INTERNAL_SERVER_ERROR",
     });
   }
 };
@@ -145,7 +145,7 @@ export const sendMessage = async (req, res, next) => {
         req,
         next,
         status: 403,
-        message: "Unauthorized to send messages in this conversation",
+        message: "CONVERSATION_UNAUTHORIZED",
       });
     }
 
@@ -155,7 +155,7 @@ export const sendMessage = async (req, res, next) => {
       res,
       req,
       status: 201,
-      message: "Message sent successfully",
+      message: "MESSAGE_SENT",
       data: message,
     });
   } catch (error) {
@@ -164,7 +164,7 @@ export const sendMessage = async (req, res, next) => {
       req,
       next,
       status: 500,
-      message: error.message || "Internal Server Error",
+      message: error.message || "INTERNAL_SERVER_ERROR",
     });
   }
 };

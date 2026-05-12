@@ -15,7 +15,6 @@ export const getAllPlans = asyncHandler(async (req, res, next) => {
         select: {
           id: true,
           name_en: true,
-          name_ar: true,
           symbol: true,
           code: true,
         },
@@ -23,12 +22,20 @@ export const getAllPlans = asyncHandler(async (req, res, next) => {
     },
   });
 
+  const formattedPlans = plans.map((plan) => {
+    if (plan.currency) {
+      plan.currency.name = plan.currency.name_en;
+      delete plan.currency.name_en;
+    }
+    return plan;
+  });
+
   return successResponse({
     res,
     req,
     message: "FETCH_SUCCESS",
     status: 200,
-    data: plans,
+    data: formattedPlans,
   });
 });
 

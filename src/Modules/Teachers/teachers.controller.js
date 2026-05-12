@@ -192,7 +192,6 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
         select: {
           id: true,
           name_en: true,
-          name_ar: true,
           symbol: true,
           code: true,
           createdAt: true,
@@ -200,7 +199,14 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
       },
     },
     message: "TEACHER_NOT_FOUND",
+    next,
+    status: 404,
   });
+
+  if (teacher?.currency) {
+    teacher.currency.name = teacher.currency.name_en;
+    delete teacher.currency.name_en;
+  }
 
   if (teacher.user && teacher.user.phone) {
     teacher.user.phone = await decryptText({ text: teacher.user.phone });
@@ -306,7 +312,9 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   });
 
   if (updatedTeacher.user && updatedTeacher.user.phone) {
-    updatedTeacher.user.phone = await decryptText({ text: updatedTeacher.user.phone });
+    updatedTeacher.user.phone = await decryptText({
+      text: updatedTeacher.user.phone,
+    });
   }
 
   return successResponse({

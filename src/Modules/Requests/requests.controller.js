@@ -159,7 +159,11 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
     // 2. Process based on type (only for automated actions)
     if (type === "reschedule" && sessionId) {
       const oldSession = request.schedule;
-      if (!oldSession) throw new Error("RELATED_SESSION_NOT_FOUND");
+      if (!oldSession) {
+        const error = new Error("RELATED_SESSION_NOT_FOUND");
+        error.isMessageKey = true;
+        throw error;
+      }
 
       const startTime = normalizeDate(requestedData.new_start_time);
       const endTime = normalizeDate(requestedData.new_end_time);
@@ -184,7 +188,11 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         },
       });
 
-      if (teacher_conflict || student_conflict) throw new Error("SESSION_CONFLICT");
+      if (teacher_conflict || student_conflict) {
+        const error = new Error("SESSION_CONFLICT");
+        error.isMessageKey = true;
+        throw error;
+      }
 
       await tx.create({
         model: "schedule",

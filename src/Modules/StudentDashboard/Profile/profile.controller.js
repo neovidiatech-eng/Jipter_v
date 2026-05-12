@@ -78,7 +78,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
   });
   if (!user) {
     const error = createError({
-      message: "Student not found",
+      message: "STUDENT_NOT_FOUND",
       status: 404,
       next,
     });
@@ -116,7 +116,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   if (!student) {
     const error = createError({
-      message: "Student not found",
+      message: "STUDENT_NOT_FOUND",
       status: 404,
       next,
     });
@@ -169,7 +169,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   if (!user_updated) {
     const error = createError({
-      message: "User not updated",
+      message: "UPDATE_FAILED",
       status: 500,
       next,
     });
@@ -181,6 +181,6 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     req,
     data: user_updated,
     status: 200,
-    message: "UPDATED_SUCCESS",
+    message: "UPDATE_SUCCESS",
   });
 });

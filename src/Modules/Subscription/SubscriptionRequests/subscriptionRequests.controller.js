@@ -114,7 +114,9 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       });
 
       if (!systemWallet) {
-        throw new Error("SYSTEM_WALLET_NOT_FOUND");
+        const error = new Error("SYSTEM_WALLET_NOT_FOUND");
+        error.isMessageKey = true;
+        throw error;
       }
 
       // ✅ update user
@@ -145,7 +147,9 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       });
 
       if (existingStudent) {
-        throw new Error("STUDENT_ALREADY_EXISTS");
+        const error = new Error("STUDENT_ALREADY_EXISTS");
+        error.isMessageKey = true;
+        throw error;
       }
 
       // ✅ create student

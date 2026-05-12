@@ -1,6 +1,5 @@
-import { findMany } from "../../database/dbService.js";
 import * as db from "../../database/dbService.js";
-import { asyncHandler } from "../../Utils/Response.js";
+import { asyncHandler, successResponse, errorResponse } from "../../Utils/Response.js";
 import { decryptText } from "../../Utils/Security/index.js";
 
 export const getallSubscriptions = asyncHandler(async (req, res, next) => {
@@ -49,8 +48,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
         },
         currency: {
           id: subscription.currency?.id,
-          name_en: subscription.currency?.name_en,
-          name_ar: subscription.currency?.name_ar,
+          name: subscription.currency?.name_en,
           symbol: subscription.currency?.symbol,
           code: subscription.currency?.code,
           default: subscription.currency?.default,
@@ -60,7 +58,13 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
     }),
   );
 
-  return res.status(200).json({ success: true, data: subscriptionsData });
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "FETCH_SUCCESS",
+    data: subscriptionsData,
+  });
 });
 
 
@@ -79,7 +83,13 @@ export const getMySubscription = asyncHandler(async (req, res, next) => {
   });
 
   if (!subscription) {
-    return res.status(200).json({ success: true, data: null });
+    return successResponse({
+      res,
+      req,
+      status: 200,
+      data: null,
+      message: "FETCH_SUCCESS",
+    });
   }
 
   const phone = subscription.user?.phone ? await decryptText({ text: subscription.user.phone }) : "";
@@ -116,8 +126,7 @@ export const getMySubscription = asyncHandler(async (req, res, next) => {
     },
     currency: {
       id: subscription.currency?.id,
-      name_en: subscription.currency?.name_en,
-      name_ar: subscription.currency?.name_ar,
+      name: subscription.currency?.name_en,
       symbol: subscription.currency?.symbol,
       code: subscription.currency?.code,
       default: subscription.currency?.default,
@@ -125,5 +134,11 @@ export const getMySubscription = asyncHandler(async (req, res, next) => {
     },
   };
 
-  return res.status(200).json({ success: true, data: subscriptionData });
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "FETCH_SUCCESS",
+    data: subscriptionData,
+  });
 });

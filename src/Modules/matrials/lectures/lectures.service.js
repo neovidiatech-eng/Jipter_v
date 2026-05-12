@@ -9,7 +9,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!courseId) {
     const error = createError({
-      message: "courseId is required",
+      message: "COURSE_ID_REQUIRED",
       status: 400,
       next,
     });
@@ -19,7 +19,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!title) {
     const error = createError({
-      message: "title is required",
+      message: "TITLE_REQUIRED",
       status: 400,
       next,
     });
@@ -28,7 +28,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!content) {
     const error = createError({
-      message: "content is required",
+      message: "DESCRIPTION_REQUIRED",
       status: 400,
       next,
     });
@@ -37,7 +37,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!videoUrl) {
     const error = createError({
-      message: "videoUrl is required",
+      message: "LINK_REQUIRED",
       status: 400,
       next,
     });
@@ -46,7 +46,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!order) {
     const error = createError({
-      message: "order is required",
+      message: "ORDER_REQUIRED",
       status: 400,
       next,
     });
@@ -55,7 +55,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!pdfUrl && !videoUrl) {
     const error = createError({
-      message: "pdfUrl is required",
+      message: "LINK_REQUIRED",
       status: 400,
       next,
     });
@@ -70,7 +70,7 @@ export const createLecture = async ({ req, res, next }) => {
 
   if (!course) {
     const error = createError({
-      message: "Course not found",
+      message: "COURSE_NOT_FOUND",
       status: 404,
       next,
     });
@@ -99,7 +99,7 @@ export const createLecture = async ({ req, res, next }) => {
   });
   if (!lecture) {
     const error = createError({
-      message: "Lecture not created",
+      message: "CREATE_FAILED",
       status: 500,
       next,
     });
@@ -127,9 +127,7 @@ export const getLectures = async ({ req, res, next }) => {
     orderBy: { order: "asc" },
   });
   if (!lectures) {
-    const error = new Error("Lectures not found");
-    error.status = 404;
-    throw error;
+    throw createError({ message: "LECTURE_NOT_FOUND", status: 404, next });
   }
 
   return lectures;
@@ -145,7 +143,9 @@ export const getLectureById = async (id) => {
   });
 
   if (!lecture) {
-    throw new Error("Lecture not found");
+    const error = new Error("LECTURE_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
   }
 
   return lecture;
@@ -177,7 +177,7 @@ export const updateLecture = async ({ req, res, next }) => {
 
   if (!lecture) {
     const error = createError({
-      message: "Lecture not found",
+      message: "LECTURE_NOT_FOUND",
       status: 404,
       next,
     });
@@ -193,7 +193,7 @@ export const updateLecture = async ({ req, res, next }) => {
 
     if (!course) {
       const error = createError({
-        message: "New course not found",
+        message: "COURSE_NOT_FOUND",
         status: 404,
         next,
       });
@@ -221,7 +221,7 @@ export const deleteLecture = async ({ req, res, next }) => {
 
   if (!lecture) {
     const error = createError({
-      message: "Lecture not found",
+      message: "LECTURE_NOT_FOUND",
       status: 404,
       next,
     });
@@ -249,7 +249,7 @@ export const completeLecture = async ({ req, res, next }) => {
 
   if (!lecture) {
     const error = createError({
-      message: "Lecture not found",
+      message: "LECTURE_NOT_FOUND",
       status: 404,
       next,
     });
