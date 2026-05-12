@@ -13,4 +13,11 @@ router.get(
   authorization({ permissions: endpoints.getProfile }), 
   profileController.getProfile,
 );
+router.get(
+  "/my-students",
+  authentication,
+  authorization({ permissions: endpoints.GET_MY_STUDENTS }),
+  profileController.getMyStudents,
+);
+
 export default router;

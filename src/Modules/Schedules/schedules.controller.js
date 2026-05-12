@@ -151,7 +151,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     videoUrl,
     slidesUrl,
   } = req.body;
-  /* check if student and teacher exist */
+  /* check if student, teacher and course exist */
   const [student, teacher, course] = await Promise.all([
     db.findOne({
       model: "student",
@@ -344,7 +344,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   const skipedSchedules = [];
   const perSessionUnits = 1;
 
-  /* check exist student, teacher, subject */
+  /* check exist student, teacher, course */
   const [student, teacher, course] = await Promise.all([
     db.findOne({
       model: "student",

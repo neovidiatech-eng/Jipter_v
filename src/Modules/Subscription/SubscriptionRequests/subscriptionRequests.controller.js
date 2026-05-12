@@ -122,6 +122,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         model: "user",
         where: { id: subscriptionRequest.user_id },
         data: {
+          gender: parsedStudentData.gender,
           status: status === "approved" ? "active" : "rejected",
           ...(status === "approved" &&
             studentRole && { roleId: studentRole.id }),
@@ -154,7 +155,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         data: {
           user: { connect: { id: subscriptionRequest.user_id } },
           birth_date: new Date(parsedStudentData.birth_date),
-          gender: parsedStudentData.gender,
           country: parsedStudentData.country,
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,

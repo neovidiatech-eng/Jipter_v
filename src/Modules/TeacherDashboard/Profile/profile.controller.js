@@ -27,6 +27,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
         include: {
           teacher: true,
           student: { include: { user: true } },
+          course: true,
         },
       },
     },
@@ -51,9 +52,9 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
           phone: `${student.user.code_country}${student.user.phone}`,
-          subject: {
-            name: item.subject.name_en,
-            code: `SUB-${item.subject.id.slice(0, 3)}`,
+          course: {
+            title: item.course.title,
+            id: item.course.id,
           },
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
@@ -89,10 +90,9 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       isRecurring: s.is_recurring,
       link: s.link,
       notes: s.notes,
-      subject: {
-        nameEn: s.subject.name_en,
-        nameAr: s.subject.name_ar,
-        color: s.subject.color,
+      course: {
+        title: s.course.title,
+        id: s.course.id,
       },
       student: {
         name: s.student.user.name,
@@ -116,5 +116,55 @@ export const getProfile = asyncHandler(async (req, res, next) => {
     data: mapped,
     status: 200,
     message: "FETCH_SUCCESS",
+  });
+});
+export const getMyStudents = asyncHandler(async (req, res, next) => {
+  const teacher = req.user.teacher;
+
+  const myStudents = await db.findMany({
+    model: "schedule",
+    where: {
+      teacherId: teacher?.id,
+    },
+    include: {
+      student: {
+        include: {
+          user: true,
+        },
+      },
+      teacher: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+  console.log(myStudents);
+  
+
+  const students = Object.values(
+    myStudents.reduce((acc, item) => {
+      const student = item.student;
+
+      if (!acc[student.id]) {
+        acc[student.id] = {
+          id: student.id,
+          user_id: student.user.id,
+          name: student.user.name,
+          code: `STU-${student.id.slice(0, 3)}`,
+          email: student.user.email,
+          phone: `${student.user.code_country}${student.user.phone}`,
+          sessions: `${student.sessions_attended}/${student.sessions}`,
+        };
+      }
+
+      return acc;
+    }, {}),
+  );
+  return successResponse({
+    res,
+    req,
+    message: "FETCH_SUCCESS",
+    data: students,
   });
 });

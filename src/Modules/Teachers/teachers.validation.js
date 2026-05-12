@@ -64,12 +64,6 @@ export const updateTeacherSchema = {
       age: generalFields.number,
       hour_price: generalFields.price,
       active: generalFields.active,
-      subject_ids: joi.array().items(
-        generalFields.id.messages({
-          "string.base": "SUBJECT_ID_STRING",
-          "string.empty": "SUBJECT_ID_EMPTY",
-        }),
-      ),
     })
     .required(),
 };

@@ -8,7 +8,6 @@ export const createHomework = {
       description: joi.string().required(),
       dueDate: joi.date().required(),
       studentId: generalFields.id.required(),
-      subjectId: generalFields.id.required(),
       status: joi
         .string()
         .valid("pending", "submitted", "completed")
@@ -29,7 +28,6 @@ export const updateHomework = {
       description: joi.string().optional(),
       dueDate: joi.date().optional(),
       studentId: generalFields.id.optional(),
-      subjectId: generalFields.id.optional(),
       status: joi
         .string()
         .valid("pending", "submitted", "completed")
@@ -58,7 +56,6 @@ export const getAllHomework = {
   query: joi
     .object({
       studentId: generalFields.id.optional(),
-      subjectId: generalFields.id.optional(),
       teacherId: generalFields.id.optional(),
       status: joi.string().optional(),
     })

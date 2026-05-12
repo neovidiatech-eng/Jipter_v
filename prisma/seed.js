@@ -3,7 +3,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import dotenv from "dotenv";
 import { seedCurrencies } from "./seeders/currency.seeder.js";
-import { seedSubjects } from "./seeders/subjects.seeder.js";
 import { seedPlans } from "./seeders/plans.seeder.js";
 import { seedPermissions } from "./seeders/permissions.seeder.js";
 import { seedRoles } from "./seeders/roles.seeder.js";
@@ -36,7 +35,6 @@ async function main() {
   await seedCurrencies();
   await seedSettings();
   await seedMatrials();
-  await seedSubjects();
   await seedPlans();
   await seedPermissions();
   await seedRoles();

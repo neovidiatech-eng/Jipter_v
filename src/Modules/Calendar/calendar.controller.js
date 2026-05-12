@@ -99,11 +99,6 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: {
-          select: {
-            name: true,
-          },
-        },
       },
     }),
     db.count({
@@ -141,11 +136,6 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
                 },
               },
             },
-          },
-        },
-        subject: {
-          select: {
-            name: true,
           },
         },
       },
@@ -186,7 +176,6 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: true,
       },
     }),
     db.findMany({
@@ -229,7 +218,6 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: true,
       },
     }),
   ]);
@@ -296,11 +284,6 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: {
-          select: {
-            name: true,
-          },
-        },
       },
     }),
     db.count({
@@ -338,11 +321,6 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
                 },
               },
             },
-          },
-        },
-        subject: {
-          select: {
-            name: true,
           },
         },
       },
@@ -383,7 +361,6 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: true,
       },
     }),
     db.findMany({
@@ -426,7 +403,6 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        subject: true,
       },
     }),
   ]);

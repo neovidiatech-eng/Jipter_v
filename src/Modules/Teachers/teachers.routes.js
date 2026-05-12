@@ -10,10 +10,8 @@ import {
   updateTeacherSchema,
   deleteTeacherSchema,
 } from "./teachers.validation.js";
-import subjectsRouter from "./subjects/subjects.routes.js";
 import { endpoints } from "./teachers.authorization.js";
 const router = Router();
-router.use("/subjects", authentication, subjectsRouter);
 router.get(
   "/",
   authentication,

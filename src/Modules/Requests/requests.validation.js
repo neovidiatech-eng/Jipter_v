@@ -29,7 +29,7 @@ export const createRequest = {
       // Fields for new_session if no initial sessionId
       studentId: generalFields.id.optional(),
       teacherId: generalFields.id.optional(),
-      subjectId: generalFields.id.optional(),
+      courseId: generalFields.id.optional(),
       title: Joi.string().optional(),
     }).optional(),
   }).required(),

@@ -42,9 +42,6 @@ export const PERMISSIONS = {
   STUDENT_DELETE: "student.delete",
 
   // ─── Teacher Management ───────────────────────────────────────────────────
-  TEACHER_SUBJECTS_CREATE: "teacher.subjects.create",
-  TEACHER_SUBJECTS_UPDATE: "teacher.subjects.update",
-  TEACHER_SUBJECTS_DELETE: "teacher.subjects.delete",
   TEACHER_ALL_READ: "teacher.all.read",
 
   // ─── System – Roles ───────────────────────────────────────────────────────

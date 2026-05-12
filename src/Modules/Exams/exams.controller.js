@@ -8,7 +8,7 @@ import * as db from "../../database/dbService.js";
 import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
 
 export const createExam = asyncHandler(async (req, res, next) => {
-  const { title, totalMarks, studentId, subjectId, status, dueDate, duration } =
+  const { title, totalMarks, studentId, status, dueDate, duration } =
     req.body;
   
   const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ); // Or another appropriate teacher-only permission
@@ -43,7 +43,6 @@ export const createExam = asyncHandler(async (req, res, next) => {
       title,
       totalMarks,
       studentId,
-      subjectId,
       status: status || "pending",
       teacherId: assignedTeacherId,
       dueDate,
@@ -64,7 +63,7 @@ export const createExam = asyncHandler(async (req, res, next) => {
 
 export const updateExam = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, totalMarks, dueDate, studentId, subjectId, status, duration } =
+  const { title, totalMarks, dueDate, studentId, status, duration } =
     req.body;
 
   const examExists = await db.findOne({
@@ -95,7 +94,6 @@ export const updateExam = asyncHandler(async (req, res, next) => {
       ...(totalMarks !== undefined && { totalMarks }),
       ...(dueDate && { dueDate: new Date(dueDate) }),
       ...(studentId && { studentId }),
-      ...(subjectId && { subjectId }),
       ...(status && { status }),
       ...(duration !== undefined && { duration }),
     },
@@ -150,7 +148,6 @@ export const getExam = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: true } },
       teacher: { include: { user: true } },
-      subject: true,
     },
   });
 
@@ -183,7 +180,6 @@ export const getStudentExams = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: true } },
       teacher: { include: { user: true } },
-      subject: true,
     },
   });
 
@@ -195,12 +191,11 @@ export const getStudentExams = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllExams = asyncHandler(async (req, res, next) => {
-  const { studentId, subjectId, teacherId, status, page, limit } = req.query;
+  const { studentId, teacherId, status, page, limit } = req.query;
 
   const condition = {};
 
   if (studentId) condition.studentId = studentId;
-  if (subjectId) condition.subjectId = subjectId;
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
@@ -223,7 +218,6 @@ export const getAllExams = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: { select: { name: true, email: true } } } },
       teacher: { include: { user: { select: { name: true, email: true } } } },
-      subject: true,
     },
     orderBy: { createdAt: "desc" },
   });

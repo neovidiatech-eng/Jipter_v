@@ -8,7 +8,7 @@ import * as db from "../../database/dbService.js";
 import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
 
 export const createHomework = asyncHandler(async (req, res, next) => {
-  const { title, description, dueDate, studentId, subjectId, status } =
+  const { title, description, dueDate, studentId, status } =
     req.body;
   
   const isTeacher = req.user.hasPermission(PERMISSIONS.TEACHER_PROFILE_READ);
@@ -44,7 +44,6 @@ export const createHomework = asyncHandler(async (req, res, next) => {
       description,
       dueDate: new Date(dueDate),
       studentId,
-      subjectId,
       status: status || "pending",
       teacherId: assignedTeacherId,
     },
@@ -55,7 +54,7 @@ export const createHomework = asyncHandler(async (req, res, next) => {
 
 export const updateHomework = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, description, dueDate, studentId, subjectId, status } =
+  const { title, description, dueDate, studentId, status } =
     req.body;
 
   const homeworkExists = await db.findOne({
@@ -92,7 +91,6 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
       ...(description && { description }),
       ...(finalDueDate && { dueDate: finalDueDate }),
       ...(studentId && { studentId }),
-      ...(subjectId && { subjectId }),
       ...(status && { status }),
     },
   });
@@ -146,7 +144,6 @@ export const getHomework = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: true } },
       teacher: { include: { user: true } },
-      subject: true,
     },
   });
 
@@ -169,7 +166,6 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: true } },
       teacher: { include: { user: true } },
-      subject: true,
     },
   });
 
@@ -181,12 +177,11 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllHomework = asyncHandler(async (req, res, next) => {
-  const { studentId, subjectId, teacherId, status, page, limit } = req.query;
+  const { studentId, teacherId, status, page, limit } = req.query;
 
   const condition = {};
 
   if (studentId) condition.studentId = studentId;
-  if (subjectId) condition.subjectId = subjectId;
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
@@ -209,7 +204,6 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
     include: {
       student: { include: { user: { select: { name: true, email: true } } } },
       teacher: { include: { user: { select: { name: true, email: true } } } },
-      subject: true,
     },
     orderBy: { createdAt: "desc" },
   });

@@ -89,10 +89,10 @@ export const getDashboard = async ({ req, res, next }) => {
           },
         },
       },
-      subject: {
+      course: {
         select: {
           id: true,
-          name: true,
+          title: true,
         },
       },
     },

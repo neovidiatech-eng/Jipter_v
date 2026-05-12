@@ -124,22 +124,6 @@ model plan {
   @@index([name])
 }
 
-model subjects {
-  id        String     @id @default(uuid())
-  name      String     @default(dbgenerated("1"))
-  active    Boolean    @default(false)
-  color     String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  rankId    String
-  rank      ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
-  exams     exam[]
-  homeworks homework[]
-
-  @@unique([name, rankId], name: "name_rankId")
-  @@index([name])
-  @@index([rankId])
-}
 
 model subscription_requests {
   id        String   @id @default(uuid())
@@ -341,16 +325,13 @@ model homework {
   dueDate     DateTime
   studentId   String
   teacherId   String
-  subjectId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   student     student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject     subjects @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   teacher     teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId])
   @@index([studentId])
-  @@index([subjectId])
 }
 
 model exam {
@@ -358,7 +339,6 @@ model exam {
   title      String
   grade      Float    @default(0)
   studentId  String
-  subjectId  String
   teacherId  String
   dueDate    DateTime
   totalMarks Float    @default(100)
@@ -367,7 +347,6 @@ model exam {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   student    student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject    subjects @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   teacher    teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 }
 
@@ -509,7 +488,6 @@ model ranks {
   ageRange          Json
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  subjects          subjects[]
   students          student[]
   courses           courses[]
   userRankHistories user_rank_history[]

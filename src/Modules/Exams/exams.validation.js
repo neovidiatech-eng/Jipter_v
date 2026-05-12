@@ -15,13 +15,6 @@ export const createExam = {
       studentId: generalFields.id
         .messages({
           "string.empty": "STUDENT_ID_REQUIRED",
-          "any.required": "STUDENT_ID_REQUIRED",
-        })
-        .required(),
-      subjectId: generalFields.id
-        .messages({
-          "string.empty": "SUBJECT_ID_REQUIRED",
-          "any.required": "SUBJECT_ID_REQUIRED",
         })
         .required(),
       status: joi
@@ -60,7 +53,6 @@ export const updatecreateExam = {
       description: joi.string().optional(),
       dueDate: joi.date().optional(),
       studentId: generalFields.id.optional(),
-      subjectId: generalFields.id.optional(),
       status: joi
         .string()
         .valid("pending", "submitted", "completed")
@@ -89,7 +81,6 @@ export const getAllExams = {
   query: joi
     .object({
       studentId: generalFields.id.optional(),
-      subjectId: generalFields.id.optional(),
       teacherId: generalFields.id.optional(),
       status: joi.string().optional(),
     })

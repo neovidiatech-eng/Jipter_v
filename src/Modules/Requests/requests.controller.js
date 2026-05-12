@@ -191,7 +191,7 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         data: {
           teacherId: oldSession.teacherId,
           studentId: oldSession.studentId,
-          subjectId: oldSession.subjectId,
+          courseId: oldSession.courseId,
           title: oldSession.title,
           description: oldSession.description,
           link: oldSession.link,
@@ -231,7 +231,7 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
         data: {
           teacherId,
           studentId,
-          subjectId: requestedData.subjectId,
+          courseId: requestedData.courseId,
           title: requestedData.title || "New Session",
           description: "Session created via request",
           link: "",

@@ -204,7 +204,6 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     age,
     hour_price,
     active,
-    subject_ids,
   } = req.body;
 
   const teacher = await ensureExists({
@@ -266,19 +265,10 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
       ...(currency_id && { currency: { connect: { id: currency_id } } }),
       ...(hour_price !== undefined && { hour_price }),
       ...(active !== undefined && { active }),
-      ...(subject_ids && {
-        teacherSubjects: {
-          deleteMany: {},
-          create: subject_ids.map((subject_id) => ({
-            subject: { connect: { id: subject_id } },
-          })),
-        },
-      }),
     },
     include: {
       user: true,
       currency: true,
-      teacherSubjects: { include: { subject: true } },
     },
   });
 

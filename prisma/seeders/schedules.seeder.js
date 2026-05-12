@@ -27,12 +27,11 @@ export async function seedSchedules() {
   const student = await prisma.student.findFirst({
     where: { user: { email: "john.doe@jipter.com" } },
   });
-  const subject = await prisma.subjects.findFirst({ where: { name: "Mathematics" } });
   const course = await prisma.courses.findFirst({ include: { lectures: true } });
 
-  if (!teacher || !student || !subject || !course) {
+  if (!teacher || !student || !course) {
     console.warn(
-      "Teacher, student, subject, or course not found. Skipping schedule seeding.",
+      "Teacher, student, or course not found. Skipping schedule seeding.",
     );
     return;
   }
