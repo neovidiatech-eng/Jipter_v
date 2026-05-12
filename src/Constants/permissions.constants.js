@@ -130,8 +130,6 @@ export const PERMISSIONS_V2 = {
   // Calendar Management
   CALENDAR: {
     READ: "calendar:read",
-    
-    
   },
 
   // Plan Management
