@@ -5,7 +5,7 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
-import { decryptText, hash } from "../../Utils/Security/index.js";
+import { decryptText, hash,encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {

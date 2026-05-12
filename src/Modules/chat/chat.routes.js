@@ -31,5 +31,5 @@ router.post(
   authorize(PERMISSIONS_V2.CHAT.CREATE),
   chatController.sendMessage,
 );
-
+  
 export default router;
