@@ -140,3 +140,104 @@ export const deletePermission = asyncHandler(async (req, res, next) => {
     message: "DELETE_SUCCESS",
   });
 });
+
+export const addPermissionsToRole = asyncHandler(async (req, res, next) => {
+  const { roleId } = req.params;
+  const { permissionIds } = req.body;
+
+  const role = await db.findOne({
+    model: "role",
+    where: { id: roleId },
+  });
+
+  if (!role) {
+    return errorResponse({
+      req,
+      next,
+      message: "ROLE_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  const permissions = await db.findMany({
+    model: "permission",
+    where: {
+      id: {
+        in: permissionIds,
+      },
+    },
+  });
+  const rolePermissions = await db.findMany({
+    model: "rolePermission",
+    where: {
+      roleId: roleId,
+      permissionId: {
+        in: permissionIds,
+      },
+    },
+    include: {
+      permission: true,
+    },
+  });
+  console.log(rolePermissions);
+
+  if (rolePermissions.length > 0) {
+    return errorResponse({
+      next,
+      req,
+      status: 409,
+      message: `role already have this ${rolePermissions
+        .map((r) => r.permission.name)
+        .join(", ")}  permission`,
+    });
+  }
+
+  if (permissions.length !== permissionIds.length) {
+    return errorResponse({
+      req,
+      next,
+      message: "PERMISSION_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  const updatedRole = await db.updateOne({
+    model: "role",
+    where: { id: roleId },
+    data: {
+      rolePermissions: {
+        create: permissionIds.map((permissionId) => ({
+          permission: {
+            connect: {
+              id: permissionId,
+            },
+          },
+        })),
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      rolePermissions: {
+        select: {
+          id: true,
+          permission: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return successResponse({
+    res,
+    req,
+    message: "UPDATE_SUCCESS",
+    status: 200,
+    data: updatedRole,
+  });
+});

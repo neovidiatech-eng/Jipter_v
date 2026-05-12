@@ -102,6 +102,14 @@ export const PERMISSIONS = {
 
   // ─── Calendar ─────────────────────────────────────────────────────────────
   CALENDAR_READ: "calendar.read",
+  // ─── Schedule ─────────────────────────────────────────────────────────────
+  SCHEDULE_READ: "schedule.read",
+  SCHEDULE_CREATE: "schedule.create",
+  SCHEDULE_UPDATE: "schedule.update",
+  SCHEDULE_DELETE: "schedule.delete",
+  SCHEDULE_JOIN: "schedule.join",
+  SCHEDULE_LEAVE: "schedule.leave",
+  SCHEDULE_SUBMIT_REVIEW: "schedule.submit_review",
 };
 
 /**
@@ -179,4 +187,12 @@ export const hasAllPermissions = (user, permissionCodes) => {
     return true;
   const userPermissions = getUserPermissions(user);
   return codes.every((code) => userPermissions.has(code));
+};
+
+export const ROLES = {
+  STUDENT: "student",
+  TEACHER: "teacher",
+  ADMIN: "admin",
+  STAFF: "staff",
+  SUPER_ADMIN: "super_admin",
 };

@@ -4,6 +4,7 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const createRoleSchema = {
   body: Joi.object({
     name: generalFields.role_name.required(),
+    permissionIds: Joi.array().items(generalFields.id).optional(),
   }).required(),
 };
 

@@ -8,6 +8,7 @@ import {
   createPermissionSchema,
   deletePermissionSchema,
   updatePermissionSchema,
+  addPermissionsToRoleSchema,
 } from "./permissions.validation.js";
 
 const router = Router();
@@ -43,4 +44,13 @@ router.delete(
   permissionsController.deletePermission,
 );
 
+router.patch(
+  "/add-permissions-to-role/:roleId",
+  authentication,
+  authorization({
+    permissions: endpoints.addPermissionsToRole,
+  }),
+  validation(addPermissionsToRoleSchema),
+  permissionsController.addPermissionsToRole,
+);
 export default router;

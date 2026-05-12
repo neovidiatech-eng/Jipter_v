@@ -23,3 +23,11 @@ export const deletePermissionSchema = {
     id: generalFields.id.required(),
   }).required(),
 };
+export const addPermissionsToRoleSchema = {
+  body: Joi.object({
+    permissionIds: Joi.array().items(generalFields.id).required(),
+  }).required(),
+  params: Joi.object({
+    roleId: generalFields.id.required(),
+  }).required(),
+};

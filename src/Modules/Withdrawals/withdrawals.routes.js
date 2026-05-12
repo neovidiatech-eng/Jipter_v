@@ -5,7 +5,7 @@ import { authorization } from "../../Middlewares/Authorization.js";
 import * as withdrawalController from "./withdrawals.controller.js";
 import * as schema from "./withdrawals.validation.js";
 
-import { PERMISSIONS } from "../../Utils/Permissions/permissions.js";
+import { PERMISSIONS, ROLES } from "../../Utils/Permissions/permissions.js";
 
 const router = Router();
 
@@ -17,22 +17,31 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_READ] }),
-  withdrawalController.getWithdrawals
+  authorization({
+    permissions: [PERMISSIONS.WITHDRAWAL_READ],
+    roles: [ROLES.TEACHER],
+  }),
+  withdrawalController.getWithdrawals,
 );
 router.get(
   "/all",
   authentication,
-  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_READ] }),
-  withdrawalController.getAllWithdrawals
+  authorization({
+    permissions: [PERMISSIONS.WITHDRAWAL_READ],
+    roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN],
+  }),
+  withdrawalController.getAllWithdrawals,
 );
 router.post(
   "/request",
   authentication,
   // Assuming 'Teacher' is the role name in DB
-  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_CREATE] }),
+  authorization({
+    permissions: [PERMISSIONS.WITHDRAWAL_CREATE],
+    roles: [ROLES.TEACHER],
+  }),
   validation(schema.requestWithdrawal),
-  withdrawalController.requestWithdrawal
+  withdrawalController.requestWithdrawal,
 );
 
 /**
@@ -44,9 +53,12 @@ router.patch(
   "/:id/approve",
   authentication,
   // Assuming 'Admin' or 'SuperAdmin'
-  authorization({ permissions: [PERMISSIONS.WITHDRAWAL_APPROVE] }),
+  authorization({
+    permissions: [PERMISSIONS.WITHDRAWAL_APPROVE],
+    roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN],
+  }),
   validation(schema.processWithdrawal),
-  withdrawalController.approveWithdrawal
+  withdrawalController.approveWithdrawal,
 );
 
 /**
@@ -59,7 +71,7 @@ router.patch(
   authentication,
   authorization({ permissions: [PERMISSIONS.WITHDRAWAL_APPROVE] }),
   validation(schema.processWithdrawal),
-  withdrawalController.rejectWithdrawal
+  withdrawalController.rejectWithdrawal,
 );
 
 export default router;

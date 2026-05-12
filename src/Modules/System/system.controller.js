@@ -23,7 +23,7 @@ export const getAllRoles = asyncHandler(async (req, res, next) => {
   });
 });
 export const createRole = asyncHandler(async (req, res, next) => {
-  const { name } = req.body;
+  const { name, permissionIds } = req.body;
   if (!name) {
     return errorResponse({
       req,
@@ -46,11 +46,44 @@ export const createRole = asyncHandler(async (req, res, next) => {
       status: 400,
     });
   }
-  const newRole = await db.create({
-    model: "role",
-    data: {
-      name,
-    },
+  if (permissionIds?.length > 0) {
+    const permissions = await db.findMany({
+      model: "permission",
+      where: {
+        id: {
+          in: permissionIds,
+        },
+      },
+    });
+    if (permissions.length !== permissionIds.length) {
+      return errorResponse({
+        req,
+        next,
+        message: "PERMISSION_NOT_FOUND",
+        status: 404,
+      });
+    }
+  }
+  const newRole = await db.transaction(async (tx) => {
+    const role = await tx.create({
+      model: "role",
+      data: {
+        name,
+      },
+      include: {
+        rolePermissions: true,
+      },
+    });
+    if (permissionIds?.length > 0) {
+      const rolePermissions = await tx.createMany({
+        model: "rolePermission",
+        data: permissionIds.map((id) => ({
+          roleId: role.id,
+          permissionId: id,
+        })),
+      });
+    }
+    return role;
   });
   return successResponse({
     res,
@@ -95,17 +128,17 @@ export const assignRoleToUser = asyncHandler(async (req, res, next) => {
     data: {
       roleId: role_id,
     },
-    include:{
-      role:true
-    }
+    include: {
+      role: true,
+    },
   });
   return successResponse({
     res,
     req,
     status: 200,
     message: "ROLE_ASSIGNED_SUCCESS",
-    data:{
-      newRole
+    data: {
+      newRole,
     },
   });
 });
