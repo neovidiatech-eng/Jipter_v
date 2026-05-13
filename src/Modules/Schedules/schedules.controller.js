@@ -94,7 +94,6 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
             },
           },
         },
-        
       },
     });
   const scheduleData = await Promise.all(
@@ -177,11 +176,25 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
           },
         },
       },
+      course: {
+        select: {
+          id: true,
+          title: true,
+          lectures: {
+            select: {
+              title: true,
+              content: true,
+              videoUrl: true,
+              pdfUrl: true,
+              date: true,
+              order: true,
+            },
+          },
+        },
+      },
       scheduleLogs: true,
     },
   });
-  console.log({ schedule });
-
   if (schedule?.student?.user?.phone) {
     schedule.student.user.phone = await decryptText({
       text: schedule.student.user.phone,

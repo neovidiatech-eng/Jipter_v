@@ -16,6 +16,7 @@ export const fileValidation = {
 export const localMulterUpload = ({
   customPath = "general",
   validation = [],
+  maxSize = 1024 * 1024 * 1024 * 1,
 } = {}) => {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -39,10 +40,15 @@ export const localMulterUpload = ({
   });
 
   const fileFilter = (req, file, cb) => {
+    if (file.size > maxSize) {
+      req.multerError = "File size is too large";
+      return cb(null, false);
+    }
     if (validation.length === 0 || validation.includes(file.mimetype)) {
       return cb(null, true);
     }
-    return cb(new Error("Invalid File Format"), false);
+    req.multerError = "Invalid File Format";
+    return cb(null, false);
   };
 
   return multer({ fileFilter, storage });

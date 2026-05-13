@@ -6,6 +6,11 @@ import { authorize } from "../../Middlewares/Authorize.js";
 import * as homeworkController from "./homework.controller.js";
 import * as schema from "./homework.validation.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import {
+  cloudinaryMulterUpload,
+  fileValidation,
+} from "../../Utils/Multer/Cloudinary.multer.js";
+import { localMulterUpload } from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 const homeworkResource = "homework";
@@ -16,6 +21,19 @@ router.post(
   authorizeResource(homeworkResource),
   validation(schema.createHomework),
   homeworkController.createHomework,
+);
+
+router.post(
+  "/:id/submit",
+  authentication,
+
+  localMulterUpload({
+    validation: [fileValidation.pdf, ...fileValidation.image],
+    maxSize: 10 * 1024 * 1024,
+    customPath: "homework",
+  }).single("attachments"),
+  validation(schema.getHomework),
+  homeworkController.submitHomework,
 );
 
 router.patch(

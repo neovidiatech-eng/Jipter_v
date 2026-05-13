@@ -184,7 +184,7 @@
   "RANK_ID_REQUIRED": "Rank ID is required",
   "ORDER_REQUIRED": "Order is required",
   "RANK_EXISTS": "Rank already exists",
-  "HOMEWORK_NOT_FOUND": "Homework not found",
+  "HOMEWORK_NOT_FOUND": "Homework not found or already submitted",
   "USER_NO_ROLE": "User has no assigned role",
   "RESET_PASSWORD_EMAIL_TEXT": "You requested to reset your password. Your OTP is: {{otp}}",
   "RESET_PASSWORD_SUBJECT": "Reset Password Request",

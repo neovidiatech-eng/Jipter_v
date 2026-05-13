@@ -326,6 +326,7 @@ model homework {
   dueDate     DateTime
   studentId   String
   teacherId   String
+  attachments Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   student     student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -497,16 +498,16 @@ model ranks {
 }
 
 model courses {
-  id          String     @id @default(uuid())
-  title       String     @unique
-  description String?
-  rankId      String
-  image       String     @default("default_course.jpg")
-  rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
-  lectures    lectures[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  schedules   schedule[]
+    id          String     @id @default(uuid())
+    title       String     @unique
+    description String?
+    rankId      String
+    image       String     @default("default_course.jpg")
+    rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
+    lectures    lectures[]
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    schedules   schedule[]
 
   @@index([rankId])
 }
