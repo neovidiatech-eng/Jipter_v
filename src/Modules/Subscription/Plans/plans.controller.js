@@ -119,6 +119,7 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
     description,
     active,
     features,
+    type,
     currencyId,
   } = req.body;
 
@@ -181,6 +182,7 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
   if (rescheduleCount !== undefined) data.rescheduleCount = rescheduleCount;
   if (active !== undefined) data.active = active;
   if (features !== undefined) data.features = features;
+    if (type !== undefined) data.type = type;
 
   if (currencyId !== undefined) {
     data.currency = {
