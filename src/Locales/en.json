@@ -222,5 +222,7 @@
   "PRISMA_DATABASE_ERROR": "A database error occurred",
   "PRISMA_DUPLICATE_VALUE": "A record with this {{target}} already exists",
   "PRISMA_INVALID_RELATION": "Invalid relation on field: {{field}}",
-  "PRISMA_RECORD_NOT_FOUND": "Record not found in the database"
+  "PRISMA_RECORD_NOT_FOUND": "Record not found in the database",
+  "INVALID_FILE_FORMAT": "Invalid file format. Please upload a valid file.",
+  "NO_FILES_UPLOADED": "No files were uploaded. Please attach a file."
 }

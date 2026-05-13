@@ -342,8 +342,16 @@ export const submitHomework = asyncHandler(async (req, res, next) => {
   }
 
   // Handle file uploads
+  if (req.multerError) {
+    return errorResponse({
+      req,
+      next,
+      message: req.multerError,
+      status: 400,
+    });
+  }
+
   const attachments = [];
-  console.log({ file: req.file });
 
   if (req.file) {
     const file = req.file;

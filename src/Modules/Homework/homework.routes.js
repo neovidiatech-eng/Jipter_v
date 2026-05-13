@@ -28,7 +28,7 @@ router.post(
   authentication,
 
   localMulterUpload({
-    validation: [fileValidation.pdf, ...fileValidation.image],
+    validation: [...fileValidation.pdf, ...fileValidation.image],
     maxSize: 10 * 1024 * 1024,
     customPath: "homework",
   }).single("attachments"),

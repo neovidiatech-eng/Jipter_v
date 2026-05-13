@@ -40,16 +40,17 @@ export const localMulterUpload = ({
   });
 
   const fileFilter = (req, file, cb) => {
-    if (file.size > maxSize) {
-      req.multerError = "File size is too large";
-      return cb(null, false);
-    }
-    if (validation.length === 0 || validation.includes(file.mimetype)) {
+    const flatValidation = validation.flat();
+    if (flatValidation.length === 0 || flatValidation.includes(file.mimetype)) {
       return cb(null, true);
     }
-    req.multerError = "Invalid File Format";
+    req.multerError = "INVALID_FILE_FORMAT";
     return cb(null, false);
   };
 
-  return multer({ fileFilter, storage });
+  return multer({ 
+    fileFilter, 
+    storage,
+    limits: { fileSize: maxSize }
+  });
 };

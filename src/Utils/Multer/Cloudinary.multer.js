@@ -15,7 +15,8 @@ export const cloudinaryMulterUpload = ({ validation = [] } = {}) => {
     const storage = multer.diskStorage({});
 
     const fileFilter = (req, file, cb) => {
-        if (validation.length === 0 || validation.includes(file.mimetype)) {
+        const flatValidation = validation.flat();
+        if (flatValidation.length === 0 || flatValidation.includes(file.mimetype)) {
             return cb(null, true);
         }
         return cb(new Error("Invalid File Format"), false);
