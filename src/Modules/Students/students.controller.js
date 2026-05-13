@@ -5,7 +5,7 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
-import { decryptText, hash,encryptText } from "../../Utils/Security/index.js";
+import { decryptText, hash, encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {
@@ -90,26 +90,20 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     timezone,
   } = req.body;
 
-  const [
-    checkUserByEmail,
-    allUsers,
-    checkPlan,
-    studentRole,
-    settings,
-    rank,
-  ] = await Promise.all([
-    email
-      ? db.findOne({ model: "user", where: { email } })
-      : Promise.resolve(null),
-    db.findMany({ model: "user" }),
-    db.findOne({ model: "plan", where: { id: planId } }),
-    db.findFirst({
-      model: "role",
-      where: { name: { equals: "student", mode: "insensitive" } },
-    }),
-    db.findFirst({ model: "settings" }),
-    db.findOne({ model: "ranks", where: { id: rankId } }),
-  ]);
+  const [checkUserByEmail, allUsers, checkPlan, studentRole, settings, rank] =
+    await Promise.all([
+      email
+        ? db.findOne({ model: "user", where: { email } })
+        : Promise.resolve(null),
+      db.findMany({ model: "user" }),
+      db.findOne({ model: "plan", where: { id: planId } }),
+      db.findFirst({
+        model: "role",
+        where: { name: { equals: "student", mode: "insensitive" } },
+      }),
+      db.findFirst({ model: "settings" }),
+      db.findOne({ model: "ranks", where: { id: rankId } }),
+    ]);
 
   let checkUserByPhone = null;
   if (phone) {
@@ -138,7 +132,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       message: "PHONE_EXISTS",
       status: 400,
     });
-  
+
   if (!checkPlan)
     return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
 
@@ -362,6 +356,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       data: {
         ...(name && { name }),
         ...(email && { email }),
+        ...(gender && { gender }),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
         ...(timezone && { timezone }),
@@ -376,14 +371,16 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(country && { country }),
       ...(planId && { plan: { connect: { id: planId } } }),
       ...(birth_date && { birth_date: new Date(birth_date) }),
-      ...(gender && { gender }),
+
       ...(active !== undefined && { active }),
       ...(rankId && { rank: { connect: { id: rankId } } }),
     },
     include: { user: true, plan: true },
   });
 
-  updatedStudent.user.phone = await decryptText({ text: updatedStudent.user.phone });
+  updatedStudent.user.phone = await decryptText({
+    text: updatedStudent.user.phone,
+  });
 
   return successResponse({
     res,
