@@ -5,7 +5,8 @@ import { createError } from "../../../Utils/Helpers.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title, content, videoUrl, pdfUrl, order, duration, date } = req.body;
+  const { courseId, title, content, videoUrl, pdfUrl, duration, date } = req.body;
+  let { order } = req.body;
 
   if (!courseId) {
     const error = createError({
@@ -44,15 +45,6 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  if (!order) {
-    const error = createError({
-      message: "ORDER_REQUIRED",
-      status: 400,
-      next,
-    });
-    throw error;
-  }
-
   if (!pdfUrl && !videoUrl) {
     const error = createError({
       message: "LINK_REQUIRED",
@@ -77,6 +69,16 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
+  // Auto-calculate order if not provided
+  if (order === undefined || order === null) {
+    const lastLecture = await db.findFirst({
+      model: "lectures",
+      where: { courseId },
+      orderBy: { order: "desc" },
+    });
+    order = lastLecture ? lastLecture.order + 1 : 1;
+  }
+
   const lecture = await db.create({
     model: "lectures",
     data: {
@@ -84,7 +86,7 @@ export const createLecture = async ({ req, res, next }) => {
       title,
       content,
       videoUrl,
-      order,
+      order: parseInt(order),
       pdfUrl,
       duration,
       date,

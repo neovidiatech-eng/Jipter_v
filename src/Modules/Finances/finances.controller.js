@@ -114,7 +114,6 @@ export const createExpense = asyncHandler(async (req, res, next) => {
         amount: parsedAmount,
         status: "completed",
         reason: title,
-        referenceId: expense.id,
       },
     });
 

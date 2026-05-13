@@ -12,6 +12,7 @@ export const createPlanSchema = {
     active: Joi.boolean().default(false),
     features: Joi.array().items(Joi.string()).min(1).required(),
     currencyId: Joi.string().uuid().required(),
+    type: Joi.string().valid("quarterly", "annually", "halfAnnually").required(),
   }),
 };
 
@@ -26,6 +27,7 @@ export const updatePlanSchema = {
     active: Joi.boolean(),
     features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid(),
+    type: Joi.string().valid("quarterly", "annually", "halfAnnually"),
   }),
 };
 export const deletePlanSchema = {

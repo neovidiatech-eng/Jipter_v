@@ -113,6 +113,7 @@ export async function seedSchedules() {
         courseId: course.id,
         lecturesId: lecture?.id || null,
         videoUrl: lecture?.videoUrl || null,
+        order: lecture?.order || 0,
         title: item.title,
         description: item.title,
         status: item.status,

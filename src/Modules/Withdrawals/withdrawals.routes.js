@@ -32,7 +32,7 @@ router.post(
   withdrawalController.requestWithdrawal,
 );
 
-router.post(
+router.patch(
   "/:id/approve",
   authentication,
   authorize(PERMISSIONS_V2.WITHDRAWALS.APPROVE),
@@ -40,7 +40,7 @@ router.post(
   withdrawalController.approveWithdrawal,
 );
 
-router.post(
+router.patch(
   "/:id/reject",
   authentication,
   authorize(PERMISSIONS_V2.WITHDRAWALS.APPROVE), // Reject usually handled by same permission as approve

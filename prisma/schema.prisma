@@ -252,6 +252,7 @@ model schedule {
   requests            request[]
   lectures            lectures?    @relation(fields: [lecturesId], references: [id])
   lecturesId          String?
+  order               Int?         @default(0)
 
   @@index([teacherId])
   @@index([studentId])

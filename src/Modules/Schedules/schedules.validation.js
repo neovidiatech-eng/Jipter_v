@@ -114,7 +114,19 @@ export const createRecurringSchedule = {
         )
         .min(1)
         .required(),
-      startDate: Joi.date().iso().required(),
+      startDate: generalFields.date
+        .messages({
+          "string.empty": "START_TIME_REQUIRED",
+          "any.required": "START_TIME_REQUIRED",
+          "string.pattern.base": "START_TIME_INVALID",
+        })
+        .custom((value) => {
+          if (dayjs(value).isBefore(dayjs())) {
+            return dayjs(value).isAfter(dayjs().subtract(1, "day"));
+          }
+          return value;
+        })
+        .required(),
       endDate: Joi.date().iso().min(Joi.ref("startDate")).required(),
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))

@@ -94,18 +94,22 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
             },
           },
         },
+        
       },
     });
   const scheduleData = await Promise.all(
-    schedule.map(async (schedule, index) => {
+    schedule.map(async (schedule) => {
       if (schedule.student?.user?.phone) {
-        schedule.student.user.phone = await decryptText({ text: schedule.student.user.phone });
+        schedule.student.user.phone = await decryptText({
+          text: schedule.student.user.phone,
+        });
       }
       if (schedule.teacher?.user?.phone) {
-        schedule.teacher.user.phone = await decryptText({ text: schedule.teacher.user.phone });
+        schedule.teacher.user.phone = await decryptText({
+          text: schedule.teacher.user.phone,
+        });
       }
       return {
-        order: index + 1,
         ...schedule,
         start_time: toLocal(schedule.start_time, req.timezone),
         end_time: toLocal(schedule.end_time, req.timezone),
@@ -179,10 +183,14 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
   console.log({ schedule });
 
   if (schedule?.student?.user?.phone) {
-    schedule.student.user.phone = await decryptText({ text: schedule.student.user.phone });
+    schedule.student.user.phone = await decryptText({
+      text: schedule.student.user.phone,
+    });
   }
   if (schedule?.teacher?.user?.phone) {
-    schedule.teacher.user.phone = await decryptText({ text: schedule.teacher.user.phone });
+    schedule.teacher.user.phone = await decryptText({
+      text: schedule.teacher.user.phone,
+    });
   }
 
   const scheduleData = {
@@ -231,7 +239,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
       model: "courses",
       where: { id: courseId },
       next,
-      include: { lectures: true },
+      include: { lectures: { orderBy: { order: "asc" } } },
     }),
   ]);
 
@@ -334,6 +342,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         courseId,
         start_time: startTime,
         lecturesId: course.lectures[0]?.id || null,
+        order: course.lectures[0]?.order || 0,
         end_time: endTime,
         type,
         language,
@@ -424,7 +433,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       model: "courses",
       where: { id: courseId },
       next,
-      include: { lectures: true },
+      include: { lectures: { orderBy: { order: "asc" } } },
     }),
   ]);
 
@@ -529,6 +538,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
 
     schedulesToCreate.push({
       studentId,
+      order: currentLecture?.order || 0,
       teacherId,
       title,
       description,
@@ -716,6 +726,11 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
           },
         },
       },
+      course: {
+        select: {
+          lectures: true,
+        },
+      },
     },
     orderBy: { start_time: "asc" },
   });
@@ -723,10 +738,14 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
   const schedulesData = await Promise.all(
     schedules.map(async (s) => {
       if (s.student?.user?.phone) {
-        s.student.user.phone = await decryptText({ text: s.student.user.phone });
+        s.student.user.phone = await decryptText({
+          text: s.student.user.phone,
+        });
       }
       if (s.teacher?.user?.phone) {
-        s.teacher.user.phone = await decryptText({ text: s.teacher.user.phone });
+        s.teacher.user.phone = await decryptText({
+          text: s.teacher.user.phone,
+        });
       }
       return {
         ...s,

@@ -43,12 +43,12 @@ router.patch(
   requestsController.rejectRequest,
 );
 
-router.delete(
-  "/:id",
-  authorizeResource(requestsResource),
-  validation(schema.requestIdSchema),
-  // deleteRequest is missing in controller, I'll assume it's not implemented or uses a generic one
-  // Actually, I'll just comment it out or point to a placeholder to avoid crash if it's missing
-);
+// router.delete(
+//   "/:id",
+//   authorizeResource(requestsResource),
+//   validation(schema.requestIdSchema),
+//   // deleteRequest is missing in controller, I'll assume it's not implemented or uses a generic one
+//   // Actually, I'll just comment it out or point to a placeholder to avoid crash if it's missing
+// );
 
 export default router;
