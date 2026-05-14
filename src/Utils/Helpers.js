@@ -33,6 +33,7 @@ import {
   toUTC,
   getDatesBetweenUTC,
   combineDateAndTime,
+  getNowUTC,
 } from "./Date/time.js";
 
 export const getEndTime = (startTime, type, duration = 0) => {
@@ -104,7 +105,17 @@ export const convertAmount = (amount, sourceRate, targetRate) => {
 
 export const getAge = ({ birthDate }) => {
   const today = getNowUTC();
-  const birthDateUTC = toUTC(birthDate);
-  const age = today.diff(birthDateUTC, "year");
+  const birth = toUTC(birthDate);
+
+  let age = today.year() - birth.year();
+
+  const hasNotHadBirthdayThisYear =
+    today.month() < birth.month() ||
+    (today.month() === birth.month() && today.date() < birth.date());
+
+  if (hasNotHadBirthdayThisYear) {
+    age--;
+  }
+
   return age;
 };

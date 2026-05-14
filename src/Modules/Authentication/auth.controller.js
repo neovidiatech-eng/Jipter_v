@@ -18,6 +18,7 @@ import { generateOtp } from "../../Utils/Security/otp.js";
 import { sendEmail } from "../../Utils/Mailer/SendEmail.js";
 import { generateToken, verifyToken } from "../../Utils/Token/token.js";
 import { getAge } from "../../Utils/Helpers.js";
+import { nanoid } from "nanoid";
 
 /* -------------------------------------------- ------------------------------ */
 /*                                SIGN IN AND SIGN UP                           */
@@ -34,7 +35,6 @@ export const register = asyncHandler(async (req, res, next) => {
     gender,
     country,
     timezone,
-    
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
@@ -86,7 +86,9 @@ export const register = asyncHandler(async (req, res, next) => {
       });
     }
   }
-const age=getAge({birthDate:birth_date});
+  const age = getAge({ birthDate: birth_date });
+  console.log(age);
+
   // 2. Preparation (Hashing, Encryption, OTP)
   const hashedPassword = await hash({ password });
   const encryptedPhone = encryptText({ text: phone });
@@ -113,8 +115,7 @@ const age=getAge({birthDate:birth_date});
   await db.transaction(async (tx) => {
     // Create User record
     const prefix = settings?.userPrefix || "jupiter";
-    const username = `${name.trim().replace(/\s+/g, "-")}_${prefix}`;
-
+    const username = `${name.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
     const user = await tx.create({
       model: "user",
       data: {
@@ -486,124 +487,126 @@ export const refresh = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const googleSignUp = asyncHandler(async (req, res, next) => {
-  const { idToken } = req.body;
-  const verify = await googleVerify(idToken);
-  if (!verify) {
-    return errorResponse({ req, next, message: "INVALID_TOKEN", status: 401 });
-  }
+// export const googleSignUp = asyncHandler(async (req, res, next) => {
+//   const { idToken } = req.body;
+//   const verify = await googleVerify(idToken);
+//   if (!verify) {
+//     return errorResponse({ req, next, message: "INVALID_TOKEN", status: 401 });
+//   }
 
-  if (!verify.email_verified) {
-    return errorResponse({
-      req,
-      next,
-      message: "EMAIL_NOT_VERIFIED",
-      status: 401,
-    });
-  }
+//   if (!verify.email_verified) {
+//     return errorResponse({
+//       req,
+//       next,
+//       message: "EMAIL_NOT_VERIFIED",
+//       status: 401,
+//     });
+//   }
 
-  let user = await db.findFirst({
-    model: "user",
-    where: { email: verify.email },
-  });
+//   let user = await db.findFirst({
+//     model: "user",
+//     where: { email: verify.email },
+//   });
 
-  if (!user) {
-    const settings = await db.findFirst({ model: "settings" });
-    const prefix = settings?.userPrefix || "jupiter";
-    const fullName = `${verify.given_name} ${verify.family_name}`;
-    const username = `${fullName.trim().replace(/\s+/g, "-")}_${prefix}`;
+//   if (!user) {
+//     const settings = await db.findFirst({ model: "settings" });
+//     const prefix = settings?.userPrefix || "jupiter";
+//     const fullName = `${verify.given_name} ${verify.family_name}`;
+//     const username = `${fullName.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
+//     console.log(username);
+    
 
-    await db.transaction(async (tx) => {
-      user = await tx.create({
-        model: "user",
-        data: {
-          name: fullName,
-          email: verify.email,
-          username,
-          provider: "google",
-          googleId: verify.sub,
-          confirmAt: new Date().toISOString(),
-          status: "pending",
-          ...(studentRole && { roleId: studentRole.id }),
-        },
-      });
+//     await db.transaction(async (tx) => {
+//       user = await tx.create({
+//         model: "user",
+//         data: {
+//           name: fullName,
+//           email: verify.email,
+//           username,
+//           provider: "google",
+//           googleId: verify.sub,
+//           confirmAt: new Date().toISOString(),
+//           status: "pending",
+//           ...(studentRole && { roleId: studentRole.id }),
+//         },
+//       });
 
-      await tx.create({
-        model: "subscription_requests",
-        data: {
-          user_id: user.id,
-          planId: null,
-        },
-      });
-    });
-  }
+//       await tx.create({
+//         model: "subscription_requests",
+//         data: {
+//           user_id: user.id,
+//           planId: null,
+//         },
+//       });
+//     });
+//   }
 
-  return successResponse({
-    res,
-    req,
-    status: 201,
-    message: "USER_CREATED_SUCCESS",
-    data: {},
-  });
-});
-export const googlelogin = asyncHandler(async (req, res, next) => {
-  const { idToken, provider } = req.body;
-  if (provider !== "google") {
-    return errorResponse({
-      req,
-      next,
-      message: "INVALID_PROVIDER",
-      status: 401,
-    });
-  }
-  const verify = await googleVerify(idToken);
-  if (!verify) {
-    return errorResponse({ req, next, message: "INVALID_TOKEN", status: 401 });
-  }
-  if (!verify.email_verified) {
-    return errorResponse({
-      req,
-      next,
-      message: "EMAIL_NOT_VERIFIED",
-      status: 401,
-    });
-  }
+//   return successResponse({
+//     res,
+//     req,
+//     status: 201,
+//     message: "USER_CREATED_SUCCESS",
+//     data: {},
+//   });
+// });
+// export const googlelogin = asyncHandler(async (req, res, next) => {
+//   const { idToken, provider } = req.body;
+//   if (provider !== "google") {
+//     return errorResponse({
+//       req,
+//       next,
+//       message: "INVALID_PROVIDER",
+//       status: 401,
+//     });
+//   }
+//   const verify = await googleVerify(idToken);
+//   if (!verify) {
+//     return errorResponse({ req, next, message: "INVALID_TOKEN", status: 401 });
+//   }
+//   if (!verify.email_verified) {
+//     return errorResponse({
+//       req,
+//       next,
+//       message: "EMAIL_NOT_VERIFIED",
+//       status: 401,
+//     });
+//   }
 
-  const user = await db.findFirst({
-    model: "user",
-    where: { googleId: verify.sub, provider: "google", email: verify.email },
-  });
-  if (!user) {
-    return errorResponse({ req, next, message: "USER_NOT_FOUND", status: 404 });
-  }
-  if (user.password) {
-    return errorResponse({
-      req,
-      next,
-      message: "INVALID_CREDENTIALS",
-      status: 401,
-    });
-  }
+//   const user = await db.findFirst({
+//     model: "user",
+//     where: { googleId: verify.sub, provider: "google", email: verify.email },
+//   });
+//   if (!user) {
+//     return errorResponse({ req, next, message: "USER_NOT_FOUND", status: 404 });
+//   }
+//   if (user.password) {
+//     return errorResponse({
+//       req,
+//       next,
+//       message: "INVALID_CREDENTIALS",
+//       status: 401,
+//     });
+//   }
 
-  if (user.phone) {
-    user.phone = await decryptText({ text: user.phone });
-  }
+//   if (user.phone) {
+//     user.phone = await decryptText({ text: user.phone });
+//   }
 
-  const accessToken = generateToken({ user, tokenType: "access" });
-  const refreshToken = generateToken({ user, tokenType: "refresh" });
+//   const accessToken = generateToken({ user, tokenType: "access" });
+//   const refreshToken = generateToken({ user, tokenType: "refresh" });
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    maxAge: 60 * 60 * 1000,
-  });
+//   res.cookie("refreshToken", refreshToken, {
+//     httpOnly: true,
+//     secure: true,
+//     sameSite: "strict",
+//     maxAge: 60 * 60 * 1000,
+//   });
 
-  return successResponse({
-    res,
-    req,
-    status: 200,
-    message: "LOGIN_SUCCESS",
-    data: { accessToken },
-  });
-});
+//   return successResponse({
+//     res,
+//     req,
+//     status: 200,
+//     message: "LOGIN_SUCCESS",
+//     data: { accessToken },
+//   });
+// });

@@ -20,14 +20,14 @@ router.post("/sign-in", validation(loginSchema), auth.login); //done
 
 router.post("/refresh", cookieParser(), auth.refresh); //done
 
-router.post(
+/* router.post(
   "/google-signup",
   validation(googleSignupSchema),
   auth.googleSignUp,
 );
 
 router.post("/google-login", validation(googleLoginSchema), auth.googlelogin); //done
-
+ */
 router.post(
   "/verify-account",
   validation(verifiyCodeSchema),
