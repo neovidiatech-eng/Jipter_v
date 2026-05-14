@@ -6,6 +6,7 @@ import {
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, encryptText, hash } from "../../Utils/Security/index.js";
+import { nanoid } from "nanoid";
 
 export const getAllTeachers = asyncHandler(async (req, res, next) => {
   const { search, page = 1, limit = 10, active } = req.query;
