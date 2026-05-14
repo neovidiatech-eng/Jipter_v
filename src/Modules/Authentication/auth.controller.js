@@ -17,6 +17,7 @@ import {
 import { generateOtp } from "../../Utils/Security/otp.js";
 import { sendEmail } from "../../Utils/Mailer/SendEmail.js";
 import { generateToken, verifyToken } from "../../Utils/Token/token.js";
+import { getAge } from "../../Utils/Helpers.js";
 
 /* -------------------------------------------- ------------------------------ */
 /*                                SIGN IN AND SIGN UP                           */
@@ -33,6 +34,7 @@ export const register = asyncHandler(async (req, res, next) => {
     gender,
     country,
     timezone,
+    
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
@@ -84,7 +86,7 @@ export const register = asyncHandler(async (req, res, next) => {
       });
     }
   }
-
+const age=getAge({birthDate:birth_date});
   // 2. Preparation (Hashing, Encryption, OTP)
   const hashedPassword = await hash({ password });
   const encryptedPhone = encryptText({ text: phone });
@@ -118,6 +120,7 @@ export const register = asyncHandler(async (req, res, next) => {
       data: {
         name,
         email,
+        age,
         username,
         password: hashedPassword,
         phone: encryptedPhone,
@@ -138,6 +141,7 @@ export const register = asyncHandler(async (req, res, next) => {
         code_country: codeCountry,
         birth_date,
         gender,
+        age,
         country,
         timezone,
         user_id: user.id,
