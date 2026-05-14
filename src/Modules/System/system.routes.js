@@ -14,6 +14,8 @@ import {
 } from "./system.validation.js";
 import stuffRouter from "./stuff/stuff.routes.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import { authorization } from "../../Middlewares/Authorization.js";
+import { ROLES } from "../../Utils/Permissions/permissions.js";
 
 const router = Router();
 const rolesResource = "roles";
@@ -64,5 +66,5 @@ router.delete(
   validation(deleteRoleSchema),
   systemController.deleteRole,
 );
-
+router.get("/dashboard", authentication, authorization({ roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }), systemController.getDashboard);
 export default router;
