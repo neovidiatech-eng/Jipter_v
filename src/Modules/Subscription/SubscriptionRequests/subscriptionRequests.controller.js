@@ -7,6 +7,8 @@ import * as db from "../../../database/dbService.js";
 import { redis } from "../../../Utils/Radis/Connection.js";
 import { decryptText } from "../../../Utils/Security/index.js";
 import { ensureExists } from "../../../database/genericService.js";
+import { convertAmount } from "../../../Utils/Helpers.js";
+
 
 export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
   const { search, status, page = 1, limit = 10 } = req.query;
@@ -107,19 +109,25 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
   try {
     await db.transaction(async (tx) => {
-      // ✅ system wallet
-      const systemWallet = await tx.findFirst({
-        model: "wallet",
-        where: { type: "system" },
-      });
+      // ✅ system wallet & currencies
+      const [systemWallet, defaultCurrency] = await Promise.all([
+        tx.findFirst({
+          model: "wallet",
+          where: { type: "system" },
+        }),
+        tx.findFirst({
+          model: "currency",
+          where: { default: true },
+        }),
+      ]);
 
-      if (!systemWallet) {
-        const error = new Error("SYSTEM_WALLET_NOT_FOUND");
+      if (!systemWallet || !defaultCurrency) {
+        const error = new Error("SYSTEM_CONFIGURATION_ERROR");
         error.isMessageKey = true;
         throw error;
       }
 
-      // ✅ update user
+      // ... existing user and request updates ...
       await tx.updateOne({
         model: "user",
         where: { id: subscriptionRequest.user_id },
@@ -130,17 +138,15 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // ✅ update request
       await tx.updateOne({
         model: "subscription_requests",
         where: { id },
         data: { status },
       });
 
-      // ❌ لو rejected خلاص
       if (status !== "approved") return;
 
-      // 🔒 prevent duplicate student
+      // ... existing student creation ...
       const existingStudent = await tx.findFirst({
         model: "student",
         where: { user_id: subscriptionRequest.user_id },
@@ -152,7 +158,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         throw error;
       }
 
-      // ✅ create student
       await tx.create({
         model: "student",
         data: {
@@ -168,6 +173,16 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
+      // ✅ Fetch plan with currency for conversion
+      const plan = await tx.findOne({
+        model: "plan",
+        where: { id: subscriptionRequest.planId },
+        include: { currency: true },
+      });
+
+      const rawPrice = parseFloat(plan?.price) || 0;
+      const convertedAmount = convertAmount(rawPrice, plan.currency.exchangeRate, defaultCurrency.exchangeRate);
+
       // ✅ create subscription
       const subscription = await tx.create({
         model: "Subscription",
@@ -175,24 +190,22 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           userId: subscriptionRequest.user_id,
           planId: subscriptionRequest.planId,
           status: "active",
-          amount: parseFloat(subscriptionRequest.plan?.price) || 0,
-          currencyId: subscriptionRequest.plan?.currencyId,
+          amount: rawPrice,
+          currencyId: plan.currencyId,
           startDate: new Date(),
           paidAt: new Date(),
         },
       });
-
-      const amount = parseFloat(subscriptionRequest.plan?.price) || 0;
 
       // ✅ ledger (transaction)
       await tx.create({
         model: "Transaction",
         data: {
           walletId: systemWallet.id,
-          type: "credit",
-          amount,
+          type: "subscription",
+          amount: convertedAmount,
           status: "completed",
-          reason: "subscription",
+          reason: `Subscription: ${plan.name}`,
           subscriptionId: subscription.id,
         },
       });
@@ -202,9 +215,10 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         model: "Wallet",
         where: { id: systemWallet.id },
         data: {
-          balance: { increment: amount },
+          balance: { increment: convertedAmount },
         },
       });
+
     });
 
     await redis.del(redisKey);

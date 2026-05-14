@@ -86,3 +86,19 @@ export const createError = ({ message, status, next }) => {
 
   return error;
 };
+
+/**
+ * Converts an amount from one currency to another using exchange rates relative to a common base.
+ * Formula: (amount / sourceRate) * targetRate
+ * 
+ * @param {number} amount - The amount to convert.
+ * @param {number} sourceRate - The exchange rate of the source currency.
+ * @param {number} targetRate - The exchange rate of the target currency.
+ * @returns {number} The converted amount.
+ */
+export const convertAmount = (amount, sourceRate, targetRate) => {
+  if (!sourceRate || sourceRate === 0) return amount;
+  const result = (amount / sourceRate) * targetRate;
+  return Number(result.toFixed(2));
+};
+

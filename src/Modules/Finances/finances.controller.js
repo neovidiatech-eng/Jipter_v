@@ -5,6 +5,7 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
+import { convertAmount } from "../../Utils/Helpers.js";
 
 export const getExpenses = asyncHandler(async (req, res, next) => {
   const { search, status, type, page = 1, limit = 10 } = req.query;
@@ -61,71 +62,87 @@ export const createExpense = asyncHandler(async (req, res, next) => {
   const { title, currencyId, amount, payment_type, type, status, date } =
     req.body;
 
-  const [currencyExists, systemWallet] = await Promise.all([
+
+  // 1. Fetch required configuration outside transaction
+  const [sourceCurrency, defaultCurrency, systemWallet] = await Promise.all([
     db.findOne({ model: "currency", where: { id: currencyId } }),
-    db.findFirst({ model: "Wallet", where: { type: "system" } }),
+    db.findFirst({ model: "currency", where: { default: true } }),
+    db.findFirst({ model: "Wallet", where: { type: "system" }, include: { currency: true } }),
   ]);
 
-  if (!currencyExists) {
+  if (!sourceCurrency) {
     return errorResponse({ req, next, message: "CURRENCY_NOT_FOUND", status: 404 });
   }
-  if (!systemWallet) {
-    return errorResponse({ req, next, message: "SYSTEM_WALLET_NOT_FOUND", status: 500 });
+  if (!defaultCurrency || !systemWallet) {
+    return errorResponse({ req, next, message: "SYSTEM_CONFIGURATION_ERROR", status: 500 });
   }
 
-  const parsedAmount = parseFloat(amount);
-
-  // 🔒 Prevent wallet balance from going negative
-  if (systemWallet.balance < parsedAmount) {
-    return errorResponse({
-      req,
-      next,
-      message: "INSUFFICIENT_BALANCE",
-      status: 400,
-      details: {
-        available: systemWallet.balance,
-        required: parsedAmount,
-      },
-    });
-  }
+  const rawAmount = parseFloat(amount);
+  
+  // 2. Convert amount to system default currency (Wallet Currency)
+  // Logic: All system wallet movements must be in the default currency.
+  const convertedAmount = convertAmount(rawAmount, sourceCurrency.exchangeRate, defaultCurrency.exchangeRate);
 
   let expense;
-  await db.transaction(async (tx) => {
-    // 1. Create expense record
-    expense = await tx.create({
-      model: "expenses",
-      data: {
-        title,
-        currencyId,
-        amount: parsedAmount,
-        payment_type,
-        type,
-        status,
-        date: new Date(date),
-      },
-    });
+  try {
+    await db.transaction(async (tx) => {
+      // 3. Re-verify balance inside transaction for absolute safety
+      const currentWallet = await tx.findOne({
+        model: "Wallet",
+        where: { id: systemWallet.id },
+      });
 
-    // 2. Create debit ledger entry
-    await tx.create({
-      model: "Transaction",
-      data: {
-        walletId: systemWallet.id,
-        type: "expense",
-        amount: parsedAmount,
-        status: "completed",
-        reason: title,
-      },
-    });
+      if (currentWallet.balance < convertedAmount) {
+        const error = new Error("INSUFFICIENT_BALANCE");
+        error.isMessageKey = true;
+        error.status = 400;
+        throw error;
+      }
 
-    // 3. Deduct from system wallet balance
-    await tx.updateOne({
-      model: "Wallet",
-      where: { id: systemWallet.id },
-      data: { balance: { decrement: parsedAmount } },
-    });
-  });
+      // 4. Create expense record
+      expense = await tx.create({
+        model: "expenses",
+        data: {
+          title,
+          currencyId,
+          amount: rawAmount, // Original amount for record
+          payment_type,
+          type,
+          status,
+          date: new Date(date),
+        },
+      });
 
-  // Re-fetch with currency include after transaction
+      // 5. Create Transaction record (Ledger Entry)
+      await tx.create({
+        model: "Transaction",
+        data: {
+          walletId: systemWallet.id,
+          type: "expense",
+          amount: convertedAmount, // Amount in system currency
+          status: "completed",
+          reason: title,
+          expenseId: expense.id,
+        },
+      });
+
+      // 6. Deduct from system wallet balance (Atomic)
+      await tx.updateOne({
+        model: "Wallet",
+        where: { id: systemWallet.id },
+        data: { balance: { decrement: convertedAmount } },
+      });
+    });
+  } catch (error) {
+    return errorResponse({
+      next,
+      req,
+      message: error.message || "TRANSACTION_FAILED",
+      status: error.status || 500,
+    });
+  }
+
+  // 7. Re-fetch with relations for response
   const expenseWithCurrency = await db.findOne({
     model: "expenses",
     where: { id: expense.id },
@@ -140,6 +157,7 @@ export const createExpense = asyncHandler(async (req, res, next) => {
     data: expenseWithCurrency,
   });
 });
+
 
 export const updateExpense = asyncHandler(async (req, res, next) => {
   const { id } = req.params;

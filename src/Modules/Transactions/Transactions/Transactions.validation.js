@@ -1,54 +1,25 @@
 import Joi from "joi";
 import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
-export const getCurrenciesSchema = {
+export const getTransactionsSchema = {
   query: Joi.object()
     .keys({
-      search: generalFields.search_Currency.optional(),
-    })
-    .required(),
-};
-export const getCurrencyById = {
-  query: Joi.object()
-    .keys({
-      search: generalFields.search_Currency.optional(),
+      currency: generalFields.code.optional(),
+      page: Joi.number().integer().min(1).optional(),
+      limit: Joi.number().integer().min(1).max(100).optional(),
+      type: Joi.string().valid("subscription", "expense", "withdrawal", "credit", "debit").optional(),
+      status: Joi.string().valid("completed", "pending", "failed", "cancelled").optional(),
+      search: generalFields.search.optional(),
     })
     .required(),
 };
 
-export const addCurrencySchema = {
-  body: Joi.object()
+export const getTransactionsStatsSchema = {
+  query: Joi.object()
     .keys({
-      name_en: generalFields.name_en.required(),
-      name_ar: generalFields.name_ar.optional(),
-      symbol: generalFields.symbol.required(),
-      code: generalFields.code.required(),
-      exchangeRate: generalFields.exchangeRate.required(),
+      currency: generalFields.code.optional(),
     })
     .required(),
 };
 
-export const updateCurrencySchema = {
-  body: Joi.object()
-    .keys({
-      name_en: generalFields.name_en.optional(),
-      name_ar: generalFields.name_ar.optional(),
-      symbol: generalFields.symbol.optional(),
-      code: generalFields.code.optional(),
-      exchangeRate: generalFields.exchangeRate.optional(),
-      default: generalFields.default.optional(),
-    })
-    .required(),
-  params: Joi.object()
-    .keys({
-      id: Joi.string().uuid().required(),
-    })
-    .required(),
-};
-export const deleteCurrencySchema = {
-  params: Joi.object()
-    .keys({
-      id: Joi.string().uuid().required(),
-    })
-    .required(),
-};
+

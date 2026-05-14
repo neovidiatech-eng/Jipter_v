@@ -7,6 +7,7 @@ import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, hash, encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
+import { nanoid } from "nanoid";
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {
   const { search, country, plans, page = 1, limit = 10 } = req.query;
@@ -162,7 +163,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
   await db.transaction(async (tx) => {
     // 1. Create user
     const prefix = settings?.userPrefix || "jupiter";
-    const username = `${name.trim().replace(/\s+/g, "-")}_${prefix}`;
+    const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     const user = await tx.create({

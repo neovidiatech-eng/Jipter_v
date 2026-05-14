@@ -16,7 +16,7 @@ export const currencies = [
     symbol: "$",
     code: "USD",
     exchangeRate: 1,
-    default: true,
+    default: false,
   },
   {
     name_en: "Euro",
@@ -32,7 +32,7 @@ export const currencies = [
     symbol: "EGP",
     code: "EGP",
     exchangeRate: 48.5,
-    default: false,
+    default: true,
   },
   {
     name_en: "Saudi Riyal",
