@@ -276,12 +276,14 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const {
     name,
-    email,
+    username,
+    password,
     phone,
     phone_code,
     country,
     planId,
     birth_date,
+    age,
     gender,
     active,
     rankId,
@@ -294,14 +296,13 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     include: { user: true },
   });
 
-  // Handle unique constraints for user
-  if (email && email !== student.user.email) {
-    const existing = await db.findOne({ model: "user", where: { email } });
+  if (username && username !== student.user.username) {
+    const existing = await db.findOne({ model: "user", where: { username } });
     if (existing)
       return errorResponse({
         req,
         next,
-        message: "EMAIL_EXISTS",
+        message: "USERNAME_EXISTS",
         status: 400,
       });
   }
@@ -348,16 +349,37 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
+  const hashedPassword = password ? await hash({ password }) : undefined;
+  const calculatedAge = birth_date
+    ? new Date().getFullYear() - new Date(birth_date).getFullYear()
+    : undefined;
+
   // Update user record if needed
-  if (name || email || phone || phone_code || timezone) {
+  if (
+    name ||
+    username ||
+    password ||
+    phone ||
+    phone_code ||
+    birth_date ||
+    age ||
+    gender ||
+    timezone
+  ) {
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
       data: {
         ...(name && { name }),
-        ...(email && { email }),
+        ...(username && { username }),
+        ...(hashedPassword && { password: hashedPassword }),
         ...(gender && { gender }),
+        ...(age !== undefined
+          ? { age: parseInt(age) }
+          : calculatedAge !== undefined
+            ? { age: calculatedAge }
+            : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
         ...(timezone && { timezone }),
@@ -382,6 +404,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   updatedStudent.user.phone = await decryptText({
     text: updatedStudent.user.phone,
   });
+  delete updatedStudent.user.password;
 
   return successResponse({
     res,

@@ -32,11 +32,14 @@ export const updateStudentSchema = {
   body: Joi.object()
     .keys({
       name: generalFields.name,
+      username: Joi.string().min(3).max(64),
+      password: generalFields.password,
       phone: generalFields.phone,
       phone_code: generalFields.codeCountry,
       country: generalFields.country,
       planId: generalFields.id,
       birth_date: generalFields.birth_date,
+      age: generalFields.number.min(6).max(99),
       gender: generalFields.gender,
       active: generalFields.active,
       rankId: generalFields.id,

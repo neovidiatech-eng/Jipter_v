@@ -5,8 +5,15 @@ export const updateProfileSchema = {
   body: Joi.object()
     .keys({
       name: generalFields.name,
-      email: generalFields.email,
+      username: Joi.string().min(3).max(64),
+      password: generalFields.password,
+      phone: generalFields.phone,
+      phone_code: generalFields.codeCountry,
       age: generalFields.number.min(6).max(99),
+      birth_date: generalFields.birth_date,
+      gender: generalFields.gender,
+      country: generalFields.country,
+      timezone: generalFields.timezone,
     })
     .min(1),
 };
