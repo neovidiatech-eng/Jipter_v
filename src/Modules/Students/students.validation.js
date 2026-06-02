@@ -17,12 +17,15 @@ export const createStudentSchema = {
         "any.required": "PLAN_ID_REQUIRED",
       })
       .required(),
-    birth_date: generalFields.birth_date.required(),
+    age: generalFields.studentAge,
+    birth_date: generalFields.birth_date,
     gender: generalFields.gender.required(),
     active: generalFields.active.required(),
-    rankId: generalFields.id.required(),
+    rankId: generalFields.id,
     timezone: generalFields.timezone, // optional — fallback to default
-  }),
+  })
+    .or("age", "birth_date")
+    .messages({ "object.missing": "AGE_OR_BIRTH_DATE_REQUIRED" }),
 };
 
 export const updateStudentSchema = {
@@ -39,7 +42,7 @@ export const updateStudentSchema = {
       country: generalFields.country,
       planId: generalFields.id,
       birth_date: generalFields.birth_date,
-      age: generalFields.number.min(6).max(99),
+      age: generalFields.studentAge,
       gender: generalFields.gender,
       active: generalFields.active,
       rankId: generalFields.id,

@@ -9,7 +9,11 @@ import {
   hash,
 } from "../../../Utils/Security/index.js";
 import * as db from "../../../database/dbService.js";
-import { createError } from "../../../Utils/Helpers.js";
+import {
+  createError,
+  findRankByAge,
+  resolveStudentAge,
+} from "../../../Utils/Helpers.js";
 
 export const getProfile = asyncHandler(async (req, res, next) => {
   const user = await db.findOne({
@@ -153,27 +157,24 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
       });
   }
 
-  if (phone) {
-    const allUsers = await db.findMany({ model: "user" });
-    let existingPhone = null;
-    for (const existingUser of allUsers) {
-      if (existingUser.phone) {
-        const decrypted = await decryptText({ text: existingUser.phone });
-        if (decrypted === phone && existingUser.id !== user.id) {
-          existingPhone = existingUser;
-          break;
-        }
-      }
-    }
-    if (existingPhone)
-      return errorResponse({ req, message: "PHONE_EXISTS", next, status: 400 });
-  }
-
   const hashedPassword = password ? await hash({ password }) : undefined;
   const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-  const calculatedAge = birth_date
-    ? new Date().getFullYear() - new Date(birth_date).getFullYear()
-    : undefined;
+  const shouldResolveRank = age !== undefined || birth_date;
+  const studentAge = shouldResolveRank
+    ? resolveStudentAge({ age, birthDate: birth_date })
+    : null;
+  const autoRank = shouldResolveRank
+    ? await findRankByAge({ age: studentAge })
+    : null;
+
+  if (shouldResolveRank && !autoRank) {
+    return errorResponse({
+      req,
+      message: "AGE_RANK_NOT_FOUND",
+      next,
+      status: 400,
+    });
+  }
 
   let user_updated = student.user;
   if (
@@ -198,24 +199,21 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
         ...(hashedPassword && { password: hashedPassword }),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
-        ...(age !== undefined
-          ? { age: parseInt(age) }
-          : calculatedAge !== undefined
-            ? { age: calculatedAge }
-            : {}),
+        ...(studentAge !== null ? { age: studentAge } : {}),
         ...(gender && { gender }),
         ...(timezone && { timezone }),
       },
     });
   }
 
-  if (country || birth_date) {
+  if (country || birth_date || autoRank) {
     await db.updateOne({
       model: "student",
       where: { id: student.id },
       data: {
         ...(country && { country }),
         ...(birth_date && { birth_date: new Date(birth_date) }),
+        ...(autoRank && { rank: { connect: { id: autoRank.id } } }),
       },
     });
   }

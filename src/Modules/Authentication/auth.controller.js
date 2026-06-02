@@ -17,7 +17,7 @@ import {
 import { generateOtp } from "../../Utils/Security/otp.js";
 import { sendEmail } from "../../Utils/Mailer/SendEmail.js";
 import { generateToken, verifyToken } from "../../Utils/Token/token.js";
-import { getAge } from "../../Utils/Helpers.js";
+import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 
 /* -------------------------------------------- ------------------------------ */
@@ -31,6 +31,7 @@ export const register = asyncHandler(async (req, res, next) => {
     phone,
     codeCountry,
     plan_id,
+    age: submittedAge,
     birth_date,
     gender,
     country,
@@ -38,22 +39,10 @@ export const register = asyncHandler(async (req, res, next) => {
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, allUsers, settings] = await Promise.all([
+  const [checkUserByEmail, settings] = await Promise.all([
     db.findFirst({ model: "user", where: { email } }),
-    db.findMany({ model: "user" }),
     db.findFirst({ model: "settings" }),
   ]);
-
-  let checkUserByPhone = null;
-  for (const u of allUsers) {
-    if (u.phone) {
-      const decrypted = await decryptText({ text: u.phone });
-      if (decrypted === phone) {
-        checkUserByPhone = u;
-        break;
-      }
-    }
-  }
 
   const userRole = await db.findFirst({
     model: "role",
@@ -66,10 +55,6 @@ export const register = asyncHandler(async (req, res, next) => {
 
   if (checkUserByEmail) {
     return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
-  }
-
-  if (checkUserByPhone) {
-    return errorResponse({ req, next, message: "PHONE_EXISTS", status: 400 });
   }
 
   if (plan_id) {
@@ -86,8 +71,10 @@ export const register = asyncHandler(async (req, res, next) => {
       });
     }
   }
-  const age = getAge({ birthDate: birth_date });
-  console.log(age);
+  const studentAge = resolveStudentAge({
+    age: submittedAge,
+    birthDate: birth_date,
+  });
 
   // 2. Preparation (Hashing, Encryption, OTP)
   const hashedPassword = await hash({ password });
@@ -121,7 +108,7 @@ export const register = asyncHandler(async (req, res, next) => {
       data: {
         name,
         email,
-        age,
+        age: studentAge,
         username,
         password: hashedPassword,
         phone: encryptedPhone,
@@ -140,9 +127,9 @@ export const register = asyncHandler(async (req, res, next) => {
         password: hashedPassword,
         phone: encryptedPhone,
         code_country: codeCountry,
-        birth_date,
+        birth_date: birth_date || null,
         gender,
-        age,
+        age: studentAge,
         country,
         timezone,
         user_id: user.id,

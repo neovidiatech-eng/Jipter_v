@@ -116,6 +116,8 @@
   "VALID_SAUDI_PHONE": "Please enter a valid Saudi phone number",
   "VALID_PHONE": "Please enter a valid phone number",
   "VALID_COUNTRY_CALLING_CODE": "Please enter a valid country calling code (for example +20, +1, +44, +966)",
+  "AGE_OR_BIRTH_DATE_REQUIRED": "Age or birth date is required",
+  "AGE_RANK_NOT_FOUND": "No rank was found for this student age",
   "VALID_PLAN_ID": "Please enter a valid plan ID",
   "STUDENT_ID_REQUIRED": "Student ID is required",
   "STUDENT_ID_INVALID": "Student ID is invalid",

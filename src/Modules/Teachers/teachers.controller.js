@@ -74,36 +74,19 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     active,
   } = req.body;
 
-  const [checkUserByEmail, allUsers, checkCurrency, getrole, settings] =
+  const [checkUserByEmail, checkCurrency, getrole, settings] =
     await Promise.all([
       db.findOne({ model: "user", where: { email } }),
-      db.findMany({ model: "user" }),
       db.findOne({ model: "currency", where: { id: currency_id } }),
       db.findFirst({ model: "role", where: { name: "teacher" } }),
       db.findFirst({ model: "settings" }),
     ]);
-
-  let checkUserByPhone = null;
-  if (phone) {
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone) {
-          checkUserByPhone = u;
-          break;
-        }
-      }
-    }
-  }
 
   if (!getrole)
     return errorResponse({ req, message: "ROLE_NOT_FOUND", next, status: 404 });
 
   if (checkUserByEmail)
     return errorResponse({ req, message: "EMAIL_EXISTS", next, status: 400 });
-
-  if (checkUserByPhone)
-    return errorResponse({ req, message: "PHONE_EXISTS", next, status: 400 });
 
   if (!checkCurrency)
     return errorResponse({
@@ -254,27 +237,6 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
       return errorResponse({
         req,
         message: "EMAIL_EXISTS",
-        next,
-        status: 400,
-      });
-  }
-
-  if (phone) {
-    const allUsers = await db.findMany({ model: "user" });
-    let existing = null;
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone && u.id !== teacher.user_id) {
-          existing = u;
-          break;
-        }
-      }
-    }
-    if (existing)
-      return errorResponse({
-        req,
-        message: "PHONE_EXISTS",
         next,
         status: 400,
       });

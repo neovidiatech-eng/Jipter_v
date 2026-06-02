@@ -7,7 +7,11 @@ import * as db from "../../../database/dbService.js";
 import { redis } from "../../../Utils/Radis/Connection.js";
 import { decryptText } from "../../../Utils/Security/index.js";
 import { ensureExists } from "../../../database/genericService.js";
-import { convertAmount } from "../../../Utils/Helpers.js";
+import {
+  convertAmount,
+  findRankByAge,
+  resolveStudentAge,
+} from "../../../Utils/Helpers.js";
 
 
 export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
@@ -95,13 +99,38 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
-  if (rankId) {
-    const rank = await ensureExists({
-      model: "ranks",
-      where: { id: rankId },
-      message: "RANK_NOT_FOUND",
+  let studentAge = null;
+  let selectedRank = null;
+  if (status === "approved") {
+    studentAge = resolveStudentAge({
+      age: parsedStudentData?.age,
+      birthDate: parsedStudentData?.birth_date,
     });
+
+    selectedRank = studentAge !== null
+      ? await findRankByAge({ age: studentAge })
+      : null;
+
+    if (!selectedRank && rankId) {
+      selectedRank = await ensureExists({
+        model: "ranks",
+        where: { id: rankId },
+        message: "RANK_NOT_FOUND",
+      });
+    }
+
+    if (!selectedRank) {
+      return errorResponse({
+        next,
+        req,
+        message: studentAge === null
+          ? "AGE_OR_BIRTH_DATE_REQUIRED"
+          : "AGE_RANK_NOT_FOUND",
+        status: 400,
+      });
+    }
   }
+
   const studentRole = await db.findFirst({
     model: "role",
     where: { name: { equals: "student", mode: "insensitive" } },
@@ -133,6 +162,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         where: { id: subscriptionRequest.user_id },
         data: {
           status: status === "approved" ? "active" : "rejected",
+          ...(status === "approved" && studentAge !== null && { age: studentAge }),
           ...(status === "approved" &&
             studentRole && { roleId: studentRole.id }),
         },
@@ -162,14 +192,16 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         model: "student",
         data: {
           user: { connect: { id: subscriptionRequest.user_id } },
-          birth_date: new Date(parsedStudentData.birth_date),
+          ...(parsedStudentData.birth_date && {
+            birth_date: new Date(parsedStudentData.birth_date),
+          }),
           country: parsedStudentData.country,
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           status: "approved",
           active: true,
-          rank: { connect: { id: rankId } },
+          rank: { connect: { id: selectedRank.id } },
         },
       });
 

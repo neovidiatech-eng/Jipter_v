@@ -12,7 +12,7 @@ model user {
   username             String?                 @unique
   password             String?
   name                 String?
-  phone                String?                 @unique
+  phone                String?
   createdAt            DateTime                @default(now())
   gender               String?
   age                  Int?
@@ -195,7 +195,7 @@ model weekly_report {
 model student {
   id                 String              @id @default(uuid())
   user_id            String              @unique
-  birth_date         DateTime
+  birth_date         DateTime?
   active             Boolean             @default(false)
   planId             String?
   country            String

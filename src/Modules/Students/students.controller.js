@@ -7,6 +7,7 @@ import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, hash, encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
+import { findRankByAge, resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {
@@ -84,6 +85,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     phone_code,
     country,
     planId,
+    age,
     birth_date,
     gender,
     active,
@@ -91,33 +93,22 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     timezone,
   } = req.body;
 
-  const [checkUserByEmail, allUsers, checkPlan, studentRole, settings, rank] =
+  const studentAge = resolveStudentAge({ age, birthDate: birth_date });
+
+  const [checkUserByEmail, checkPlan, studentRole, settings] =
     await Promise.all([
       email
         ? db.findOne({ model: "user", where: { email } })
         : Promise.resolve(null),
-      db.findMany({ model: "user" }),
       db.findOne({ model: "plan", where: { id: planId } }),
       db.findFirst({
         model: "role",
         where: { name: { equals: "student", mode: "insensitive" } },
       }),
       db.findFirst({ model: "settings" }),
-      db.findOne({ model: "ranks", where: { id: rankId } }),
     ]);
 
-  let checkUserByPhone = null;
-  if (phone) {
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone) {
-          checkUserByPhone = u;
-          break;
-        }
-      }
-    }
-  }
+  const rank = await findRankByAge({ age: studentAge });
 
   if (checkUserByEmail)
     return errorResponse({
@@ -126,19 +117,17 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       message: "EMAIL_EXISTS",
       status: 400,
     });
-  if (checkUserByPhone)
-    return errorResponse({
-      req,
-      next,
-      message: "PHONE_EXISTS",
-      status: 400,
-    });
 
   if (!checkPlan)
     return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
 
   if (!rank)
-    return errorResponse({ req, next, message: "RANK_NOT_FOUND", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "AGE_RANK_NOT_FOUND",
+      status: 400,
+    });
 
   const hashedPassword = await hash({ password });
 
@@ -178,9 +167,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         status: "active",
         confirmAt: new Date(),
         gender,
-        age: birth_date
-          ? new Date().getFullYear() - new Date(birth_date).getFullYear()
-          : null,
+        age: studentAge,
         timezone: userTimezone,
         ...(studentRole && { roleId: studentRole.id }),
       },
@@ -193,7 +180,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         user: { connect: { id: user.id } },
         country,
         plan: { connect: { id: planId } },
-        birth_date: new Date(birth_date),
+        ...(birth_date && { birth_date: new Date(birth_date) }),
         active: active ?? false,
         status: "approved",
         sessions: checkPlan.sessionsCount,
@@ -307,27 +294,6 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
-  if (phone) {
-    const allUsers = await db.findMany({ model: "user" });
-    let existing = null;
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone && u.id !== student.user_id) {
-          existing = u;
-          break;
-        }
-      }
-    }
-    if (existing)
-      return errorResponse({
-        req,
-        next,
-        message: "PHONE_EXISTS",
-        status: 400,
-      });
-  }
-
   if (planId && planId !== student.planId) {
     const plan = await db.findOne({ model: "plan", where: { id: planId } });
     if (!plan)
@@ -338,7 +304,25 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         status: 404,
       });
   }
-  if (rankId && rankId !== student.rankId) {
+
+  const shouldResolveRank = age !== undefined || birth_date;
+  const studentAge = shouldResolveRank
+    ? resolveStudentAge({ age, birthDate: birth_date })
+    : null;
+  const autoRank = shouldResolveRank
+    ? await findRankByAge({ age: studentAge })
+    : null;
+
+  if (shouldResolveRank && !autoRank) {
+    return errorResponse({
+      req,
+      next,
+      message: "AGE_RANK_NOT_FOUND",
+      status: 400,
+    });
+  }
+
+  if (!shouldResolveRank && rankId && rankId !== student.rankId) {
     const rank = await db.findOne({ model: "ranks", where: { id: rankId } });
     if (!rank)
       return errorResponse({
@@ -350,9 +334,6 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   }
 
   const hashedPassword = password ? await hash({ password }) : undefined;
-  const calculatedAge = birth_date
-    ? new Date().getFullYear() - new Date(birth_date).getFullYear()
-    : undefined;
 
   // Update user record if needed
   if (
@@ -375,11 +356,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(username && { username }),
         ...(hashedPassword && { password: hashedPassword }),
         ...(gender && { gender }),
-        ...(age !== undefined
-          ? { age: parseInt(age) }
-          : calculatedAge !== undefined
-            ? { age: calculatedAge }
-            : {}),
+        ...(studentAge !== null ? { age: studentAge } : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
         ...(timezone && { timezone }),
@@ -396,7 +373,11 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(birth_date && { birth_date: new Date(birth_date) }),
 
       ...(active !== undefined && { active }),
-      ...(rankId && { rank: { connect: { id: rankId } } }),
+      ...(autoRank
+        ? { rank: { connect: { id: autoRank.id } } }
+        : rankId
+          ? { rank: { connect: { id: rankId } } }
+          : {}),
     },
     include: { user: true, plan: true },
   });

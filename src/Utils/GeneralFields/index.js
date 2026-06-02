@@ -63,6 +63,13 @@ export const generalFields = {
     "any.required": "Email is required",
   }),
   number: Joi.number(),
+  studentAge: Joi.number().integer().min(1).max(120).messages({
+    "number.base": "Age must be a number",
+    "number.integer": "Age must be an integer",
+    "number.min": "Age must be at least {#limit}",
+    "number.max": "Age must be at most {#limit}",
+    "any.required": "Age is required",
+  }),
   password: Joi.string()
     .pattern(
       new RegExp(

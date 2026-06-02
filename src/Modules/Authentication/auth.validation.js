@@ -8,7 +8,8 @@ export const registeritonSchema = {
       email: generalFields.email.required(),
       password: generalFields.password.required(),
       codeCountry: generalFields.codeCountry.required(),
-      birth_date: generalFields.birth_date.required(),
+      age: generalFields.studentAge,
+      birth_date: generalFields.birth_date,
       gender: generalFields.gender.required(),
       country: generalFields.country.required(),
       phone: generalFields.phone.required(),
@@ -21,6 +22,8 @@ export const registeritonSchema = {
         })
         .required(),
     })
+    .or("age", "birth_date")
+    .messages({ "object.missing": "AGE_OR_BIRTH_DATE_REQUIRED" })
     .required(),
 };
 export const loginSchema = {

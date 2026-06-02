@@ -81,27 +81,12 @@ export const getStuffById = asyncHandler(async (req, res, next) => {
 export const createStuffUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, phone, codeCountry, roleId } = req.body;
 
-  const [checkUserByEmail, allUsers, checkRole] = await Promise.all([
+  const [checkUserByEmail, checkRole] = await Promise.all([
     db.findOne({ model: "user", where: { email } }),
-    db.findMany({ model: "user" }),
     roleId ? db.findOne({ model: "role", where: { id: roleId } }) : Promise.resolve(null)
   ]);
 
-  let checkUserByPhone = null;
-  if (phone) {
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone) {
-          checkUserByPhone = u;
-          break;
-        }
-      }
-    }
-  }
-
   if (checkUserByEmail) return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
-  if (checkUserByPhone) return errorResponse({ req, next, message: "PHONE_EXISTS", status: 400 });
   if (roleId && !checkRole) return errorResponse({ req, next, message: "ROLE_NOT_FOUND", status: 404 });
 
   const hashedPassword = await hash({ password });
@@ -155,21 +140,6 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
   if (email && email !== stuff.user.email) {
     const existing = await db.findOne({ model: "user", where: { email } });
     if (existing) return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
-  }
-
-  if (phone) {
-    const allUsers = await db.findMany({ model: "user" });
-    let existing = null;
-    for (const u of allUsers) {
-      if (u.phone) {
-        const decrypted = await decryptText({ text: u.phone });
-        if (decrypted === phone && u.id !== stuff.user_id) {
-          existing = u;
-          break;
-        }
-      }
-    }
-    if (existing) return errorResponse({ req, next, message: "PHONE_EXISTS", status: 400 });
   }
 
   // Update user data

@@ -9,7 +9,7 @@ export const updateProfileSchema = {
       password: generalFields.password,
       phone: generalFields.phone,
       phone_code: generalFields.codeCountry,
-      age: generalFields.number.min(6).max(99),
+      age: generalFields.studentAge,
       birth_date: generalFields.birth_date,
       gender: generalFields.gender,
       country: generalFields.country,

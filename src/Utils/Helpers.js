@@ -119,3 +119,35 @@ export const getAge = ({ birthDate }) => {
 
   return age;
 };
+
+export const resolveStudentAge = ({ age, birthDate }) => {
+  if (age !== undefined && age !== null && age !== "") {
+    return Number(age);
+  }
+
+  if (birthDate) {
+    return getAge({ birthDate });
+  }
+
+  return null;
+};
+
+export const findRankByAge = async ({ age, dbClient = db }) => {
+  const numericAge = Number(age);
+  if (!Number.isFinite(numericAge)) return null;
+
+  const ranks = await dbClient.findMany({ model: "ranks" });
+  return ranks
+    .sort((a, b) => {
+      const aMin = Number(a.ageRange?.minAge ?? 0);
+      const bMin = Number(b.ageRange?.minAge ?? 0);
+      const aMax = Number(a.ageRange?.maxAge ?? 0);
+      const bMax = Number(b.ageRange?.maxAge ?? 0);
+      return aMin - bMin || aMax - bMax;
+    })
+    .find((rank) => {
+      const minAge = Number(rank.ageRange?.minAge);
+      const maxAge = Number(rank.ageRange?.maxAge);
+      return numericAge >= minAge && numericAge <= maxAge;
+    });
+};
