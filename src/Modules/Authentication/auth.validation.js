@@ -29,9 +29,12 @@ export const registeritonSchema = {
 export const loginSchema = {
   body: Joi.object()
     .keys({
-      username: Joi.string().required(),
+      email: generalFields.email,
+      username: Joi.string(),
       password: generalFields.password.required(),
     })
+    .or("email", "username")
+    .messages({ "object.missing": "MISSING_CREDENTIALS" })
     .required(),
 };
 export const googleSignupSchema = {
