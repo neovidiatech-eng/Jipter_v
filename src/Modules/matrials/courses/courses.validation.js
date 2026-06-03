@@ -23,8 +23,18 @@ export const createCourseSchema = {
         "string.empty": "rankId cannot be empty",
         "any.required": "rankId is required",
       })
-      .required(),
+      .required()
   }).required(),
+};
+
+export const getCoursesSchema = {
+  query: Joi.object({
+    rankId: generalFields.id.optional(),
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).max(50).optional(),
+    sort: Joi.string().valid("asc", "desc").optional(),
+    sortBy: Joi.string().valid("rankId", "createdAt", "title").optional(),
+  }).optional(),
 };
 
 export const updateCourseSchema = {
@@ -44,7 +54,7 @@ export const updateCourseSchema = {
       "string.base": "rankId must be a string",
       "string.empty": "rankId cannot be empty",
       "any.required": "rankId is required",
-    }),
+    })
   }).required(),
   params: Joi.object({
     id: generalFields.id
@@ -68,3 +78,4 @@ export const courseIdSchema = {
       .required(),
   }).required(),
 };
+

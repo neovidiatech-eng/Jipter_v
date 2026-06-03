@@ -15,8 +15,11 @@ const coursesResource = "courses";
 router.get(
   "/",
   authorizeResource(coursesResource),
+  validation(coursesValidation.getCoursesSchema),
   coursesController.getAllCourses,
 );
+
+
 
 router.get(
   "/:id",

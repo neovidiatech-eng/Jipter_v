@@ -7,6 +7,7 @@ import { createError } from "../../../Utils/Helpers.js";
 const lecturesInclude = {
   rank: {
     select: {
+      id: true,
       name: true,
       slug: true,
       color: true,
@@ -90,7 +91,11 @@ export const createCourse = async ({ req, res, next }) => {
 export const getCourses = async (query = {}) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
-  const { rankId } = query;
+  const rankId = query.rankId;
+  const { sortBy = "createdAt" } = query;
+  const sortDirection = query.sort || "desc";
+  console.log(query);
+  
 
   const where = {};
 
@@ -103,6 +108,9 @@ export const getCourses = async (query = {}) => {
     where,
     page,
     limit,
+    orderBy: [
+      { [sortBy]: sortDirection },
+    ],
     include: lecturesInclude,
   });
 };
@@ -184,9 +192,15 @@ export const updateCourse = async ({ req, res, next }) => {
   return await db.updateOne({
     model: "courses",
     where: { id },
-    data: { title, description, rankId },
+    data: {
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(rankId !== undefined && { rankId }),
+    },
   });
 };
+
+
 
 /* -----------------------------
    DELETE COURSE

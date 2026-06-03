@@ -21,6 +21,8 @@ export const updateCourse = asyncHandler(async (req, res, next) => {
     return successResponse({ res, req, message: "UPDATE_SUCCESS", data: course });
 });
 
+
+
 export const deleteCourse = asyncHandler(async (req, res, next) => {
     await coursesService.deleteCourse({req,res,next});
     return successResponse({ res, req, message: "DELETE_SUCCESS" });
