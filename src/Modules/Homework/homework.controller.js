@@ -4,13 +4,13 @@ import {
   successResponse,
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
-import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import { isAdmin, ROLES } from "../../Utils/Permissions/permissions.js";
+
+const isHomeworkManagementUser = (user) =>
+  isAdmin(user) || user?.role?.name === ROLES.STAFF;
 
 export const createHomework = asyncHandler(async (req, res, next) => {
   const { title, description, dueDate, studentId, status } = req.body;
-
-  const isTeacher = !!req.user.teacher;
-  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
 
   const teacher = req.user.teacher;
   const student = await db.findOne({
@@ -80,7 +80,7 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
+  const isManagement = isHomeworkManagementUser(req.user);
   const isTeacher = !!req.user.teacher;
 
   // Check permissions: Teacher can update only their own homework.
@@ -140,7 +140,7 @@ export const deleteHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
+  const isManagement = isHomeworkManagementUser(req.user);
   const isTeacher = !!req.user.teacher;
 
   // Teacher can only delete their own homework; admin/super_admin can delete any
@@ -189,6 +189,23 @@ export const getHomework = asyncHandler(async (req, res, next) => {
       message: "HOMEWORK_NOT_FOUND",
       status: 404,
     });
+  }
+
+  const isManagement = isHomeworkManagementUser(req.user);
+  if (!isManagement) {
+    const canStudentAccess =
+      req.user.student && homework.studentId === req.user.student.id;
+    const canTeacherAccess =
+      req.user.teacher && homework.teacherId === req.user.teacher.id;
+
+    if (!canStudentAccess && !canTeacherAccess) {
+      return errorResponse({
+        req,
+        next,
+        message: "UNAUTHORIZED_ACCESS",
+        status: 403,
+      });
+    }
   }
 
   return successResponse({
@@ -247,7 +264,7 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
   if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
-  const isManagement = req.user.hasPermission(PERMISSIONS_V2.HOMEWORK.READ);
+  const isManagement = isHomeworkManagementUser(req.user);
 
   if (!isManagement) {
     if (req.user.student) {
