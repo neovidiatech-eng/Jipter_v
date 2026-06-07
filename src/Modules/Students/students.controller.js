@@ -79,6 +79,15 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   if (plans) {
     where.planId = plans;
   }
+  const activeStudents = await db.count({
+    model: "student",
+    where: { active: true },
+  });
+  const inactiveStudents = await db.count({
+    model: "student",
+    where: { active: false },
+  });
+  const totalStudents = await db.count({ model: "student" });
 
   const { items: students, pagination } =
     await db.findManyWithPaginationAndCount({
@@ -122,7 +131,11 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { studentsData, pagination },
+    data: {
+      studentsData,
+      pagination,
+      status: { activeStudents, inactiveStudents, totalStudents },
+    },
     status: 200,
   });
 });
@@ -317,7 +330,7 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     include: {
       user: {
         include: {
-        reviewsReceived: true,
+          reviewsReceived: true,
         },
       },
       plan: true,
@@ -325,13 +338,10 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     message: "STUDENT_NOT_FOUND",
   });
 
-
-
   if (student.user.phone) {
     student.user.phone = await decryptText({ text: student.user.phone });
   }
   delete student.user.password;
-
 
   return successResponse({
     res,
