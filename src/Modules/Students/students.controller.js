@@ -317,44 +317,7 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     include: {
       user: {
         include: {
-          reviewsReceived: {
-            where: {
-              isHidden: false,
-              role: "teacher",
-            },
-            orderBy: {
-              createdAt: "desc",
-            },
-            select: {
-              id: true,
-              rating: true,
-              comment: true,
-              role: true,
-              createdAt: true,
-              reviewer: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  teacher: {
-                    select: {
-                      id: true,
-                      user_id: true,
-                    },
-                  },
-                },
-              },
-              schedule: {
-                select: {
-                  id: true,
-                  title: true,
-                  status: true,
-                  start_time: true,
-                  end_time: true,
-                },
-              },
-            },
-          },
+        reviewsReceived: true,
         },
       },
       plan: true,
@@ -362,27 +325,13 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     message: "STUDENT_NOT_FOUND",
   });
 
-  const feedback = student.user.reviewsReceived.map((review) => ({
-    id: review.id,
-    rating: review.rating,
-    comment: review.comment,
-    role: review.role,
-    createdAt: review.createdAt,
-    instructor: {
-      id: review.reviewer.teacher?.id,
-      user_id: review.reviewer.teacher?.user_id,
-      name: review.reviewer.name,
-      email: review.reviewer.email,
-    },
-    session: review.schedule,
-  }));
+
 
   if (student.user.phone) {
     student.user.phone = await decryptText({ text: student.user.phone });
   }
   delete student.user.password;
-  delete student.user.reviewsReceived;
-  student.feedback = feedback;
+
 
   return successResponse({
     res,
