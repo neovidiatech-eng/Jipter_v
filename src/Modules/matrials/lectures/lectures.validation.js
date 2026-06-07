@@ -24,6 +24,13 @@ export const createLectureSchema = {
         "any.required": "videoUrl is required",
       })
       .required(),
+    slidesUrl: generalFields.url
+      .messages({
+        "string.base": "slidesUrl must be a string",
+        "string.empty": "slidesUrl cannot be empty",
+        "any.required": "slidesUrl is required",
+      })
+      .required(),
     pdfUrl: generalFields.url
       .messages({
         "string.base": "pdfUrl must be a string",
@@ -54,6 +61,7 @@ export const updateLectureSchema = {
     duration: Joi.string().optional(),
     date: Joi.date().optional(),
     pdfUrl: generalFields.url.optional(),
+    slidesUrl: generalFields.url.optional(),
   }).required(),
   params: Joi.object({
     id: generalFields.id.required(),

@@ -10,6 +10,57 @@ import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 import { findRankByAge, resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 
+const getStartingPointLectureIds = async ({
+  rankId,
+  startingCourseId,
+  startingLectureId,
+}) => {
+  if (!startingCourseId && !startingLectureId) return [];
+
+  const courses = await db.findMany({
+    model: "courses",
+    where: { rankId },
+    orderBy: { createdAt: "asc" },
+    include: {
+      lectures: {
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  const selectedCourseIndex = courses.findIndex(
+    (course) => course.id === startingCourseId,
+  );
+
+  if (selectedCourseIndex === -1) {
+    const error = new Error("COURSE_NOT_FOUND");
+    error.cause = 404;
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  const selectedCourse = courses[selectedCourseIndex];
+  const selectedLecture = selectedCourse.lectures.find(
+    (lecture) => lecture.id === startingLectureId,
+  );
+
+  if (!selectedLecture) {
+    const error = new Error("LECTURE_NOT_FOUND");
+    error.cause = 404;
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  return [
+    ...courses
+      .slice(0, selectedCourseIndex)
+      .flatMap((course) => course.lectures.map((lecture) => lecture.id)),
+    ...selectedCourse.lectures
+      .filter((lecture) => lecture.order < selectedLecture.order)
+      .map((lecture) => lecture.id),
+  ];
+};
+
 export const getAllStudents = asyncHandler(async (req, res, next) => {
   const { search, country, plans, page = 1, limit = 10 } = req.query;
 
@@ -90,6 +141,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     gender,
     active,
     rankId,
+    startingCourseId,
+    startingLectureId,
     timezone,
   } = req.body;
 
@@ -128,6 +181,13 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       message: "AGE_RANK_NOT_FOUND",
       status: 400,
     });
+
+  const effectiveRankId = rankId || rank.id;
+  const completedLectureIds = await getStartingPointLectureIds({
+    rankId: effectiveRankId,
+    startingCourseId,
+    startingLectureId,
+  });
 
   const hashedPassword = await hash({ password });
 
@@ -186,9 +246,22 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         sessions: checkPlan.sessionsCount,
         sessions_attended: 0,
         sessions_remaining: checkPlan.sessionsCount,
-        rank: { connect: { id: rankId } },
+        rank: { connect: { id: effectiveRankId } },
       },
     });
+
+    if (completedLectureIds.length) {
+      await tx.createMany({
+        model: "user_lectures",
+        data: completedLectureIds.map((lectureId) => ({
+          userId: user.id,
+          lectureId,
+          status: "completed",
+          progress: 100,
+          completedAt: new Date(),
+        })),
+      });
+    }
 
     // 3. Create subscription record
     const subscription = await tx.create({

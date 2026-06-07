@@ -5,7 +5,7 @@ import { createError } from "../../../Utils/Helpers.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title, content, videoUrl, pdfUrl, duration, date } = req.body;
+  const { courseId, title, content, videoUrl, pdfUrl, slidesUrl, duration, date } = req.body;
   let { order } = req.body;
 
   if (!courseId) {
@@ -45,7 +45,7 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  if (!pdfUrl && !videoUrl) {
+  if (!pdfUrl && !videoUrl && !slidesUrl) {
     const error = createError({
       message: "LINK_REQUIRED",
       status: 400,
@@ -88,6 +88,7 @@ export const createLecture = async ({ req, res, next }) => {
       videoUrl,
       order: parseInt(order),
       pdfUrl,
+      slidesUrl,
       duration,
       date,
     },
@@ -158,7 +159,7 @@ export const getLectureById = async (id) => {
 ----------------------------- */
 export const updateLecture = async ({ req, res, next }) => {
   const { id } = req.params;
-  const { courseId, title, content, videoUrl, order, pdfUrl, duration, date } = req.body;
+  const { courseId, title, content, videoUrl, order, pdfUrl, slidesUrl, duration, date } = req.body;
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
@@ -170,6 +171,7 @@ export const updateLecture = async ({ req, res, next }) => {
     videoUrl,
     order,
     pdfUrl,
+    slidesUrl,
     duration,
     date,
   };

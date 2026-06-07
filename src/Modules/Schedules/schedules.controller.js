@@ -556,6 +556,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       title,
       description,
       link,
+      pdfUrl: currentLecture?.pdfUrl || pdfUrl || null,
       notes,
       start_time,
       end_time,
@@ -566,7 +567,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       parent_recurring_id: parentRecurringId,
       language,
       videoUrl: currentLecture?.videoUrl || videoUrl || null,
-      slidesUrl,
+      slidesUrl: currentLecture?.slidesUrl || slidesUrl || null,
     });
 
     notificationJobs.push({ start_time, notification_Time });

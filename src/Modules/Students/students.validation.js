@@ -22,8 +22,11 @@ export const createStudentSchema = {
     gender: generalFields.gender.required(),
     active: generalFields.active.required(),
     rankId: generalFields.id,
+    startingCourseId: generalFields.id,
+    startingLectureId: generalFields.id,
     timezone: generalFields.timezone, // optional — fallback to default
   })
+    .and("startingCourseId", "startingLectureId")
     .or("age", "birth_date")
     .messages({ "object.missing": "AGE_OR_BIRTH_DATE_REQUIRED" }),
 };

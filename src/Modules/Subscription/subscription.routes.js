@@ -5,6 +5,8 @@ import * as controller from "./subscription.controller.js";
 import plansRouter from "./Plans/plans.routes.js";
 import requestsRouter from "./SubscriptionRequests/subscriptionRequests.routes.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import { validation } from "../../Middlewares/Validation.js";
+import * as schem from "./subscription.validation.js";
 
 const router = Router();
 
@@ -16,6 +18,14 @@ router.get(
   authentication,
   authorize(PERMISSIONS_V2.SUBSCRIPTIONS.READ),
   controller.getMySubscription,
+);
+
+router.post(
+  "/:studentId/renew",
+  authentication,
+  authorize(PERMISSIONS_V2.SUBSCRIPTIONS.MANAGE),
+  validation(schem.renewSubscription),
+  controller.renewSubscription,
 );
 
 export default router;

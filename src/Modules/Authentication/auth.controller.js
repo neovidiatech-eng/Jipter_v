@@ -159,8 +159,8 @@ export const register = asyncHandler(async (req, res, next) => {
 });
 
 export const login = asyncHandler(async (req, res, next) => {
-  const { email, username, password } = req.body;
-  if ((!email && !username) || !password) {
+  const { username, password } = req.body;
+  if (!username || !password) {
     return errorResponse({
       req,
       next,
@@ -170,7 +170,9 @@ export const login = asyncHandler(async (req, res, next) => {
   }
   const user = await db.findFirst({
     model: "user",
-    where: email ? { email } : { username },
+    where: {
+      OR: [{ username }, { email: username }],
+    },
     include: {
       role: {
         select: {

@@ -29,12 +29,16 @@ export const registeritonSchema = {
 export const loginSchema = {
   body: Joi.object()
     .keys({
-      email: generalFields.email,
-      username: Joi.string(),
+      username: Joi.alternatives()
+        .try(
+          Joi.string()
+            .email({ tlds: false })
+            .messages({ "string.email": "VALID_EMAIL" }),
+          Joi.string(),
+        )
+        .required(),
       password: generalFields.password.required(),
     })
-    .or("email", "username")
-    .messages({ "object.missing": "MISSING_CREDENTIALS" })
     .required(),
 };
 export const googleSignupSchema = {

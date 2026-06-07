@@ -518,6 +518,7 @@ model lectures {
   content   String?
   videoUrl  String?
   pdfUrl    String?
+  slidesUrl String?
   date      DateTime?
   order     Int
   courseId  String

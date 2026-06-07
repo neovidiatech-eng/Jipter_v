@@ -77,6 +77,7 @@
   "SESSION_CONFLICT": "Update failed due to conflict with existing session",
   "INSUFFICIENT_SESSIONS_RESTORE": "Student does not have enough sessions to restore this session",
   "SYSTEM_WALLET_NOT_FOUND": "System wallet not found. Please run the database seeder.",
+  "SYSTEM_CONFIGURATION_ERROR": "System financial configuration is missing. Please check the system wallet and default currency.",
   "INSUFFICIENT_BALANCE": "Insufficient wallet balance. Available: {{available}}, Required: {{required}}",
   "TOO_EARLY_TO_JOIN": "Too early to join the session. Current: {{now}}, Session starts: {{start}}",
   "TOO_LATE_TO_JOIN": "Too late to join the session",
@@ -227,5 +228,6 @@
   "PRISMA_INVALID_RELATION": "Invalid relation on field: {{field}}",
   "PRISMA_RECORD_NOT_FOUND": "Record not found in the database",
   "INVALID_FILE_FORMAT": "Invalid file format. Please upload a valid file.",
-  "NO_FILES_UPLOADED": "No files were uploaded. Please attach a file."
+  "NO_FILES_UPLOADED": "No files were uploaded. Please attach a file.",
+  "STUDENT_HAS_ACTIVE_SUBSCRIPTION": "Student has an active subscription"
 }
