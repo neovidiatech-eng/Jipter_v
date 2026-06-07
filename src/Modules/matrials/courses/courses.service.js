@@ -92,9 +92,9 @@ export const getCourses = async (query = {}) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const rankId = query.rankId;
+  const title = query.title;
   const { sortBy = "createdAt" } = query;
   const sortDirection = query.sort || "desc";
-  console.log(query);
   
 
   const where = {};
@@ -103,6 +103,9 @@ export const getCourses = async (query = {}) => {
     where.rankId = rankId;
   }
 
+  if(title){
+    where.title = { contains: title, mode: "insensitive" };
+  } 
   return await db.findManyWithPaginationAndCount({
     model: "courses",
     where,
