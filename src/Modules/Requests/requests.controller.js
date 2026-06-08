@@ -207,7 +207,7 @@ export const approveRequest = asyncHandler(async (req, res, next) => {
           end_time: endTime,
           notes: requestedData.suggested_notes || oldSession.notes,
           rescheduledFromId: oldSession.id,
-          status: "rescheduled",
+          status: "scheduled",
         },
       });
 

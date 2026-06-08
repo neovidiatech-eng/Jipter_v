@@ -227,6 +227,7 @@ model schedule {
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   notes               String?
+  pdfUrl              String?
   description         String
   videoUrl            String?
   slidesUrl           String?

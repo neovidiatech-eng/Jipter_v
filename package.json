@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node ./src/index.js",
     "dev": "nodemon ./src/index.js",
+    "test": "node --test",
     "seed:currency": "node prisma/seeders/currency.seeder.js",
     "seed:plans": "node prisma/seeders/plans.seeder.js",
     "seed:subjects": "node prisma/seeders/subjects.seeder.js",

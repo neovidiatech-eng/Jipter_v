@@ -25,6 +25,7 @@ import {
   isInsideJoinWindow,
   toLocal,
 } from "../../Utils/Date/time.js";
+import { settleTeacherReview } from "./sessionSettlement.service.js";
 import dayjs from "dayjs";
 
 /* ------------------------------------------------------------------ */
@@ -556,7 +557,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       title,
       description,
       link,
-      pdfUrl: currentLecture?.pdfUrl || pdfUrl || null,
+      pdfUrl: currentLecture?.pdfUrl || null,
       notes,
       start_time,
       end_time,
@@ -1344,66 +1345,14 @@ export const submitReview = asyncHandler(async (req, res, next) => {
   // Note: Only the TEACHER can officially confirm attendance for payment purposes in this current flow.
   if (isTeacher) {
     await db.transaction(async (tx) => {
-      if (teacherAttended) {
-        // 1. Pay the teacher
-        const sessionDuration =
-          (session.end_time - session.start_time) / (60 * 1000 * 60); // duration in hours
-        const payoutAmount = sessionDuration * session.teacher.hour_price;
-        const teacherWallet = await tx.findFirst({
-          model: "Wallet",
-          where: { userId: session.teacher.user_id },
-        });
-
-        if (teacherWallet) {
-          await tx.updateOne({
-            model: "Wallet",
-            where: { id: teacherWallet.id },
-            data: { balance: { increment: payoutAmount } },
-          });
-
-          await tx.create({
-            model: "Transaction",
-            data: {
-              walletId: teacherWallet.id,
-              type: "payout",
-              amount: payoutAmount,
-              reason: req.t("PAYOUT_REASON", { title: session.title }),
-              status: "completed",
-            },
-          });
-        }
-
-        // 2. Mark session as completed
-        await tx.updateOne({
-          model: "schedule",
-          where: { id },
-          data: { status: "completed" },
-        });
-
-        // 3. Update student attended sessions if they attended
-        if (studentAttended) {
-          await tx.updateOne({
-            model: "student",
-            where: { id: session.studentId },
-            data: { sessions_attended: { increment: 1 } },
-          });
-        }
-      } else {
-        // Teacher did NOT attend
-        // 1. Refund the student
-        await tx.updateOne({
-          model: "student",
-          where: { id: session.studentId },
-          data: { sessions_remaining: { increment: 1 } },
-        });
-
-        // 2. Mark session as missed (by teacher)
-        await tx.updateOne({
-          model: "schedule",
-          where: { id },
-          data: { status: "missed" },
-        });
-      }
+      await settleTeacherReview({
+        tx,
+        session,
+        scheduleId: id,
+        teacherAttended,
+        studentAttended,
+        translate: req.t,
+      });
     });
   }
 
