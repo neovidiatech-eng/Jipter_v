@@ -117,11 +117,13 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   const studentsData = await Promise.all(
     students.map(async (student) => {
       const phone = await decryptText({ text: student.user.phone });
+      const decryptedPassword = student.user.password ? await decryptText({ text: student.user.password }) : undefined;
       return {
         ...student,
         user: {
           ...student.user,
           phone: phone,
+          ...(decryptedPassword && { password: decryptedPassword }),
         },
       };
     }),
@@ -341,7 +343,9 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
   if (student.user.phone) {
     student.user.phone = await decryptText({ text: student.user.phone });
   }
-  delete student.user.password;
+  if (student.user.password) {
+    student.user.password = await decryptText({ text: student.user.password });
+  }
 
   return successResponse({
     res,
@@ -478,7 +482,11 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   updatedStudent.user.phone = await decryptText({
     text: updatedStudent.user.phone,
   });
-  delete updatedStudent.user.password;
+  if (updatedStudent.user.password) {
+    updatedStudent.user.password = await decryptText({
+      text: updatedStudent.user.password,
+    });
+  }
 
   return successResponse({
     res,

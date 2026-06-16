@@ -31,6 +31,9 @@ export const getAllStuff = asyncHandler(async (req, res, next) => {
     if (s.user && s.user.phone) {
       s.user.phone = await decryptText({ text: s.user.phone });
     }
+    if (s.user && s.user.password) {
+      s.user.password = await decryptText({ text: s.user.password });
+    }
   }
 
   return successResponse({
@@ -63,6 +66,9 @@ export const getStuffById = asyncHandler(async (req, res, next) => {
 
   if (stuff.user && stuff.user.phone) {
     stuff.user.phone = await decryptText({ text: stuff.user.phone });
+  }
+  if (stuff.user && stuff.user.password) {
+    stuff.user.password = await decryptText({ text: stuff.user.password });
   }
 
   const permissions = stuff.role?.rolePermissions.map(rp => rp.permission) || [];
@@ -121,6 +127,9 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
   if (newStuff.user && newStuff.user.phone) {
     newStuff.user.phone = await decryptText({ text: newStuff.user.phone });
   }
+  if (newStuff.user && newStuff.user.password) {
+    newStuff.user.password = await decryptText({ text: newStuff.user.password });
+  }
 
   return successResponse({
     res,
@@ -133,7 +142,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
 
 export const updateStuffUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name, email, phone, code_country, roleId } = req.body;
+  const { name, email, password, phone, code_country, roleId } = req.body;
 
   const stuff = await ensureExists({ model: "stuff", where: { id }, include: { user: true } });
 
@@ -142,14 +151,20 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
     if (existing) return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
   }
 
+  let hashedPassword;
+  if (password) {
+    hashedPassword = await hash({ password });
+  }
+
   // Update user data
-  if (name || email || phone || code_country || roleId !== undefined) {
+  if (name || email || hashedPassword || phone || code_country || roleId !== undefined) {
     await db.updateOne({
       model: "user",
       where: { id: stuff.user_id },
       data: {
         ...(name && { name }),
         ...(email && { email }),
+        ...(hashedPassword && { password: hashedPassword }),
         ...(phone && { phone: encryptText({ text: phone }) }),
         ...(code_country && { code_country }),
         ...(roleId !== undefined && { roleId }),
@@ -171,6 +186,9 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
 
   if (updatedStuff.user && updatedStuff.user.phone) {
     updatedStuff.user.phone = await decryptText({ text: updatedStuff.user.phone });
+  }
+  if (updatedStuff.user && updatedStuff.user.password) {
+    updatedStuff.user.password = await decryptText({ text: updatedStuff.user.password });
   }
 
   return successResponse({

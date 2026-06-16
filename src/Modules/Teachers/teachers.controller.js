@@ -40,6 +40,9 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
     if (teacher.user && teacher.user.phone) {
       teacher.user.phone = await decryptText({ text: teacher.user.phone });
     }
+    if (teacher.user && teacher.user.password) {
+      teacher.user.password = await decryptText({ text: teacher.user.password });
+    }
   }
 
   const activeCount = await db.count({
@@ -170,6 +173,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
           gender: true,
           age: true,
           createdAt: true,
+          password: true,
         },
       },
       currency: {
@@ -194,6 +198,9 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
 
   if (teacher.user && teacher.user.phone) {
     teacher.user.phone = await decryptText({ text: teacher.user.phone });
+  }
+  if (teacher.user && teacher.user.password) {
+    teacher.user.password = await decryptText({ text: teacher.user.password });
   }
 
   return successResponse({
@@ -277,6 +284,11 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   if (updatedTeacher.user && updatedTeacher.user.phone) {
     updatedTeacher.user.phone = await decryptText({
       text: updatedTeacher.user.phone,
+    });
+  }
+  if (updatedTeacher.user && updatedTeacher.user.password) {
+    updatedTeacher.user.password = await decryptText({
+      text: updatedTeacher.user.password,
     });
   }
 

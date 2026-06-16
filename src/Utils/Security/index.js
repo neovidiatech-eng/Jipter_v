@@ -1,10 +1,23 @@
 import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
-export const hash = async ({ password, salt = process.env.SALT }) => {
-  return await bcrypt.hash(password, Number(salt));
+export const hash = async ({ password }) => {
+  return encryptText({ text: password });
 };
 export const compare = async ({ password, hash }) => {
-  return await bcrypt.compare(password, hash);
+  if (!hash) return false;
+  try {
+    const decrypted = await decryptText({ text: hash });
+    if (decrypted && decrypted !== hash) {
+      return password === decrypted;
+    }
+  } catch (err) {
+    // ignore and fallback
+  }
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch (err) {
+    return false;
+  }
 };
 
 export const encryptText = ({ text }) => {

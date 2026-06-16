@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { generalFields } from "../../../Middlewares/Validation.js";
+import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createStuffUserSchema = {
   body: Joi.object({
@@ -13,11 +13,16 @@ export const createStuffUserSchema = {
 };
 
 export const updateStuffUserSchema = {
+  params: Joi.object({
+    id: generalFields.id.required(),
+  }),
   body: Joi.object({
-    name: generalFields.name.required(),
-    phone: generalFields.phone.required(),
-    code_country: generalFields.codeCountry.required(),
-    roleId: generalFields.id.required(),
+    name: generalFields.name,
+    email: generalFields.email,
+    password: generalFields.password,
+    phone: generalFields.phone,
+    code_country: generalFields.codeCountry,
+    roleId: generalFields.id,
   }),
 };
 
