@@ -35,13 +35,9 @@ export const createSchedule = {
           "string.pattern.base": "TITLE_INVALID",
         })
         .required(),
-      description: generalFields.description
-        .messages({
-          "string.empty": "DESCRIPTION_REQUIRED",
-          "any.required": "DESCRIPTION_REQUIRED",
-          "string.pattern.base": "DESCRIPTION_INVALID",
-        })
-        .required(),
+      description: Joi.string().max(1000).allow("", null).messages({
+        "string.pattern.base": "DESCRIPTION_INVALID",
+      }),
       link: generalFields.url
         .messages({
           "string.empty": "LINK_REQUIRED",
@@ -49,9 +45,7 @@ export const createSchedule = {
           "string.pattern.base": "LINK_INVALID",
         })
         .required(),
-      notes: generalFields.description.messages({
-        "string.empty": "NOTES_REQUIRED",
-        "any.required": "NOTES_REQUIRED",
+      notes: Joi.string().max(1000).allow("", null).messages({
         "string.pattern.base": "NOTES_INVALID",
       }),
 
@@ -91,9 +85,9 @@ export const createRecurringSchedule = {
       teacherId: generalFields.id.required(),
       courseId: generalFields.id.required(),
       title: generalFields.name.required(),
-      description: generalFields.description.required(),
+      description: Joi.string().max(1000).allow("", null),
       link: generalFields.url.required(),
-      notes: generalFields.description,
+      notes: Joi.string().max(1000).allow("", null),
       startTime: Joi.string()
         .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
         .required()
@@ -141,9 +135,9 @@ export const updateSchedule = {
   body: Joi.object()
     .keys({
       title: generalFields.name,
-      description: generalFields.description,
+      description: Joi.string().max(1000).allow("", null),
       link: generalFields.url,
-      notes: generalFields.description,
+      notes: Joi.string().max(1000).allow("", null),
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
       start_time: Joi.date().greater("now"),
       type: generalFields.type,
@@ -165,9 +159,9 @@ export const updateRecurringGroup = {
   body: Joi.object()
     .keys({
       title: generalFields.name,
-      description: generalFields.description,
+      description: Joi.string().max(1000).allow("", null),
       link: generalFields.url,
-      notes: generalFields.description,
+      notes: Joi.string().max(1000).allow("", null),
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
       startTime: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/),
       type: generalFields.type,

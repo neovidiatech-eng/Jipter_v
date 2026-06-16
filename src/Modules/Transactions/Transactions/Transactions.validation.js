@@ -6,7 +6,7 @@ export const getTransactionsSchema = {
     .keys({
       currency: generalFields.code.optional(),
       page: Joi.number().integer().min(1).optional(),
-      limit: Joi.number().integer().min(1).max(100).optional(),
+      limit: Joi.number().integer().min(1).optional(),
       type: Joi.string().valid("subscription", "expense", "withdrawal", "credit", "debit").optional(),
       status: Joi.string().valid("completed", "pending", "failed", "cancelled").optional(),
       search: generalFields.search.optional(),

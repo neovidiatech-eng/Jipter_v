@@ -31,7 +31,7 @@ export const getCoursesSchema = {
   query: Joi.object({
     rankId: generalFields.id.optional(),
     page: Joi.number().integer().min(1).optional(),
-    limit: Joi.number().integer().min(1).max(50).optional(),
+    limit: Joi.number().integer().min(1).optional(),
     sort: Joi.string().valid("asc", "desc").optional(),
     sortBy: Joi.string().valid("rankId", "createdAt", "title").optional(),
   }).optional(),

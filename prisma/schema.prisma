@@ -228,7 +228,7 @@ model schedule {
   updatedAt           DateTime     @updatedAt
   notes               String?
   pdfUrl              String?
-  description         String
+  description         String?
   videoUrl            String?
   slidesUrl           String?
   link                String

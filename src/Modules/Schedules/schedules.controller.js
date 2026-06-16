@@ -554,7 +554,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       studentId,
       order: currentLecture?.order || 0,
       teacherId,
-      title,
+      title: currentLecture?.title || title,
       description,
       link,
       pdfUrl: currentLecture?.pdfUrl || null,
