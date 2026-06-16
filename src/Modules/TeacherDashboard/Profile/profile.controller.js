@@ -5,6 +5,7 @@ import {
 } from "../../../Utils/Response.js";
 import { decryptText } from "../../../Utils/Security/index.js";
 import * as db from "../../../database/dbService.js";
+import { toLocal } from "../../../Utils/Date/time.js";
 
 export const getProfile = asyncHandler(async (req, res, next) => {
   const user = await db.findOne({
@@ -86,8 +87,8 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       description: s.description,
       type: s.type,
       status: s.status,
-      startTime: s.start_time,
-      endTime: s.end_time,
+      startTime: toLocal(s.start_time, req.timezone),
+      endTime: toLocal(s.end_time, req.timezone),
       isRecurring: s.is_recurring,
       link: s.link,
       notes: s.notes,

@@ -45,6 +45,7 @@
     "joi": "^18.0.2",
     "joi-to-swagger": "^6.2.0",
     "jsonwebtoken": "^9.0.3",
+    "maxmind": "^5.0.6",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nanoid": "^5.1.6",

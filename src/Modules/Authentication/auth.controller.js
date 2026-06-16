@@ -2,6 +2,7 @@ import { googleVerify } from "../../Utils/GoogleClient/index.js";
 import sendEmailEvent from "../../Utils/Mailer/sendEmailEvent.js";
 import { redis } from "../../Utils/Radis/Connection.js";
 import * as db from "../../database/dbService.js";
+import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 
 import {
   asyncHandler,
@@ -114,7 +115,7 @@ export const register = asyncHandler(async (req, res, next) => {
         phone: encryptedPhone,
         code_country: codeCountry,
         role: { connect: { id: userRole.id } },
-        timezone,
+        timezone: req.timezone || DEFAULT_TIMEZONE,
       },
     });
 
@@ -131,7 +132,7 @@ export const register = asyncHandler(async (req, res, next) => {
         gender,
         age: studentAge,
         country,
-        timezone,
+        timezone: req.timezone || DEFAULT_TIMEZONE,
         user_id: user.id,
       }),
     );

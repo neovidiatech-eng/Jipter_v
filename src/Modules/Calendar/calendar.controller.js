@@ -4,7 +4,7 @@ import {
   errorResponse,
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
-import { getNowUTC, toUTC } from "../../Utils/Date/time.js";
+import { getNowUTC, toUTC, toLocal } from "../../Utils/Date/time.js";
 
 export const getCalendar = asyncHandler(async (req, res, next) => {
   const { startDate, endDate } = req.query;
@@ -37,10 +37,22 @@ export const getCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
   ]);
+  const formattedSessions = sessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
+  const formattedToDaySessions = toDaySessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
   return successResponse({
     res,
     req,
-    data: { sessions, count, planned, toDaySessions },
+    data: { sessions: formattedSessions, count, planned, toDaySessions: formattedToDaySessions },
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -221,10 +233,22 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
   ]);
+  const formattedSessions = sessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
+  const formattedToDaySessions = toDaySessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
   return successResponse({
     res,
     req,
-    data: { sessions, count, planned, toDaySessions },
+    data: { sessions: formattedSessions, count, planned, toDaySessions: formattedToDaySessions },
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -406,10 +430,22 @@ export const getTeacherCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
   ]);
+  const formattedSessions = sessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
+  const formattedToDaySessions = toDaySessions.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
+
   return successResponse({
     res,
     req,
-    data: { sessions, count, planned, toDaySessions },
+    data: { sessions: formattedSessions, count, planned, toDaySessions: formattedToDaySessions },
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -452,10 +488,19 @@ export const getTeachersCalendar = asyncHandler(async (req, res, next) => {
     },
   });
 
+  const formattedTeachers = teachers.map((teacher) => ({
+    ...teacher,
+    schedules: teacher.schedules.map((s) => ({
+      ...s,
+      start_time: toLocal(s.start_time, req.timezone),
+      end_time: toLocal(s.end_time, req.timezone),
+    })),
+  }));
+
   return successResponse({
     res,
     req,
-    data: { teachers },
+    data: { teachers: formattedTeachers },
     status: 200,
     message: "FETCH_SUCCESS",
   });

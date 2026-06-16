@@ -1,4 +1,5 @@
 import * as db from "../../../database/dbService.js";
+import { toLocal } from "../../../Utils/Date/time.js";
 
 export const getDashboard = async ({ req, res, next }) => {
   const user = req.user;
@@ -99,6 +100,11 @@ export const getDashboard = async ({ req, res, next }) => {
   });
   student.joindate = student.createdAt;
   delete student.createdAt;
+
+  if (nextSchedule) {
+    nextSchedule.start_time = toLocal(nextSchedule.start_time, req.timezone);
+    nextSchedule.end_time = toLocal(nextSchedule.end_time, req.timezone);
+  }
 
   return { metadata: student, nextSchedule };
 };

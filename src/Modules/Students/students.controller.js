@@ -219,8 +219,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // Resolve timezone — use provided, or fall back to default
-  const userTimezone = timezone || DEFAULT_TIMEZONE;
+  // Resolve timezone — use provided, or request-detected/default timezone
+  const userTimezone = req.timezone || DEFAULT_TIMEZONE;
 
   await db.transaction(async (tx) => {
     // 1. Create user

@@ -84,7 +84,7 @@ export const createRecurringSchedule = {
       studentId: generalFields.id.required(),
       teacherId: generalFields.id.required(),
       courseId: generalFields.id.required(),
-      title: generalFields.name.required(),
+      title: generalFields.name,
       description: Joi.string().max(1000).allow("", null),
       link: generalFields.url.required(),
       notes: Joi.string().max(1000).allow("", null),
