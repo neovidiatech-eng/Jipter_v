@@ -266,22 +266,70 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     },
   });
 
+  // Check if student has a free trial / 1 session plan
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: userId },
+    include: { plan: true },
+  });
+
+  let isFreeTrial = false;
+  let bookedSchedule = null;
+
+  if (student) {
+    isFreeTrial = student.sessions === 1 || 
+                  student.plan?.price === "0" || 
+                  student.plan?.name?.toLowerCase().includes("free") ||
+                  student.plan?.name?.toLowerCase().includes("trial") ||
+                  student.plan?.sessionsCount === 1;
+
+    if (isFreeTrial) {
+      bookedSchedule = await db.findFirst({
+        model: "schedule",
+        where: {
+          studentId: student.id,
+          courseId: id,
+        },
+      });
+    }
+  }
+
   // 3. Map lectures to include status
   let foundFirstNonCompleted = false;
-  const lecturesWithStatus = course.lectures.map((lecture) => {
+  const lecturesWithStatus = course.lectures.map((lecture, index) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     let status = "Locked";
 
-    if (userLecture && userLecture.status === "completed") {
-      status = "Completed";
-    } else if (!foundFirstNonCompleted) {
-      status = "Pending";
-      foundFirstNonCompleted = true;
+    if (isFreeTrial) {
+      // Free trial user logic:
+      // - Must have booked a schedule in this course
+      // - Only the first lecture (index 0) can be unlocked
+      if (bookedSchedule && index === 0) {
+        if (userLecture && userLecture.status === "completed") {
+          status = "Completed";
+        } else {
+          status = "Pending";
+        }
+      }
+    } else {
+      // Normal progression logic:
+      if (userLecture && userLecture.status === "completed") {
+        status = "Completed";
+      } else if (!foundFirstNonCompleted) {
+        status = "Pending";
+        foundFirstNonCompleted = true;
+      }
     }
 
     return {
       ...lecture,
       status,
+      ...(status === "Locked" && {
+        videoUrl: null,
+        pdfUrl: null,
+        slidesUrl: null,
+        content: null,
+      }),
     };
   });
 

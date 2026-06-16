@@ -260,6 +260,57 @@ export const completeLecture = async ({ req, res, next }) => {
     throw error;
   }
 
+  // Check if student has a free trial / 1 session plan
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: userId },
+    include: { plan: true },
+  });
+
+  if (student) {
+    const isFreeTrial = student.sessions === 1 || 
+                        student.plan?.price === "0" || 
+                        student.plan?.name?.toLowerCase().includes("free") ||
+                        student.plan?.name?.toLowerCase().includes("trial") ||
+                        student.plan?.sessionsCount === 1;
+
+    if (isFreeTrial) {
+      // 1. Check if they have a booked schedule in this course
+      const bookedSchedule = await db.findFirst({
+        model: "schedule",
+        where: {
+          studentId: student.id,
+          courseId: lecture.courseId,
+        },
+      });
+
+      if (!bookedSchedule) {
+        const error = createError({
+          message: "LECTURE_LOCKED",
+          status: 403,
+          next,
+        });
+        throw error;
+      }
+
+      // 2. Check if this is the first lecture of the course
+      const firstLecture = await db.findFirst({
+        model: "lectures",
+        where: { courseId: lecture.courseId },
+        orderBy: { order: "asc" },
+      });
+
+      if (firstLecture && firstLecture.id !== id) {
+        const error = createError({
+          message: "LECTURE_LOCKED",
+          status: 403,
+          next,
+        });
+        throw error;
+      }
+    }
+  }
+
   // 2. Upsert user_lectures
   const userLecture = await db.upsertOne({
     model: "user_lectures",
