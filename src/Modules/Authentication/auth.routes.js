@@ -4,8 +4,6 @@ import cookieParser from "cookie-parser";
 import { validation } from "../../Middlewares/Validation.js";
 import {
   forgetPasswordSchema,
-  googleLoginSchema,
-  googleSignupSchema,
   loginSchema,
   registeritonSchema,
   resendOtpSchema,

@@ -105,6 +105,8 @@ export const getDashboard = async ({ req, res, next }) => {
     nextSchedule.start_time = toLocal(nextSchedule.start_time, req.timezone);
     nextSchedule.end_time = toLocal(nextSchedule.end_time, req.timezone);
   }
+  console.log(nextSchedule);
+  
 
   return { metadata: student, nextSchedule };
 };

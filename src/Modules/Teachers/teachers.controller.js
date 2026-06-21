@@ -202,6 +202,19 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
   if (teacher.user && teacher.user.password) {
     teacher.user.password = await decryptText({ text: teacher.user.password });
   }
+  const sessionCount=await db.count({
+    model: "schedule",
+    where:{status:"completed",teacherId: teacher.id },
+  });
+    const teacherStudents=await db.count({
+    model: "schedule",
+    where:{studentId: teacher.id  }, 
+  });
+
+  teacher.sessionCount=sessionCount;
+  teacher.teacherStudents=teacherStudents;
+
+
 
   return successResponse({
     res,

@@ -380,13 +380,16 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
   } else if (notification_Time === notificationType[2]) {
     reminderTime = new Date(startTime.getTime() - 30 * 60 * 1000);
     notificationJobType = "before 30 minutes";
-  } else {
+  } else if (notification_Time === notificationType[3]) {
     reminderTime = new Date(startTime.getTime() - 60 * 60 * 1000);
     notificationJobType = "before 60 minutes";
+  } else{
+    reminderTime = new Date(startTime.getTime() - 5 * 60 * 1000);
+    notificationJobType = "before 5 minutes";
   }
 
   const now = new Date();
-  if (reminderTime > now) {
+  if (startTime > now) {
     addNotificationJob({
       scheduleId: newSchedule.id,
       studentId,
@@ -602,7 +605,8 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
 
     // Queue notification jobs after successful transaction
     const now = new Date();
-    for (const { start_time: st, notification_Time: nt } of notificationJobs) {
+    for (let i = 0; i < notificationJobs.length; i++) {
+      const { start_time: st, notification_Time: nt } = notificationJobs[i];
       let reminderTime;
       let notificationJobType;
       if (nt === notificationType[1]) {
@@ -611,19 +615,17 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       } else if (nt === notificationType[2]) {
         reminderTime = new Date(st.getTime() - 30 * 60 * 1000);
         notificationJobType = "before 30 minutes";
-      } else {
+      } else if (nt === notificationType[3]) {
         reminderTime = new Date(st.getTime() - 60 * 60 * 1000);
         notificationJobType = "before 60 minutes";
+      } else {
+        reminderTime = new Date(st.getTime() - 5 * 60 * 1000);
+        notificationJobType = "before 5 minutes";
       }
-      if (reminderTime > now) {
+      
+      if (st > now) {
         addNotificationJob({
-          scheduleId:
-            createdSchedules[
-              notificationJobs.indexOf({
-                start_time: st,
-                notification_Time: nt,
-              })
-            ]?.id,
+          scheduleId: createdSchedules[i]?.id,
           studentId,
           type: notificationJobType,
           sendAt: reminderTime,

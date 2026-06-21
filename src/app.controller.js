@@ -30,12 +30,12 @@ const bootstrap = async () => {
   // ── ENV DEBUG DUMP (remove after confirming env vars are correct) ──
 
   // ─────────────────────────────────────────────────────────────────
-  /*   const allJobs = await notificationQueue.getJobs([
+/*   const allJobs = await notificationQueue.getJobs([
     "waiting",
     "active",
     "delayed",
   ]);
-  console.log("All jobs:", allJobs); */
+  console.log("All jobs:", allJobs);  */
 
   const allowedOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())

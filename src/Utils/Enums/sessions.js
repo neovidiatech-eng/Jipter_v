@@ -4,6 +4,7 @@ export const sessionType = {
 };
 
 export const notificationType = {
+  0: "5",
   1: "10",
   2: "30",
   3: "60",

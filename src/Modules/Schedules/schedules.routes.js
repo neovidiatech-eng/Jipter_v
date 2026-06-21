@@ -13,7 +13,7 @@ const router = Router();
 const sessionsResource = "sessions";
 
 router.get(
-  "/", 
+  "/",  
   authentication,
   authorizeResource(sessionsResource),
   scheduleController.getAllSchedules

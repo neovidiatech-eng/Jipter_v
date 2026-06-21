@@ -4,6 +4,7 @@ export const mailTemp = ({
   text,
   username = "there",
   lang = "en",
+  variant = "verify",
 }) => {
   const isAr = lang === "ar";
 
@@ -12,7 +13,7 @@ export const mailTemp = ({
   const secondaryColor = "#5B9BF8";
 
   const displayTitle =
-    title || (isAr ? "تأكيد الحساب" : "Account Verification");
+    title || (isAr ? "إشعار" : "Notification");
 
   const safeOtp = String(otp ?? "").trim();
 
@@ -208,7 +209,7 @@ export const mailTemp = ({
               style="padding:28px 34px 0 34px;"
             >
 
-              <!-- Check -->
+              <!-- Check / Bell -->
               <table align="center" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center">
@@ -227,7 +228,7 @@ export const mailTemp = ({
                         font-size:42px;
                         font-weight:700;
                       ">
-                        ✓
+                        ${variant === "reminder" ? "🔔" : "✓"}
                       </span>
                     </div>
 
@@ -246,10 +247,18 @@ export const mailTemp = ({
                 letter-spacing:-2px;
               ">
 
-                ${isAr ? "رمز" : "VERIFY"} <br>
+                ${
+                  variant === "reminder"
+                    ? (isAr ? "تذكير" : "SESSION")
+                    : (isAr ? "رمز" : "VERIFY")
+                } <br>
 
                 <span style="color:${secondaryColor};">
-                  ${isAr ? "التحقق" : "ACCOUNT"}
+                  ${
+                    variant === "reminder"
+                      ? (isAr ? "بالجلسة" : "REMINDER")
+                      : (isAr ? "التحقق" : "ACCOUNT")
+                  }
                 </span>
 
               </h1>
@@ -264,11 +273,15 @@ export const mailTemp = ({
                 line-height:1.8;
               ">
                 ${
-                  isAr
-                    ? `مرحباً <strong style="color:#FFFFFF;">${username}</strong>،
+                  variant === "reminder"
+                    ? (isAr
+                        ? `مرحباً <strong style="color:#FFFFFF;">${username}</strong>،<br>هذا تذكير بموعد جلستك القادمة. يرجى الاستعداد في الوقت المحدد.`
+                        : `Hello <strong style="color:#FFFFFF;">${username}</strong>,<br>This is a reminder for your upcoming session. Please be ready on time.`)
+                    : (isAr
+                        ? `مرحباً <strong style="color:#FFFFFF;">${username}</strong>،
                     استخدم رمز التحقق التالي لإكمال عملية تسجيل الدخول بأمان.`
-                    : `Hello <strong style="color:#FFFFFF;">${username}</strong>,
-                    use the verification code below to securely continue your login process.`
+                        : `Hello <strong style="color:#FFFFFF;">${username}</strong>,
+                    use the verification code below to securely continue your login process.`)
                 }
               </p>
 

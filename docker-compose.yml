@@ -68,6 +68,11 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS}
       MOOD: ${MOOD}
       PORT: "6000"
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
     depends_on:
       postgres:
         condition: service_healthy
