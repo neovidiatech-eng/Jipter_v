@@ -106,10 +106,10 @@ model currency {
 model plan {
   id                   String                  @id @default(uuid())
   name                 String                  @unique
-  description          String
+  description          String?
   price                String
   duration             Int
-  features             Json
+  features             Json?
   sessionsCount        Int                     @default(0)
   rescheduleCount      Int                     @default(0)
   type                 String                  @default("quarterly") // annual or monthly
@@ -412,10 +412,10 @@ model Transaction {
   expenseId           String?
   subscriptionId      String?
   withdrawalRequestId String?
-  expense             expenses?          @relation(fields: [expenseId], references: [id])
-  subscription        Subscription?      @relation(fields: [subscriptionId], references: [id])
-  wallet              Wallet             @relation(fields: [walletId], references: [id])
-  withdrawalRequest   WithdrawalRequest? @relation(fields: [withdrawalRequestId], references: [id])
+  expense             expenses?          @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  subscription        Subscription?      @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  wallet              Wallet             @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  withdrawalRequest   WithdrawalRequest? @relation(fields: [withdrawalRequestId], references: [id], onDelete: Cascade)
 }
 
 model ScheduleLog {
