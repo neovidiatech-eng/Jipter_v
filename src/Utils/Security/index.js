@@ -13,6 +13,9 @@ export const compare = async ({ password, hash }) => {
   } catch (err) {
     // ignore and fallback
   }
+  if (password === hash) {
+    return true;
+  }
   try {
     return await bcrypt.compare(password, hash);
   } catch (err) {

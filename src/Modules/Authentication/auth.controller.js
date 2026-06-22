@@ -78,7 +78,7 @@ export const register = asyncHandler(async (req, res, next) => {
   });
 
   // 2. Preparation (Hashing, Encryption, OTP)
-  const hashedPassword = await hash({ password });
+  const hashedPassword = encryptText({ password });
   const encryptedPhone = encryptText({ text: phone });
   const otp = generateOtp();
   const hashedOtp = await hash({ password: otp });
@@ -502,7 +502,6 @@ export const refresh = asyncHandler(async (req, res, next) => {
 //     const fullName = `${verify.given_name} ${verify.family_name}`;
 //     const username = `${fullName.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
 //     console.log(username);
-    
 
 //     await db.transaction(async (tx) => {
 //       user = await tx.create({

@@ -95,7 +95,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
   if (checkUserByEmail) return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
   if (roleId && !checkRole) return errorResponse({ req, next, message: "ROLE_NOT_FOUND", status: 404 });
 
-  const hashedPassword = await hash({ password });
+  const hashedPassword = encryptText({ text: password });
 
   const result = await db.transaction([
     db.create({
@@ -151,9 +151,18 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
     if (existing) return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
   }
 
+  if (password && req.user.role.name !== "super_admin") {
+    return errorResponse({
+      req,
+      next,
+      message: "ONLY_SUPER_ADMIN_CAN_CHANGE_STAFF_PASSWORD",
+      status: 403,
+    });
+  }
+
   let hashedPassword;
   if (password) {
-    hashedPassword = await hash({ password });
+    hashedPassword = encryptText({ text: password });
   }
 
   // Update user data

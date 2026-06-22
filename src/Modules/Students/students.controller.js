@@ -204,7 +204,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     startingLectureId,
   });
 
-  const hashedPassword = await hash({ password });
+  const hashedPassword = encryptText({ text: password });
 
   // Fetch system wallet before the transaction so we can reference its id inside
   const systemWallet = await db.findFirst({
@@ -223,6 +223,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   // Resolve timezone — use provided, or request-detected/default timezone
   const userTimezone = req.timezone || DEFAULT_TIMEZONE;
+
+  let createdStudent;
 
   await db.transaction(async (tx) => {
     // 1. Create user
@@ -249,7 +251,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
 
     // 2. Create student profile
-    await tx.create({
+    createdStudent = await tx.create({
       model: "student",
       data: {
         user: { connect: { id: user.id } },
@@ -262,6 +264,11 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         sessions_attended: 0,
         sessions_remaining: checkPlan.sessionsCount,
         rank: { connect: { id: effectiveRankId } },
+      },
+      include: {
+        user: true,
+        plan: true,
+        rank: true,
       },
     });
 
@@ -315,10 +322,20 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
   });
 
+  if (createdStudent && createdStudent.user) {
+    if (createdStudent.user.phone) {
+      createdStudent.user.phone = await decryptText({ text: createdStudent.user.phone });
+    }
+    if (createdStudent.user.password) {
+      createdStudent.user.password = await decryptText({ text: createdStudent.user.password });
+    }
+  }
+
   return successResponse({
     res,
     req,
     message: "CREATE_SUCCESS",
+    data: createdStudent,
     status: 201,
   });
 });
@@ -430,7 +447,16 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
-  const hashedPassword = password ? await hash({ password }) : undefined;
+  if (password && req.user.role.name !== "admin" && req.user.role.name !== "super_admin") {
+    return errorResponse({
+      req,
+      next,
+      message: "ONLY_ADMIN_OR_SUPER_ADMIN_CAN_CHANGE_PASSWORDS",
+      status: 403,
+    });
+  }
+
+  const hashedPassword = password ? encryptText({ text: password }) : undefined;
 
   // Update user record if needed
   if (

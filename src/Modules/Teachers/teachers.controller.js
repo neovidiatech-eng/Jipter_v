@@ -99,7 +99,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
       status: 404,
     });
 
-  const hashedPassword = await hash({ password });
+  const hashedPassword = encryptText({ text: password });
 
   // 🔥 كل حاجة في transaction واحدة
   const prefix = settings?.userPrefix || "jupiter";
@@ -147,6 +147,15 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
 
     return { teacher, wallet };
   });
+
+  if (result.teacher?.user) {
+    if (result.teacher.user.phone) {
+      result.teacher.user.phone = await decryptText({ text: result.teacher.user.phone });
+    }
+    if (result.teacher.user.password) {
+      result.teacher.user.password = await decryptText({ text: result.teacher.user.password });
+    }
+  }
 
   return successResponse({
     res,
@@ -256,9 +265,18 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     include: { user: true },
   });
 
+  if (password && req.user.role.name !== "admin" && req.user.role.name !== "super_admin") {
+    return errorResponse({
+      req,
+      next,
+      message: "ONLY_ADMIN_OR_SUPER_ADMIN_CAN_CHANGE_PASSWORDS",
+      status: 403,
+    });
+  }
+
   let hashedPassword;
   if (password) {
-    hashedPassword = await hash({ password });
+    hashedPassword = encryptText({ text: password });
   }
 
   // Handle unique constraints
@@ -274,7 +292,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   }
 
   // Update user data first if needed
-  if (name || email || hashedPassword || phone || code_country) {
+  if (name || email || hashedPassword || phone || code_country || gender || age) {
     await db.updateOne({
       model: "user",
       where: { id: teacher.user_id },
