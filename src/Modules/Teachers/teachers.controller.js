@@ -219,7 +219,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
   if (teacher.user && teacher.user.password) {
     teacher.user.password = await decryptText({ text: teacher.user.password });
   }
-  const [sessionCount, uniqueStudentGroups] = await Promise.all([
+  const [sessionCount, uniqueStudentGroups,totalsessions] = await Promise.all([
     db.count({
       model: "schedule",
       where: { status: "completed", teacherId: teacher.id },
@@ -229,10 +229,14 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
       by: ["studentId"],
       where: { teacherId: teacher.id },
     }),
+    db.count({
+      model: "schedule",
+      where: { teacherId: teacher.id },
+    }),
   ]);
 
   const teacherStudents = uniqueStudentGroups.length;
-  const result = { ...teacher, sessionCount, teacherStudents };
+  const result = { ...teacher, sessionCount, teacherStudents,totalsessions };
 
 
 
