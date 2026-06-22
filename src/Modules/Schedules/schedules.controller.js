@@ -1389,7 +1389,6 @@ async function finalizeSession(scheduleId, t) {
     model: "schedule",
     where: { id: scheduleId },
     include: {
-      scheduleLogs: true,
       student: true,
       teacher: { include: { user: true } },
     },
@@ -1398,9 +1397,16 @@ async function finalizeSession(scheduleId, t) {
   if (!session || session.status === "completed" || session.status === "missed")
     return;
 
-  const log = session.scheduleLogs[0];
+  // ✅ Fetch the log SEPARATELY to avoid stale data from nested include
+  const log = await db.findFirst({
+    model: "scheduleLog",
+    where: { scheduleId },
+  });
+
   if (!log) return;
 
+  // missed = nobody joined at all
+  // completed = at least one party joined (student OR teacher)
   let newStatus = "completed";
   if (!log.joinTime_student && !log.joinTime_teacher) {
     newStatus = "missed";

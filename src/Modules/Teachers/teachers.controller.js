@@ -162,6 +162,12 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
     model: "teacher",
     where: { id },
     select: {
+      id: true,
+      hour_price: true,
+      active: true,
+      createdAt: true,
+      updatedAt: true,
+  
       user: {
         select: {
           id: true,
@@ -174,7 +180,9 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
           age: true,
           createdAt: true,
           password: true,
+              wallet:true,
         },
+
       },
       currency: {
         select: {
@@ -202,17 +210,20 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
   if (teacher.user && teacher.user.password) {
     teacher.user.password = await decryptText({ text: teacher.user.password });
   }
-  const sessionCount=await db.count({
-    model: "schedule",
-    where:{status:"completed",teacherId: teacher.id },
-  });
-    const teacherStudents=await db.count({
-    model: "schedule",
-    where:{studentId: teacher.id  }, 
-  });
+  const [sessionCount, uniqueStudentGroups] = await Promise.all([
+    db.count({
+      model: "schedule",
+      where: { status: "completed", teacherId: teacher.id },
+    }),
+    db.groupBy({
+      model: "schedule",
+      by: ["studentId"],
+      where: { teacherId: teacher.id },
+    }),
+  ]);
 
-  teacher.sessionCount=sessionCount;
-  teacher.teacherStudents=teacherStudents;
+  const teacherStudents = uniqueStudentGroups.length;
+  const result = { ...teacher, sessionCount, teacherStudents };
 
 
 
@@ -220,7 +231,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: teacher,
+    data: result,
   });
 });
 

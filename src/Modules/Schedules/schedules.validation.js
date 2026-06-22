@@ -49,7 +49,7 @@ export const createSchedule = {
         "string.pattern.base": "NOTES_INVALID",
       }),
 
-      start_time: generalFields.date
+      start_time: generalFields.date.greater("now")
         .messages({
           "string.empty": "START_TIME_REQUIRED",
           "any.required": "START_TIME_REQUIRED",
@@ -93,6 +93,11 @@ export const createRecurringSchedule = {
         .required()
         .messages({
           "string.pattern.base": "START_TIME_FORMAT",
+        }).custom((value) => {
+          if (dayjs(value).isBefore(dayjs())) {
+            return dayjs(value).isAfter(dayjs().subtract(1, "day"));
+          }
+          return value;
         }),
       days: Joi.array()
         .items(

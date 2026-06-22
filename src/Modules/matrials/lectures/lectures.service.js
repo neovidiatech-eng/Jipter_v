@@ -293,14 +293,10 @@ export const completeLecture = async ({ req, res, next }) => {
         throw error;
       }
 
-      // 2. Check if this is the first lecture of the course
-      const firstLecture = await db.findFirst({
-        model: "lectures",
-        where: { courseId: lecture.courseId },
-        orderBy: { order: "asc" },
-      });
-
-      if (firstLecture && firstLecture.id !== id) {
+      // 2. Allow completing ONLY the lecture linked to the booked schedule
+      //    (if the schedule has a specific lectureId) — or any lecture in the course
+      //    if the schedule is a general course booking
+      if (bookedSchedule.lectureId && bookedSchedule.lectureId !== id) {
         const error = createError({
           message: "LECTURE_LOCKED",
           status: 403,
