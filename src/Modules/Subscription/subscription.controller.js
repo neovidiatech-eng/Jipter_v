@@ -40,9 +40,14 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
   const subscriptions = await db.findMany({
     model: "Subscription",
     include: {
-      user: true,
+      user: {
+        include:{
+          student:true
+        }
+      },
       plan: true,
       currency: true,
+      
     },
   });
 
@@ -65,6 +70,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
           status: subscription.user?.status,
           phone: phone,
         },
+        student: subscription.user.student,
         plan: {
           id: subscription.plan?.id,
           name: subscription.plan?.name,

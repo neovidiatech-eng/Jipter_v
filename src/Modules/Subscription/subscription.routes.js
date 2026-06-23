@@ -19,6 +19,12 @@ router.get(
   authorize(PERMISSIONS_V2.SUBSCRIPTIONS.READ),
   controller.getMySubscription,
 );
+router.get(
+  "/",
+  authentication,
+  authorize(PERMISSIONS_V2.SUBSCRIPTIONS.READ),
+  controller.getallSubscriptions,
+);
 
 router.post(
   "/:studentId/renew",
