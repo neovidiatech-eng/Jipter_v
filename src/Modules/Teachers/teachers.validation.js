@@ -3,10 +3,10 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const getAllTeachersSchema = {
   query: joi.object({
     search: generalFields.search,
-    /*  page: generalFields.page,
+    page: generalFields.page,
     limit: generalFields.limit,
     sort: generalFields.sort,
-    sortType: generalFields.sortType, */
+    sortType: generalFields.sortType, 
   }),
 };
 
