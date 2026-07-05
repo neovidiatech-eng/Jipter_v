@@ -306,6 +306,30 @@ export const generalFields = {
       "string.pattern.base": "Color must be a valid hex color",
       "any.required": "Color is required",
     }),
+  page: Joi.number().integer().min(1).messages({
+    "number.base": "Page must be a number",
+    "number.integer": "Page must be an integer",
+    "number.min": "Page must be at least {#limit}",
+    "any.required": "Page is required",
+  }),
+  limit: Joi.number().integer().min(1).max(100).messages({
+    "number.base": "Limit must be a number",
+    "number.integer": "Limit must be an integer",
+    "number.min": "Limit must be at least {#limit}",
+    "number.max": "Limit must be at most {#limit}",
+    "any.required": "Limit is required",
+  }),
+  sort: Joi.string().messages({
+    "string.base": "Sort field must be a string",
+    "string.empty": "Sort field cannot be empty",
+    "any.required": "Sort field is required",
+  }),
+  sortType: Joi.string().valid("asc", "desc").messages({
+    "string.base": "Sort type must be a string",
+    "string.empty": "Sort type cannot be empty",
+    "any.only": "Sort type must be either 'asc' or 'desc'",
+    "any.required": "Sort type is required",
+  }),
   rescheduleCount: Joi.number().positive().messages({
     "number.base": "Reschedule count must be a number",
     "number.positive": "Reschedule count must be a positive number",
