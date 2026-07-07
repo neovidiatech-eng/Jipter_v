@@ -71,6 +71,13 @@ router.patch(
   validation(schema.updateSchedule),
   scheduleController.updateSchedule,
 );
+router.patch(
+  "/change-instructor/:id",
+  authentication,
+  authorizeResource(sessionsResource),
+  validation(schema.changeInstructor),
+  scheduleController.changeInstructor,
+);
 
 router.post(
   "/:id/join",

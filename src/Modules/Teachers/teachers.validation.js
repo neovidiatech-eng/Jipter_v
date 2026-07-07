@@ -62,8 +62,8 @@ export const updateTeacherSchema = {
       }),
       gender: generalFields.gender,
       age: generalFields.number,
-      hour_price: generalFields.price,
-      active: generalFields.active,
+      hour_price: generalFields.price.optional(),
+      active: generalFields.active.optional(),
     })
     .required(),
 };

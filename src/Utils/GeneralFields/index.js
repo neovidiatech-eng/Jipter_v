@@ -83,7 +83,7 @@ export const generalFields = {
         "Password must be at least 8 characters and include uppercase, lowercase, number, and special character (@$!%*?&^#)",
       "any.required": "Password is required",
     }),
-  confirmPassword: Joi.any().valid(Joi.ref("password")).required().messages({
+  confirmPassword: Joi.any().valid(Joi.ref("password")).messages({
     "any.only": "Confirm password must match the password",
     "any.required": "Confirm password is required",
   }),
@@ -157,47 +157,47 @@ export const generalFields = {
     "any.required": "Search query is required",
   }),
   file: {
-    fieldname: Joi.string().required().messages({
+    fieldname: Joi.string().messages({
       "string.base": "File field name must be a string",
       "string.empty": "File field name cannot be empty",
       "any.required": "File field name is required",
     }),
-    originalname: Joi.string().required().messages({
+    originalname: Joi.string().messages({
       "string.base": "Original file name must be a string",
       "string.empty": "Original file name cannot be empty",
       "any.required": "Original file name is required",
     }),
-    encoding: Joi.string().required().messages({
+    encoding: Joi.string().messages({
       "string.base": "File encoding must be a string",
       "string.empty": "File encoding cannot be empty",
       "any.required": "File encoding is required",
     }),
-    mimetype: Joi.string().required().messages({
+    mimetype: Joi.string().messages({
       "string.base": "File MIME type must be a string",
       "string.empty": "File MIME type cannot be empty",
       "any.required": "File MIME type is required",
     }),
-    finalPath: Joi.string().required().messages({
+    finalPath: Joi.string().messages({
       "string.base": "File final path must be a string",
       "string.empty": "File final path cannot be empty",
       "any.required": "File final path is required",
     }),
-    destination: Joi.string().required().messages({
+    destination: Joi.string().messages({
       "string.base": "File destination must be a string",
       "string.empty": "File destination cannot be empty",
       "any.required": "File destination is required",
     }),
-    filename: Joi.string().required().messages({
+    filename: Joi.string().messages({
       "string.base": "Filename must be a string",
       "string.empty": "Filename cannot be empty",
       "any.required": "Filename is required",
     }),
-    path: Joi.string().required().messages({
+    path: Joi.string().messages({
       "string.base": "File path must be a string",
       "string.empty": "File path cannot be empty",
       "any.required": "File path is required",
     }),
-    size: Joi.number().positive().required().messages({
+    size: Joi.number().positive().messages({
       "number.base": "File size must be a number",
       "number.positive": "File size must be a positive number",
       "any.required": "File size is required",
@@ -248,43 +248,43 @@ export const generalFields = {
     "string.empty": "Description cannot be empty",
     "any.required": "Description is required",
   }),
-  price: Joi.number().positive().required().messages({
+  price: Joi.number().positive().messages({
     "number.base": "Price must be a number",
     "number.positive": "Price must be a positive number",
     "any.required": "Price is required",
   }),
-  duration: Joi.number().positive().required().messages({
+  duration: Joi.number().positive().messages({
     "number.base": "Duration must be a number",
     "number.positive": "Duration must be a positive number",
     "any.required": "Duration is required",
   }),
-  sessionsCount: Joi.number().positive().required().messages({
+  sessionsCount: Joi.number().positive().messages({
     "number.base": "Sessions count must be a number",
     "number.positive": "Sessions count must be a positive number",
     "any.required": "Sessions count is required",
   }),
-  sessionTime: Joi.number().positive().required().messages({
+  sessionTime: Joi.number().positive().messages({
     "number.base": "Session time must be a number",
     "number.positive": "Session time must be a positive number",
     "any.required": "Session time is required",
   }),
-  active: Joi.boolean().required().messages({
+  active: Joi.boolean().messages({
     "boolean.base": "Active must be a boolean",
     "boolean.empty": "Active cannot be empty",
     "any.required": "Active is required",
   }),
-  bestSeller: Joi.boolean().required().messages({
+  bestSeller: Joi.boolean().messages({
     "boolean.base": "Best seller must be a boolean",
     "boolean.empty": "Best seller cannot be empty",
     "any.required": "Best seller is required",
   }),
-  type: Joi.string().valid("full", "half").required().messages({
+  type: Joi.string().valid("full", "half").messages({
     "string.base": "Type must be a string",
     "string.empty": "Type cannot be empty",
     "any.required": "Type is required",
     "any.only": "Type must be either 'full' or 'half'",
   }),
-  features: Joi.object().required().messages({
+  features: Joi.object().messages({
     "object.base": "Features must be an object",
     "object.empty": "Features cannot be empty",
     "any.required": "Features is required",
@@ -292,7 +292,7 @@ export const generalFields = {
   id: Joi.string().uuid(),
   parent_recurring_id: Joi.string()
     .pattern(/^rec_.{10}$/)
-    .required()
+    
     .messages({
       "string.empty": "parent_recurring_id is required",
       "any.required": "parent_recurring_id is required",
@@ -312,7 +312,7 @@ export const generalFields = {
     "number.min": "Page must be at least {#limit}",
     "any.required": "Page is required",
   }),
-  limit: Joi.number().integer().min(1).max(100).messages({
+  limit: Joi.number().integer().min(1).messages({
     "number.base": "Limit must be a number",
     "number.integer": "Limit must be an integer",
     "number.min": "Limit must be at least {#limit}",
@@ -336,18 +336,18 @@ export const generalFields = {
   }),
 
   ageRange: Joi.object({
-    minAge: Joi.number().positive().required().messages({
+    minAge: Joi.number().positive().messages({
       "number.base": "Minimum age must be a number",
       "number.positive": "Minimum age must be a positive number",
       "any.required": "Minimum age is required",
     }),
-    maxAge: Joi.number().positive().required().messages({
+    maxAge: Joi.number().positive().messages({
       "number.base": "Maximum age must be a number",
       "number.positive": "Maximum age must be a positive number",
       "any.required": "Maximum age is required",
     }),
   })
-    .required()
+    
     .messages({
       "any.required": "Age range is required",
     }),

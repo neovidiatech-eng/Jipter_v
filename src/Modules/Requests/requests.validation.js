@@ -20,7 +20,7 @@ export const createRequest = {
       .required(),
     priority: Joi.string().valid("low", "medium", "high").default("medium"),
     title: Joi.string().optional(),
-    reason: Joi.string().min(5).max(500).required(),
+    reason: Joi.string().min(5).max(1000).required(),
     requestedData: Joi.object({
       new_start_time: generalFields.date.optional(),
       new_end_time: generalFields.date.optional(),

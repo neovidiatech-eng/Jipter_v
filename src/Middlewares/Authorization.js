@@ -20,12 +20,10 @@ export const authorization = ({ permissions = [], roles = [] }) => {
     if (roles.length > 0) {
       const userRoleName = req.user?.role?.name;
       if (!roles.includes(userRoleName)) {
-        return next(
-          new Error(
-            `Forbidden: This endpoint is restricted to ${roles.join(", ")} context.`,
-            { cause: 403 },
-          ),
-        );
+        const err = new Error("FORBIDDEN_ROLE");
+        err.cause = 403;
+        err.isMessageKey = true;
+        return next(err);
       }
     }
 
@@ -35,9 +33,10 @@ export const authorization = ({ permissions = [], roles = [] }) => {
       const hasPermission = hasAnyPermission(req.user, permissions);
 
       if (!hasPermission) {
-        return next(
-          new Error("Forbidden: Insufficient permissions", { cause: 403 }),
-        );
+        const err = new Error("FORBIDDEN_PERMISSION");
+        err.cause = 403;
+        err.isMessageKey = true;
+        return next(err);
       }
     }
 

@@ -383,7 +383,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
   } else if (notification_Time === notificationType[3]) {
     reminderTime = new Date(startTime.getTime() - 60 * 60 * 1000);
     notificationJobType = "before 60 minutes";
-  } else{
+  } else {
     reminderTime = new Date(startTime.getTime() - 5 * 60 * 1000);
     notificationJobType = "before 5 minutes";
   }
@@ -622,7 +622,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
         reminderTime = new Date(st.getTime() - 5 * 60 * 1000);
         notificationJobType = "before 5 minutes";
       }
-      
+
       if (st > now) {
         addNotificationJob({
           scheduleId: createdSchedules[i]?.id,
@@ -1471,4 +1471,92 @@ async function updateAverageRating(userId) {
     }
   }
 }
-``;
+
+export const changeInstructor = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { teacherId } = req.body;
+
+  const newTeacher = await db.findFirst({
+    model: "teacher",
+    where: { id: teacherId },
+  });
+
+  if (!newTeacher)
+    return errorResponse({
+      req,
+      next,
+      status: 404,
+      message: "TEACHER_NOT_FOUND",
+    });
+
+  const session = await db.findOne({
+    model: "schedule",
+    where: { id },
+    include: {
+      student: true,
+      teacher: { include: { user: true } },
+    },
+  });
+
+  if (!session)
+    return errorResponse({
+      req,
+      next,
+      status: 404,
+      message: "SESSION_NOT_FOUND",
+    });
+
+
+
+  const tz = req.timezone;
+  const startTime = normalizeDate(session.start_time, tz);
+  const endTime = getEndTime(
+    startTime,
+    session.type,
+    session.student.plan?.duration,
+  );
+  console.log({
+    tz,
+    startTime,
+    endTime
+  });
+  
+
+  const teacherSchedule = await 
+    db.findFirst({
+      model: "schedule",
+      where: {
+        teacherId,
+        status: { not: "cancelled" },
+        start_time: { lt: endTime },
+        end_time: { gt: startTime },
+      },
+    })
+
+  
+  console.log("teacherSchedule", teacherSchedule);
+
+  if ( teacherSchedule) {
+    return errorResponse({
+      req,
+      next,
+      status: 400,
+      message: "TEACHER_ALREADY_HAVE_SESSION",
+    });
+  }
+
+ 
+ const newSchedule= await db.updateOne({
+    model: "schedule",
+    where: { id },
+    data: { teacherId: newTeacher.id },
+  });
+
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "INSTRUCTOR_CHANGED_SUCCESS",
+    data: newSchedule
+  });
+});

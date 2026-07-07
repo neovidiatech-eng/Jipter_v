@@ -229,5 +229,11 @@
   "PRISMA_RECORD_NOT_FOUND": "Record not found in the database",
   "INVALID_FILE_FORMAT": "Invalid file format. Please upload a valid file.",
   "NO_FILES_UPLOADED": "No files were uploaded. Please attach a file.",
-  "STUDENT_HAS_ACTIVE_SUBSCRIPTION": "Student has an active subscription"
+  "STUDENT_HAS_ACTIVE_SUBSCRIPTION": "Student has an active subscription",
+  "FORBIDDEN": "You do not have permission to perform this action",
+  "FORBIDDEN_ROLE": "Access denied: this endpoint is restricted to specific roles",
+  "FORBIDDEN_PERMISSION": "Access denied: you do not have the required permission",
+  "UNAUTHORIZED_NO_TOKEN": "Authentication required: please provide a valid token",
+  "UNAUTHORIZED_INVALID_TOKEN": "Authentication failed: invalid or malformed token",
+  "UNAUTHORIZED_ACCOUNT": "Authentication failed: account not found or not confirmed"
 }

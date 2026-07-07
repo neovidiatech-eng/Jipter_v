@@ -150,6 +150,11 @@ export const updateSchedule = {
       videoUrl: Joi.string().uri().allow(null, ""),
       slidesUrl: Joi.string().uri().allow(null, ""),
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
+      instractor:generalFields.id.optional().messages({
+        "string.empty": "INSTRACTOR_ID_REQUIRED",
+        "any.required": "INSTRACTOR_ID_REQUIRED",
+        "string.pattern.base": "INSTRACTOR_ID_INVALID",
+      })
     })
     .min(1)
     .required(),
@@ -209,6 +214,14 @@ export const getStudentSchedules = {
 export const deleteSchedule = {
   params: Joi.object().keys({
     id: generalFields.id.required(),
+  }),
+};
+export const changeInstructor = {
+  params: Joi.object().keys({
+    id: generalFields.id.required(),
+  }),
+  body: Joi.object().keys({
+    teacherId: generalFields.id.required(),
   }),
 };
 export const deleteRecurringGroup = {

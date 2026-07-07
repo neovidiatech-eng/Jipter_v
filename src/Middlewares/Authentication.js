@@ -7,16 +7,25 @@ import { hasPermission, getUserPermissions } from "../Utils/Permissions/permissi
 const authentication = asyncHandler(async (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization) {
-    return next(new Error("Unauthorized", { cause: 401 }));
+    const err = new Error("UNAUTHORIZED_NO_TOKEN");
+    err.cause = 401;
+    err.isMessageKey = true;
+    return next(err);
   }
   const [bearer, token] = authorization.split(" ");
   if (!token || !bearer || bearer !== "Bearer") {
-    return next(new Error("Unauthorized", { cause: 401 }));
+    const err = new Error("UNAUTHORIZED_NO_TOKEN");
+    err.cause = 401;
+    err.isMessageKey = true;
+    return next(err);
   }
 
   const decoded = verifyToken({ token });
   if (!decoded || !decoded.id) {
-    return next(new Error("Invalid Token", { cause: 401 }));
+    const err = new Error("UNAUTHORIZED_INVALID_TOKEN");
+    err.cause = 401;
+    err.isMessageKey = true;
+    return next(err);
   }
 
   const cacheKey = `user:${decoded.id}`;
@@ -29,8 +38,7 @@ const authentication = asyncHandler(async (req, res, next) => {
       user = JSON.parse(cachedUser);
     }
   } catch (cacheError) {
-    console.error("Redis Cache Error:", cacheError.message);
-    // Continue to DB if cache fails
+    // Continue to DB if cache fails — cache errors are non-fatal
   }
 
   if (!user) {
@@ -57,16 +65,17 @@ const authentication = asyncHandler(async (req, res, next) => {
       // Cache for 5 minutes (300 seconds)
       try {
         await redis.set(cacheKey, JSON.stringify(user), { EX: 300 });
-      } catch (cacheError) {
-        console.error("Redis Cache Set Error:", cacheError.message);
+      } catch {
+        // Cache set failure is non-fatal; continue without caching
       }
     }
   }
 
   if (!user) {
-    return next(
-      new Error("Unauthorized or Account Not Confirmed", { cause: 401 }),
-    );
+    const err = new Error("UNAUTHORIZED_ACCOUNT");
+    err.cause = 401;
+    err.isMessageKey = true;
+    return next(err);
   }
 
   // Attach helper method to check permissions and cache permissions list

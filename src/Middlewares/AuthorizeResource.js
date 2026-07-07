@@ -15,7 +15,10 @@ export const authorizeResource = (resource) => {
     const user = req.user;
 
     if (!user) {
-      return next(new Error("Unauthorized", { cause: 401 }));
+      const err = new Error("UNAUTHORIZED_NO_TOKEN");
+      err.cause = 401;
+      err.isMessageKey = true;
+      return next(err);
     }
 
     // Super Admin / Admin bypass
@@ -29,7 +32,10 @@ export const authorizeResource = (resource) => {
 
     // Validate permission
     if (!req.permissions.has(permissionCode)) {
-      return next(new Error(`Forbidden: Access denied for ${permissionCode}`, { cause: 403 }));
+      const err = new Error("FORBIDDEN_PERMISSION");
+      err.cause = 403;
+      err.isMessageKey = true;
+      return next(err);
     }
 
     next();

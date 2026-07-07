@@ -159,7 +159,7 @@ export const globalErrorHandling = (err, req, res, next) => {
     : err.message || getMessage("INTERNAL_SERVER_ERROR", lang);
 
   return res.status(status).json({
-    message: "error",
+    message: getMessage("INTERNAL_SERVER_ERROR", lang),
     status,
     error: errorText,
     ...(err.details && { details: err.details }),
