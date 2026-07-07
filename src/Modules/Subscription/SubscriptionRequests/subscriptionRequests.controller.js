@@ -155,6 +155,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
       if (!systemWallet || !defaultCurrency) {
         const error = new Error("SYSTEM_CONFIGURATION_ERROR");
+        error.cause = 500;
         error.isMessageKey = true;
         throw error;
       }
@@ -187,6 +188,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
       if (existingStudent) {
         const error = new Error("STUDENT_ALREADY_EXISTS");
+        error.cause = 409;
         error.isMessageKey = true;
         throw error;
       }
@@ -253,7 +255,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           balance: { increment: convertedAmount },
         },
       });
-
     });
 
     await redis.del(redisKey);
@@ -265,11 +266,10 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       status: 200,
     });
   } catch (error) {
-    return errorResponse({
-      next,
-      req,
-      message: error.message || "INTERNAL_SERVER_ERROR",
-      status: 500,
-    });
+    const err = new Error(error.isMessageKey ? error.message : "INTERNAL_SERVER_ERROR");
+    err.cause = error.cause || 500;
+    err.isMessageKey = true;
+    return next(err);
   }
 });
+

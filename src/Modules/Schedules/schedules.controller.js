@@ -1515,14 +1515,8 @@ export const changeInstructor = asyncHandler(async (req, res, next) => {
     session.type,
     session.student.plan?.duration,
   );
-  console.log({
-    tz,
-    startTime,
-    endTime
-  });
-  
 
-  const teacherSchedule = await 
+  const teacherSchedule = await
     db.findFirst({
       model: "schedule",
       where: {
@@ -1531,12 +1525,9 @@ export const changeInstructor = asyncHandler(async (req, res, next) => {
         start_time: { lt: endTime },
         end_time: { gt: startTime },
       },
-    })
+    });
 
-  
-  console.log("teacherSchedule", teacherSchedule);
-
-  if ( teacherSchedule) {
+  if (teacherSchedule) {
     return errorResponse({
       req,
       next,

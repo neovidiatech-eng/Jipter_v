@@ -84,63 +84,54 @@ export const createExpense = asyncHandler(async (req, res, next) => {
   const convertedAmount = convertAmount(rawAmount, sourceCurrency.exchangeRate, defaultCurrency.exchangeRate);
 
   let expense;
-  try {
-    await db.transaction(async (tx) => {
-      // 3. Re-verify balance inside transaction for absolute safety
-      const currentWallet = await tx.findOne({
-        model: "Wallet",
-        where: { id: systemWallet.id },
-      });
-
-      if (currentWallet.balance < convertedAmount) {
-        const error = new Error("INSUFFICIENT_BALANCE");
-        error.isMessageKey = true;
-        error.status = 400;
-        throw error;
-      }
-
-      // 4. Create expense record
-      expense = await tx.create({
-        model: "expenses",
-        data: {
-          title,
-          currencyId,
-          amount: rawAmount, // Original amount for record
-          payment_type,
-          type,
-          status,
-          date: new Date(date),
-        },
-      });
-
-      // 5. Create Transaction record (Ledger Entry)
-      await tx.create({
-        model: "Transaction",
-        data: {
-          walletId: systemWallet.id,
-          type: "expense",
-          amount: convertedAmount, // Amount in system currency
-          status: "completed",
-          reason: title,
-          expenseId: expense.id,
-        },
-      });
-
-      // 6. Deduct from system wallet balance (Atomic)
-      await tx.updateOne({
-        model: "Wallet",
-        where: { id: systemWallet.id },
-        data: { balance: { decrement: convertedAmount } },
-      });
+  await db.transaction(async (tx) => {
+    // 3. Re-verify balance inside transaction for absolute safety
+    const currentWallet = await tx.findOne({
+      model: "Wallet",
+      where: { id: systemWallet.id },
     });
-  } catch (error) {
-    return errorResponse({
-      next,
-      req,
-      message: error.message || "TRANSACTION_FAILED",
-      status: error.status || 500,
+
+    if (currentWallet.balance < convertedAmount) {
+      const error = new Error("INSUFFICIENT_BALANCE");
+      error.cause = 400;
+      error.isMessageKey = true;
+      throw error;
+    }
+
+    // 4. Create expense record
+    expense = await tx.create({
+      model: "expenses",
+      data: {
+        title,
+        currencyId,
+        amount: rawAmount, // Original amount for record
+        payment_type,
+        type,
+        status,
+        date: new Date(date),
+      },
     });
-  }
+
+    // 5. Create Transaction record (Ledger Entry)
+    await tx.create({
+      model: "Transaction",
+      data: {
+        walletId: systemWallet.id,
+        type: "expense",
+        amount: convertedAmount, // Amount in system currency
+        status: "completed",
+        reason: title,
+        expenseId: expense.id,
+      },
+    });
+
+    // 6. Deduct from system wallet balance (Atomic)
+    await tx.updateOne({
+      model: "Wallet",
+      where: { id: systemWallet.id },
+      data: { balance: { decrement: convertedAmount } },
+    });
+  });
 
   // 7. Re-fetch with relations for response
   const expenseWithCurrency = await db.findOne({

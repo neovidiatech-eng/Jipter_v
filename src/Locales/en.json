@@ -235,5 +235,9 @@
   "FORBIDDEN_PERMISSION": "Access denied: you do not have the required permission",
   "UNAUTHORIZED_NO_TOKEN": "Authentication required: please provide a valid token",
   "UNAUTHORIZED_INVALID_TOKEN": "Authentication failed: invalid or malformed token",
-  "UNAUTHORIZED_ACCOUNT": "Authentication failed: account not found or not confirmed"
+  "UNAUTHORIZED_ACCOUNT": "Authentication failed: account not found or not confirmed",
+  "TRANSACTION_FAILED": "Transaction failed, please try again",
+  "LECTURE_LOCKED": "This lecture is locked. Please book a session to unlock it",
+  "ONLY_ADMIN_OR_SUPER_ADMIN_CAN_CHANGE_PASSWORDS": "Only administrators can change passwords",
+  "TEACHER_ALREADY_HAVE_SESSION": "Teacher already has a session at this time"
 }

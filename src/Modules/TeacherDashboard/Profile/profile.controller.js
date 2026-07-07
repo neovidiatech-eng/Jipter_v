@@ -141,8 +141,6 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
       },
     },
   });
-  console.log(myStudents);
-  
 
   const students = Object.values(
     await myStudents.reduce(async (accPromise, item) => {

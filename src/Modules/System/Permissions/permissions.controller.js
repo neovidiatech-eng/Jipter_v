@@ -181,8 +181,6 @@ export const addPermissionsToRole = asyncHandler(async (req, res, next) => {
       permission: true,
     },
   });
-  console.log(rolePermissions);
-
   if (rolePermissions.length > 0) {
     return errorResponse({
       next,
