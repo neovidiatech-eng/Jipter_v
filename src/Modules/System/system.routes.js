@@ -66,5 +66,5 @@ router.delete(
   validation(deleteRoleSchema),
   systemController.deleteRole,
 );
-router.get("/dashboard", authentication, authorization({ roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN] }), systemController.getDashboard);
+router.get("/dashboard", authentication, authorize(PERMISSIONS_V2.DASHBOARD.READ), systemController.getDashboard);
 export default router;
