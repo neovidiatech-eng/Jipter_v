@@ -176,8 +176,12 @@ export const login = asyncHandler(async (req, res, next) => {
     },
     include: {
       role: {
-        select: {
-          name: true,
+        include: {
+          rolePermissions: {
+            include: {
+              permission: true,
+            },
+          },
         },
       },
       subscriptionRequests: true,
@@ -242,6 +246,12 @@ export const login = asyncHandler(async (req, res, next) => {
     data: {
       accessToken,
       role: user?.role?.name ? user.role.name : req.t("USER_NO_ROLE"),
+      permissions: user?.role?.rolePermissions.map((rolePermission) => {
+        return {
+          name: rolePermission.permission.name,
+          code: rolePermission.permission.code,
+        };
+      }),
       hasPendingSubscriptionRequest: !!subscriptionRequest,
     },
   });
