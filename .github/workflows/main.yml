@@ -70,6 +70,7 @@ jobs:
             set -e
 
             cd /root/backend/Jipter_v
+            
 
             # ── Step 1: Pull latest code ──────────────────────────────────────
             git pull origin main
