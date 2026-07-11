@@ -18,10 +18,11 @@ services:
       retries: 5
     networks:
       - jipter_network
-    resources:
-      limits:
-        cpus: "1"
-        memory: "512M"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "512M"
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -38,10 +39,11 @@ services:
         condition: service_healthy
     networks:
       - jipter_network
-    resources:
-      limits:
-        cpus: "0.5"
-        memory: "256M"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
 
   redis:
     image: redis:7-alpine
@@ -52,10 +54,11 @@ services:
       - jip_redis_data:/data
     networks:
       - jipter_network
-    resources:
-      limits:
-        cpus: "0.5"
-        memory: "256M"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
 
   app:
     image: jipter_api:latest
@@ -94,10 +97,11 @@ services:
       - jip_uploads:/app/src/uploads
     networks:
       - jipter_network
-    resources:
-      limits:
-        cpus: "2"
-        memory: "1G"
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "1G"
 
 networks:
   jipter_network:
