@@ -69,7 +69,7 @@ jobs:
           script: |
             set -e
 
-            cd /root/backend/Jipter_v
+            cd /backend/Jipter_v
             
 
             # ── Step 1: Pull latest code ──────────────────────────────────────
