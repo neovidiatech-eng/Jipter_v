@@ -5,6 +5,7 @@ import morgan from "morgan";
 import path from "node:path";
 import { globalErrorHandling } from "./Utils/Response.js";
 import { langMiddleware } from "./Middlewares/i18n.js";
+import { globalRateLimiter } from "./Middlewares/RateLimiter.js";
 import {
   notificationQueue,
   redis,
@@ -59,6 +60,7 @@ const bootstrap = async () => {
     }),
   );
   app.use(morgan("dev"));
+  app.use(globalRateLimiter);
   app.use(express.json());
   app.use(langMiddleware); // Detect language for all requests
   await redisConnection();
