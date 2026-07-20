@@ -3,6 +3,7 @@ import { verifyToken } from "../Utils/Token/token.js";
 import * as db from "../database/dbService.js";
 import { redis } from "../Utils/Radis/Connection.js";
 import { hasPermission, getUserPermissions } from "../Utils/Permissions/permissions.js";
+import { applyUserTimezone } from "./Timezone.js";
 
 const authentication = asyncHandler(async (req, res, next) => {
   const { authorization } = req.headers;
@@ -83,6 +84,10 @@ const authentication = asyncHandler(async (req, res, next) => {
   user.hasPermission = (permissionCode) => req.permissions.has(permissionCode);
 
   req.user = user;
+
+  // Upgrade req.timezone to the user's stored treimezone (overrides GeoIP / header)
+  applyUserTimezone(req);
+
   next();
 });
 

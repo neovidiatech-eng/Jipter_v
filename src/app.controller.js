@@ -20,7 +20,7 @@ import { initGeoIP } from "./Utils/GeoIP.js";
 
 const bootstrap = async () => {
   const app = express();
-  app.set("trust proxy", true);
+  app.set("trust proxy", 1);
   const port = process.env.PORT || 6000;
 
   // Initialize GeoIP database in the background

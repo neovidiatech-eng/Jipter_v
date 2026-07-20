@@ -1084,6 +1084,7 @@ export const joinSession = asyncHandler(async (req, res, next) => {
   const user = req.user;
   const role = user.role?.name?.toLowerCase();
 
+
   const session = await db.findOne({ model: "schedule", where: { id } });
   if (!session) {
     return errorResponse({
@@ -1104,7 +1105,7 @@ export const joinSession = asyncHandler(async (req, res, next) => {
   }
 
   // 1. Check if it's too early (UTC comparison)
-  if (isBeforeAllowedJoinTime(session.start_time, 5)) {
+  if (isBeforeAllowedJoinTime(session.start_time, 15)) {
     return errorResponse({
       req,
       next,
