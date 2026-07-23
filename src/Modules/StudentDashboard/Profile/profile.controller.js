@@ -163,18 +163,15 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   const studentAge = shouldResolveRank
     ? resolveStudentAge({ age, birthDate: birth_date })
     : null;
-  const autoRank = shouldResolveRank
-    ? await findRankByAge({ age: studentAge })
-    : null;
 
-  if (shouldResolveRank && !autoRank) {
+/*   if (shouldResolveRank ) {
     return errorResponse({
       req,
       message: "AGE_RANK_NOT_FOUND",
       next,
       status: 400,
     });
-  }
+  } */
 
   let user_updated = student.user;
   if (
@@ -206,16 +203,16 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     });
   }
 
-  if (country || birth_date || autoRank) {
-    await db.updateOne({
+  if (country || age || birth_date  ) {
+   await db.updateOne({
       model: "student",
       where: { id: student.id },
       data: {
         ...(country && { country }),
         ...(birth_date && { birth_date: new Date(birth_date) }),
-        ...(autoRank && { rank: { connect: { id: autoRank.id } } }),
       },
     });
+    
   }
 
   if (!user_updated) {
