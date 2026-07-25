@@ -60,7 +60,7 @@ export const init_io = (io) => {
        * Event: message:send
        * Validates sender, saves message, and broadcasts to room
        */
-      socket.on("message:send", async ({ conversationId, content }) => {
+      socket.on("message:send", async ({ conversationId, content, mediaUrl, mediaType, attachments }) => {
         try {
           // Rule: Admin is read-only
           if (user.role.name === "admin") {
@@ -80,7 +80,14 @@ export const init_io = (io) => {
           }
 
           // Save to DB
-          const message = await ChatService.saveMessage(conversationId, user.id, content);
+          const message = await ChatService.saveMessage(
+            conversationId,
+            user.id,
+            content,
+            mediaUrl,
+            mediaType,
+            attachments,
+          );
 
           // Broadcast to everyone in the room (including sender's other tabs)
           io.to(`conv_${conversationId}`).emit("message:new", message);

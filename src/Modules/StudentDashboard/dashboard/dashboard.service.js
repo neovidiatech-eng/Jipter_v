@@ -90,6 +90,14 @@ export const getDashboard = async ({ req, res, next }) => {
           },
         },
       },
+      lectures: {
+        select: {
+          id: true,
+          title: true,
+          order:true,
+          
+        },
+      },
       course: {
         select: {
           id: true,

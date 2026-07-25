@@ -107,7 +107,7 @@ export const getMessages = asyncHandler(async (req, res, next) => {
  */
 export const sendMessage = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { content } = req.body;
+  const { content, isVoice, duration } = req.body;
   const userId = req.user.id;
   const role = req.user.role.name;
 
@@ -122,7 +122,57 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const message = await ChatService.saveMessage(id, userId, content);
+  let mediaUrl = null;
+  let mediaType = null;
+  let attachments = null;
+
+  // Handle uploaded file (single file uploaded via local multer)
+  const uploadedFile = req.file || (req.files && req.files[0]);
+  if (uploadedFile) {
+    mediaUrl = uploadedFile.finalPath || uploadedFile.path;
+
+    const mime = uploadedFile.mimetype || "";
+    const isVoiceFlag = String(isVoice) === "true" || req.body.mediaType === "voice";
+
+    if (isVoiceFlag || mime.startsWith("audio/")) {
+      mediaType = isVoiceFlag ? "voice" : "audio";
+    } else if (mime.startsWith("image/")) {
+      mediaType = "image";
+    } else if (mime.startsWith("video/")) {
+      mediaType = "video";
+    } else if (mime === "application/pdf") {
+      mediaType = "pdf";
+    } else {
+      mediaType = "document";
+    }
+
+    attachments = {
+      path: uploadedFile.finalPath || uploadedFile.path,
+      originalname: uploadedFile.originalname,
+      size: uploadedFile.size,
+      mimetype: uploadedFile.mimetype,
+      duration: duration ? Number(duration) : undefined,
+    };
+  } else if (req.body.mediaUrl) {
+    mediaUrl = req.body.mediaUrl;
+    mediaType = req.body.mediaType || "document";
+    attachments = req.body.attachments || (duration ? { duration: Number(duration) } : null);
+  }
+
+  const message = await ChatService.saveMessage(
+    id,
+    userId,
+    content,
+    mediaUrl,
+    mediaType,
+    attachments,
+  );
+
+  // Broadcast real-time message via socket if socket server is present
+  const io = req.app.get("io");
+  if (io) {
+    io.to(`conv_${id}`).emit("message:new", message);
+  }
 
   return successResponse({
     res,

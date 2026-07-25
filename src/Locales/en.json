@@ -201,6 +201,7 @@
   "NO_SCHEDULED_SESSIONS_FOUND": "No scheduled sessions found between these parties",
   "UNAUTHORIZED_ROLE": "Unauthorized role for this action",
   "MESSAGE_EMPTY": "Message content cannot be empty",
+  "MESSAGE_OR_MEDIA_REQUIRED": "Message must contain text, media, or a voice note",
   "MESSAGE_TOO_LONG": "Message content cannot exceed 1000 characters",
   "RELATED_SESSION_NOT_FOUND": "Related session not found for this request",
   "STUDENT_ALREADY_EXISTS": "Student profile already exists for this user",

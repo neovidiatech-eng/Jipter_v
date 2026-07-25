@@ -472,7 +472,10 @@ model Message {
   id             String       @id @default(uuid())
   conversationId String
   senderId       String
-  content        String
+  content        String?
+  mediaUrl       String?
+  mediaType      String?
+  attachments    Json?
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)

@@ -166,7 +166,19 @@ export const getConversations = async (userId, role) => {
         return {
           conversationId: conv.id,
           otherParty,
-          lastMessage: lastMessage ? lastMessage.content : null,
+          lastMessage: lastMessage
+            ? lastMessage.content && lastMessage.content.trim().length > 0
+              ? lastMessage.content
+              : lastMessage.mediaType === "voice"
+              ? "🎤 Voice message"
+              : lastMessage.mediaType === "image"
+              ? "📷 Image"
+              : lastMessage.mediaType === "video"
+              ? "🎥 Video"
+              : lastMessage.mediaType === "audio"
+              ? "🎵 Audio"
+              : "📄 Attachment"
+            : null,
           lastMessageAt: lastMessage ? lastMessage.createdAt : null,
           unreadCount,
         };
@@ -234,18 +246,32 @@ export const getMessages = async (
  * Save a new message to the database
  * @param {string} conversationId - ID of the conversation
  * @param {string} senderId - ID of the sender (user)
- * @param {string} content - Message content
+ * @param {string|null} content - Message content
+ * @param {string|null} mediaUrl - URL of media attachment
+ * @param {string|null} mediaType - Type of media (image, video, voice, audio, document)
+ * @param {object|null} attachments - Additional attachment metadata
  * @returns {Promise<object>} - The created message object
  */
-export const saveMessage = async (conversationId, senderId, content) => {
+export const saveMessage = async (
+  conversationId,
+  senderId,
+  content = null,
+  mediaUrl = null,
+  mediaType = null,
+  attachments = null,
+) => {
   try {
-    // 1. Validation
-    if (!content || content.trim().length === 0) {
-      const error = new Error("MESSAGE_EMPTY");
+    const trimmedContent = content && typeof content === "string" ? content.trim() : null;
+    const hasContent = Boolean(trimmedContent && trimmedContent.length > 0);
+    const hasMedia = Boolean(mediaUrl);
+
+    // 1. Validation: Message must have content or media
+    if (!hasContent && !hasMedia) {
+      const error = new Error("MESSAGE_OR_MEDIA_REQUIRED");
       error.isMessageKey = true;
       throw error;
     }
-    if (content.length > 1000) {
+    if (hasContent && trimmedContent.length > 1000) {
       const error = new Error("MESSAGE_TOO_LONG");
       error.isMessageKey = true;
       throw error;
@@ -257,7 +283,10 @@ export const saveMessage = async (conversationId, senderId, content) => {
       data: {
         conversationId,
         senderId,
-        content: content.trim(),
+        content: hasContent ? trimmedContent : null,
+        mediaUrl: mediaUrl || null,
+        mediaType: mediaType || null,
+        attachments: attachments || null,
       },
       include: {
         sender: { select: { id: true, name: true, email: true } },
@@ -271,11 +300,13 @@ export const saveMessage = async (conversationId, senderId, content) => {
       select: { teacherUserId: true, studentUserId: true },
     });
 
-    const recipientId =
-      senderId === conversation.teacherUserId
-        ? conversation.studentUserId
-        : conversation.teacherUserId;
-    await incrementUnreadCount(conversationId, recipientId);
+    if (conversation) {
+      const recipientId =
+        senderId === conversation.teacherUserId
+          ? conversation.studentUserId
+          : conversation.teacherUserId;
+      await incrementUnreadCount(conversationId, recipientId);
+    }
 
     return message;
   } catch (error) {

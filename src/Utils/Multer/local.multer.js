@@ -5,14 +5,37 @@ import fs from "node:fs";
 
 export const fileValidation = {
   image: ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"],
-  video: ["video/mp4", "video/mpeg", "video/ogg", "video/webm"],
+  video: ["video/mp4", "video/mpeg", "video/ogg", "video/webm", "video/quicktime", "video/3gpp"],
+  audio: [
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
+    "audio/wave",
+    "audio/x-wav",
+    "audio/ogg",
+    "audio/webm",
+    "audio/m4a",
+    "audio/x-m4a",
+    "audio/aac",
+    "audio/mp4",
+    "audio/flac",
+  ],
   pdf: ["application/pdf"],
   document: [
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/plain",
   ],
 };
+fileValidation.chat = [
+  ...fileValidation.image,
+  ...fileValidation.video,
+  ...fileValidation.audio,
+  ...fileValidation.document,
+];
 export const localMulterUpload = ({
   customPath = "general",
   validation = [],

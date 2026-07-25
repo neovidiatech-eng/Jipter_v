@@ -1,3 +1,4 @@
+
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
@@ -21,7 +22,7 @@ import { initGeoIP } from "./Utils/GeoIP.js";
 const bootstrap = async () => {
   const app = express();
   app.set("trust proxy", 1);
-  const port = process.env.PORT || 6000;
+  const port = process.env.PORT || 5000;
 
   // Initialize GeoIP database in the background
   initGeoIP().catch((err) => {
@@ -45,6 +46,8 @@ const bootstrap = async () => {
         "http://localhost:5173",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
         "https://dashboard.jupiter-egy.com",
       ];
 
@@ -65,6 +68,9 @@ const bootstrap = async () => {
   app.use(langMiddleware); // Detect language for all requests
   await redisConnection();
   app.use("/uploads", express.static(path.resolve("./src/uploads")));
+  app.use("/test-chat", (req, res) => {
+    res.sendFile(path.resolve("./test_chat_frontend.html"));
+  });
 
   // Root Router
   app.use(rootRouter);
@@ -83,6 +89,8 @@ const bootstrap = async () => {
     },
     allowEIO3: true,
   });
+
+  app.set("io", io);
 
   const pubClient = redis.duplicate();
   const subClient = redis.duplicate();
