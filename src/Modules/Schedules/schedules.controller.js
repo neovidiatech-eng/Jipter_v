@@ -32,9 +32,30 @@ import dayjs from "dayjs";
 /*            Admin creates multiple sessions in one request            */
 /* ------------------------------------------------------------------ */
 export const getAllSchedules = asyncHandler(async (req, res, next) => {
-  const { search, start_date, end_date, page = 1, limit = 10 } = req.query;
+  const { search, start_date, end_date, page = 1, limit = 10, day_type } = req.query;
 
   const where = {};
+  const tz = req.timezone || "Africa/Cairo";
+  const now = getNowUTC();
+
+  const dayTypeLower = day_type?.toLowerCase();
+  if (dayTypeLower === "today") {
+    const startOfToday = now.tz(tz).startOf("day").toDate();
+    const endOfToday = now.tz(tz).endOf("day").toDate();
+    where.start_time = {
+      gte: startOfToday,
+      lte: endOfToday,
+    };
+  } else if (dayTypeLower === "previous") {
+    where.start_time = {
+      lt: now.toDate(),
+    };
+  } else if (dayTypeLower === "upcoming") {
+    where.start_time = {
+      gt: now.toDate(),
+    };
+  }
+
   if (search) {
     where.OR = [
       {
@@ -116,9 +137,8 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
       };
     }),
   );
-  const now = getNowUTC();
+
   const nowTime = now.toDate().getTime();
-  const tz = req.timezone;
 
   const previousSchedule = scheduleData.filter((s) => {
     return new Date(s.end_time).getTime() < nowTime;
