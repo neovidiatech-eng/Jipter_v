@@ -3,6 +3,7 @@ import { toLocal } from "../../../Utils/Date/time.js";
 
 export const getDashboard = async ({ req, res, next }) => {
   const user = req.user;
+
   const student = await db.findFirst({
     model: "student",
     where: {
@@ -10,6 +11,7 @@ export const getDashboard = async ({ req, res, next }) => {
     },
     select: {
       id: true,
+      user_id: true,
       birth_date: true,
       country: true,
       createdAt: true,
@@ -22,7 +24,7 @@ export const getDashboard = async ({ req, res, next }) => {
         select: {
           id: true,
           name: true,
-          courses: true,
+          color:true,
         },
       },
       user: {
@@ -51,6 +53,8 @@ export const getDashboard = async ({ req, res, next }) => {
       },
     },
   });
+
+  
 
   const nextSchedule = await db.findFirst({
     model: "schedule",
@@ -94,8 +98,7 @@ export const getDashboard = async ({ req, res, next }) => {
         select: {
           id: true,
           title: true,
-          order:true,
-          
+          order: true,
         },
       },
       course: {
@@ -106,6 +109,104 @@ export const getDashboard = async ({ req, res, next }) => {
       },
     },
   });
+
+  const userLectures = await db.findMany({
+    model: "user_lectures",
+    where: {
+      userId: student.user_id,
+    },
+    select: {
+      id: true,
+      status: true,
+      progress: true,
+      completedAt: true,
+      lectureId: true,
+      lecture: {
+        select: {
+          id: true,
+          title: true,
+          order: true,
+          courseId: true,
+        },
+      },
+    },
+  });
+
+
+  const userCourseIds = userLectures
+    .map((ul) => ul.lecture?.courseId)
+    .filter(Boolean);
+
+  const courseWhere = student?.rank?.id
+    ? {
+        OR: [
+          { rankId: student.rank.id },
+          ...(userCourseIds.length ? [{ id: { in: userCourseIds } }] : []),
+        ],
+      }
+    : {};
+
+  const courses = await db.findMany({
+    model: "courses",
+    where: courseWhere,
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      image: true,
+      lectures: {
+        select: {
+          id: true,
+          title: true,
+          order: true,
+        },
+        orderBy: { order: "asc" },
+      },
+    },
+  });
+
+  const userLectureMap = new Map();
+  for (const ul of userLectures) {
+    userLectureMap.set(ul.lectureId, ul);
+  }
+
+  const studentProgress = courses.map((course) => {
+    const totalLectures = course.lectures.length;
+    let completedLectures = 0;
+
+    const lectures = course.lectures.map((lecture) => {
+      const ul = userLectureMap.get(lecture.id);
+      const isCompleted = ul?.status === "completed";
+      if (isCompleted) {
+        completedLectures++;
+      }
+
+      return {
+        id: lecture.id,
+        title: lecture.title,
+        order: lecture.order,
+        status: ul?.status || "not_started",
+        progress: ul?.progress || 0,
+        completedAt: ul?.completedAt || null,
+      };
+    });
+
+    const progressPercentage =
+      totalLectures > 0
+        ? Math.round((completedLectures / totalLectures) * 100)
+        : 0;
+
+    return {
+      courseId: course.id,
+      courseTitle: course.title,
+      courseDescription: course.description,
+      courseImage: course.image,
+      totalLectures,
+      completedLectures,
+      progressPercentage,
+    };
+  });
+
   student.joindate = student.createdAt;
   delete student.createdAt;
 
@@ -114,5 +215,5 @@ export const getDashboard = async ({ req, res, next }) => {
     nextSchedule.end_time = toLocal(nextSchedule.end_time, req.timezone);
   }
 
-  return { metadata: student, nextSchedule };
+  return { metadata: student, nextSchedule, studentProgress };
 };
