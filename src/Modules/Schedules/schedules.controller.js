@@ -220,6 +220,12 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
         },
       },
       scheduleLogs: true,
+      reviews:{
+        include:{
+          reviewer:true,
+          reviewee:true
+        }
+      }
     },
   });
   if (schedule?.student?.user?.phone) {

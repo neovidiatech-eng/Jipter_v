@@ -41,21 +41,7 @@ export const loginSchema = {
     })
     .required(),
 };
-export const googleSignupSchema = {
-  body: Joi.object()
-    .keys({
-      idToken: generalFields.idToken.required(),
-    })
-    .required(),
-};
-export const googleLoginSchema = {
-  body: Joi.object()
-    .keys({
-      idToken: generalFields.idToken.required(),
-      provider: generalFields.provider.required(),
-    })
-    .required(),
-};
+
 export const verifiyCodeSchema = {
   body: Joi.object()
     .keys({

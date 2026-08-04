@@ -24,14 +24,6 @@ router.post("/sign-in", authRateLimiter, validation(loginSchema), auth.login);
 
 router.post("/refresh", authRateLimiter, cookieParser(), auth.refresh);
 
-/* router.post(
-  "/google-signup",
-  validation(googleSignupSchema),
-  auth.googleSignUp,
-);
-
-router.post("/google-login", validation(googleLoginSchema), auth.googlelogin);
- */
 
 router.post(
   "/verify-account",
