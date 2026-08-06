@@ -260,7 +260,7 @@ export const completeLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  // Check if student has a free trial / 1 session plan
+  // Check student session completion status & free trial restrictions
   const student = await db.findFirst({
     model: "student",
     where: { user_id: userId },
@@ -275,7 +275,7 @@ export const completeLecture = async ({ req, res, next }) => {
                         student.plan?.sessionsCount === 1;
 
     if (isFreeTrial) {
-      // 1. Check if they have a booked schedule in this course
+      // Free trial logic: Must have a booked schedule in this course and it must be completed
       const bookedSchedule = await db.findFirst({
         model: "schedule",
         where: {
@@ -284,7 +284,7 @@ export const completeLecture = async ({ req, res, next }) => {
         },
       });
 
-      if (!bookedSchedule) {
+      if (!bookedSchedule || bookedSchedule.status !== "completed") {
         const error = createError({
           message: "LECTURE_LOCKED",
           status: 403,
@@ -293,10 +293,32 @@ export const completeLecture = async ({ req, res, next }) => {
         throw error;
       }
 
-      // 2. Allow completing ONLY the lecture linked to the booked schedule
-      //    (if the schedule has a specific lectureId) — or any lecture in the course
-      //    if the schedule is a general course booking
-      if (bookedSchedule.lectureId && bookedSchedule.lectureId !== id) {
+      // Allow completing ONLY the lecture linked to the booked schedule
+      const linkedLectureId = bookedSchedule.lecturesId || bookedSchedule.lectureId;
+      if (linkedLectureId && linkedLectureId !== id) {
+        const error = createError({
+          message: "LECTURE_LOCKED",
+          status: 403,
+          next,
+        });
+        throw error;
+      }
+    } else {
+      // General student requirement: must have completed the session linked to this lecture/course
+      const bookedSchedule = await db.findFirst({
+        model: "schedule",
+        where: {
+          studentId: student.id,
+          courseId: lecture.courseId,
+          status: "completed",
+          OR: [
+            { lecturesId: id },
+            { lecturesId: null },
+          ],
+        },
+      });
+
+      if (!bookedSchedule) {
         const error = createError({
           message: "LECTURE_LOCKED",
           status: 403,
