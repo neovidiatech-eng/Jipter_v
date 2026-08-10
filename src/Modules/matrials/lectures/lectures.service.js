@@ -316,7 +316,6 @@ export const completeLecture = async ({ req, res, next }) => {
         },
       });
 
-console.log(bookedSchedule);
 
 
       if (!bookedSchedule || bookedSchedule.status !== "completed") {

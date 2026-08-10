@@ -165,8 +165,8 @@ export const globalErrorHandling = (err, req, res, next) => {
     ...(err.details && { details: err.details }),
     ...(process.env.NODE_ENV !== "production" && {
       stack: err.stack,
-    }),
-    stack: err.stack,
+    })
+    // stack: err.stack,
   });
 };
 
