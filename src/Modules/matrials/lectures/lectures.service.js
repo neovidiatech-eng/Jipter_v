@@ -309,8 +309,6 @@ export const completeLecture = async ({ req, res, next }) => {
         model: "schedule",
         where: {
           studentId: student.id,
-          courseId: lecture.courseId,
-          status: "completed",
           OR: [
             { lecturesId: id },
             { lecturesId: null },
@@ -318,7 +316,10 @@ export const completeLecture = async ({ req, res, next }) => {
         },
       });
 
-      if (!bookedSchedule) {
+console.log(bookedSchedule);
+
+
+      if (!bookedSchedule || bookedSchedule.status !== "completed") {
         const error = createError({
           message: "LECTURE_LOCKED",
           status: 403,
