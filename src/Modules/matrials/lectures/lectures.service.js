@@ -315,6 +315,7 @@ export const completeLecture = async ({ req, res, next }) => {
           ],
         },
       });
+console.log("lectures.service.js",bookedSchedule,id);
 
 
 
