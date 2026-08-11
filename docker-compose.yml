@@ -44,7 +44,7 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: "256M"
+          memory: "512M"
 
   redis:
     image: redis:7-alpine
@@ -59,7 +59,7 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: "256M"
+          memory: "512M"
 
   app:
     image: jipter_api:latest
