@@ -14,7 +14,7 @@ import { nanoid } from "nanoid";
 import { decryptText } from "../../Utils/Security/index.js";
 
 import * as db from "../../database/dbService.js";
-import { notificationType } from "../../Utils/Enums/sessions.js";
+import { notificationType, sessionStatus, sessionType } from "../../Utils/Enums/sessions.js";
 import {
   addNotificationJob,
   removeNotificationJob,
@@ -1099,6 +1099,93 @@ export const updateSchedule = asyncHandler(async (req, res, next) => {
     req,
     status: 200,
     message: "UPDATE_SUCCESS",
+    data: {
+      ...updatedSchedule,
+      start_time: toLocal(updatedSchedule.start_time, req.timezone),
+      end_time: toLocal(updatedSchedule.end_time, req.timezone),
+    },
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*               Update a single session status only                  */
+/* ------------------------------------------------------------------ */
+export const updateScheduleStatus = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const schedule = await db.findOne({
+    model: "schedule",
+    where: { id },
+    include: { student: { include: { plan: true } } },
+  });
+
+  if (!schedule) {
+    return errorResponse({
+      req,
+      next,
+      status: 404,
+      message: "SESSION_NOT_FOUND",
+    });
+  }
+
+  // Handle session adjustments if status is changing
+  if (status && status !== schedule.status) {
+    const sessionUnits = 1;
+    if (status === sessionStatus.CANCELLED) {
+      // Refund session
+      await db.updateOne({
+        model: "student",
+        where: { id: schedule.studentId },
+        data: { sessions_remaining: { increment: sessionUnits } },
+      });
+    } else if (schedule.status === sessionStatus.CANCELLED) {
+      // Restoring session: Deduct
+      if (schedule.student.sessions_remaining < sessionUnits) {
+        return errorResponse({
+          req,
+          next,
+          status: 400,
+          message: "INSUFFICIENT_SESSIONS_RESTORE",
+        });
+      }
+      await db.updateOne({
+        model: "student",
+        where: { id: schedule.studentId },
+        data: { sessions_remaining: { decrement: sessionUnits } },
+      });
+    }
+  }
+
+  const updatedSchedule = await db.updateOne({
+    model: "schedule",
+    where: { id },
+    data: { status },
+  });
+
+  // Handle notification job update
+  if (status) {
+    await removeNotificationJob(id);
+
+    if (status === sessionStatus.PLANNED) {
+      const reminderTime = new Date(schedule.start_time.getTime() - 60 * 60 * 1000);
+      const now = new Date();
+      if (reminderTime > now) {
+        addNotificationJob({
+          scheduleId: id,
+          studentId: schedule.studentId,
+          type: "before 60 minutes",
+          sendAt: reminderTime,
+        });
+      }
+    }
+  }
+
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "STATUS_UPDATED_SUCCESSFULLY",
     data: {
       ...updatedSchedule,
       start_time: toLocal(updatedSchedule.start_time, req.timezone),

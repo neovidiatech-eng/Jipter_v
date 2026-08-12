@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { generalFields } from "../../../Utils/GeneralFields/index.js";
+import { planType } from "../../../Utils/Enums/subscriptions.js";
 
 export const createPlanSchema = {
   body: Joi.object({
@@ -12,7 +13,7 @@ export const createPlanSchema = {
     active: Joi.boolean().default(false),
     features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid().required(),
-    type: Joi.string().valid("quarterly", "annually", "halfAnnually").required(),
+    type: Joi.string().valid(...Object.values(planType)).required(),
   }),
 };
 
@@ -27,7 +28,7 @@ export const updatePlanSchema = {
     active: Joi.boolean(),
     features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid(),
-    type: Joi.string().valid("quarterly", "annually", "halfAnnually"),
+    type: Joi.string().valid(...Object.values(planType)),
   }),
 };
 export const deletePlanSchema = {

@@ -71,6 +71,14 @@ router.patch(
   validation(schema.updateSchedule),
   scheduleController.updateSchedule,
 );
+
+router.patch(
+  "/:id/status",
+  authentication,
+  authorizeResource(sessionsResource),
+  validation(schema.updateScheduleStatus),
+  scheduleController.updateScheduleStatus,
+);
 router.patch(
   "/change-instructor/:id",
   authentication,

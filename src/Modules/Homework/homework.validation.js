@@ -1,5 +1,6 @@
 import joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
+import { homeworkStatus } from "../../Utils/Enums/homework.js";
 
 export const createHomework = {
   body: joi
@@ -10,7 +11,7 @@ export const createHomework = {
       studentId: generalFields.id.required(),
       status: joi
         .string()
-        .valid("pending", "submitted", "completed")
+        .valid(...Object.values(homeworkStatus))
         .optional(),
     })
     .required(),
@@ -30,7 +31,7 @@ export const updateHomework = {
       studentId: generalFields.id.optional(),
       status: joi
         .string()
-        .valid("pending", "submitted", "completed")
+        .valid(...Object.values(homeworkStatus))
         .optional(),
     })
     .required(),

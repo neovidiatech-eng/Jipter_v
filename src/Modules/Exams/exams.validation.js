@@ -1,5 +1,6 @@
 import joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
+import { examStatus } from "../../Utils/Enums/exams.js";
 
 export const createExam = {
   body: joi
@@ -19,7 +20,7 @@ export const createExam = {
         .required(),
       status: joi
         .string()
-        .valid("pending", "submitted", "completed")
+        .valid(...Object.values(examStatus))
         .optional(),
       totalMarks: joi
         .number()
@@ -55,7 +56,7 @@ export const updatecreateExam = {
       studentId: generalFields.id.optional(),
       status: joi
         .string()
-        .valid("pending", "submitted", "completed")
+        .valid(...Object.values(examStatus))
         .optional(),
     })
     .required(),

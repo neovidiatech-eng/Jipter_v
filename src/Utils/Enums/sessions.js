@@ -1,6 +1,27 @@
+export const sessionStatus = {
+  PLANNED: "planned",
+  SCHEDULED: "scheduled",
+  ONGOING: "ongoing",
+  COMPLETED: "completed",
+  MISSED: "missed",
+  CANCELLED: "cancelled",
+};
+
 export const sessionType = {
   hafl: "half",
-  full: "full",
+  HALF: "half",
+  FULL: "full",
+};
+
+export const sessionPlatform = {
+  ZOOM: "zoom",
+  GOOGLE: "google",
+};
+
+export const sessionLanguage = {
+  EN: "en",
+  AR: "ar",
+  FR: "fr",
 };
 
 export const notificationType = {

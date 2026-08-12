@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { VALID_TIMEZONE_VALUES } from "../Date/timezones.js";
+import { sessionPlatform, sessionType } from "../Enums/sessions.js";
 
 const globalPhonePattern = /^(?:\+[1-9]\d{5,14}|0?\d{5,14})$/;
 const countryCallingCodePattern = /^\+[1-9]\d{0,3}$/;
@@ -21,7 +22,7 @@ export const generalFields = {
       "any.required": "Timezone is required",
     }),
   url: Joi.string().uri(),
-  platform: Joi.string().valid("zoom", "google").messages({
+  platform: Joi.string().valid(...Object.values(sessionPlatform)).messages({
     "string.base": "Platform must be a string",
     "string.empty": "Platform cannot be empty",
     "any.only": "Platform must be either 'zoom' or 'google'",
@@ -278,7 +279,7 @@ export const generalFields = {
     "boolean.empty": "Best seller cannot be empty",
     "any.required": "Best seller is required",
   }),
-  type: Joi.string().valid("full", "half").messages({
+  type: Joi.string().valid(...Object.values(sessionType)).messages({
     "string.base": "Type must be a string",
     "string.empty": "Type cannot be empty",
     "any.required": "Type is required",

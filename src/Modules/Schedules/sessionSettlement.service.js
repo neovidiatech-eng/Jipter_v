@@ -1,3 +1,6 @@
+import { sessionStatus } from "../../Utils/Enums/sessions.js";
+import { transactionStatus } from "../../Utils/Enums/transactions.js";
+
 export const isPostponedSession = (session) => Boolean(session?.rescheduledFromId);
 
 export const settleTeacherReview = async ({
@@ -34,7 +37,7 @@ export const settleTeacherReview = async ({
             type: "payout",
             amount: payoutAmount,
             reason: translate("PAYOUT_REASON", { title: session.title }),
-            status: "completed",
+            status: transactionStatus.COMPLETED,
           },
         });
       }
@@ -43,7 +46,7 @@ export const settleTeacherReview = async ({
     await tx.updateOne({
       model: "schedule",
       where: { id: scheduleId },
-      data: { status: "completed" },
+      data: { status: sessionStatus.COMPLETED },
     });
 
     if (studentAttended) {
@@ -66,6 +69,7 @@ export const settleTeacherReview = async ({
   await tx.updateOne({
     model: "schedule",
     where: { id: scheduleId },
-    data: { status: "missed" },
+    data: { status: sessionStatus.MISSED },
   });
 };
+

@@ -1,5 +1,7 @@
 import joi from "joi";
 import { generalFields } from "../../../Utils/GeneralFields/index.js";
+import { subscriptionRequestStatus } from "../../../Utils/Enums/subscriptions.js";
+
 export const getSubscription = {
   query: joi.object({
     search: generalFields.search.messages({
@@ -7,7 +9,7 @@ export const getSubscription = {
       "string.empty": "SEARCH_EMPTY",
       "string.max": "SEARCH_MAX",
     }),
-    status: joi.string().valid("pending", "rejected", "approved").messages({
+    status: joi.string().valid(...Object.values(subscriptionRequestStatus)).messages({
       "string.base": "STATUS_STRING",
       "any.only": "STATUS_PENDING_REJECTED_APPROVED",
     }),
@@ -22,7 +24,7 @@ export const changeStatus = {
     }),
   }),
   body: joi.object({
-    status: joi.string().valid("rejected", "approved").required().messages({
+    status: joi.string().valid(subscriptionRequestStatus.REJECTED, subscriptionRequestStatus.APPROVED).required().messages({
       "string.base": "STATUS_STRING",
       "any.only": "STATUS_REJECTED_APPROVED",
     }),

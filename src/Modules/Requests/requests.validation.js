@@ -1,5 +1,7 @@
 import Joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
+import { requestType, requestPriority } from "../../Utils/Enums/requests.js";
+import { sessionStatus } from "../../Utils/Enums/sessions.js";
 
 export const createRequest = {
   body: Joi.object({
@@ -16,15 +18,16 @@ export const createRequest = {
         "emergency",
         "resign",
         "technical_issue",
+        ...Object.values(requestType)
       )
       .required(),
-    priority: Joi.string().valid("low", "medium", "high").default("medium"),
+    priority: Joi.string().valid(...Object.values(requestPriority)).default("medium"),
     title: Joi.string().optional(),
     reason: Joi.string().min(5).max(1000).required(),
     requestedData: Joi.object({
       new_start_time: generalFields.date.optional(),
       new_end_time: generalFields.date.optional(),
-      new_status: Joi.string().valid("completed", "missed").optional(),
+      new_status: Joi.string().valid(sessionStatus.COMPLETED, sessionStatus.MISSED).optional(),
       suggested_notes: Joi.string().optional(),
       // Fields for new_session if no initial sessionId
       studentId: generalFields.id.optional(),

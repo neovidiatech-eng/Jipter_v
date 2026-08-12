@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { generalFields } from "../../../Utils/GeneralFields/index.js";
+import { transactionType, transactionStatus } from "../../../Utils/Enums/transactions.js";
 
 export const getTransactionsSchema = {
   query: Joi.object()
@@ -7,8 +8,8 @@ export const getTransactionsSchema = {
       currency: generalFields.code.optional(),
       page: Joi.number().integer().min(1).optional(),
       limit: Joi.number().integer().min(1).optional(),
-      type: Joi.string().valid("subscription", "expense", "withdrawal", "credit", "debit").optional(),
-      status: Joi.string().valid("completed", "pending", "failed", "cancelled").optional(),
+      type: Joi.string().valid(...Object.values(transactionType)).optional(),
+      status: Joi.string().valid(...Object.values(transactionStatus)).optional(),
       search: generalFields.search.optional(),
     })
     .required(),

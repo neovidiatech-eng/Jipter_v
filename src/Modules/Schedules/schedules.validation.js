@@ -1,6 +1,6 @@
 import Joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
-import { notificationType } from "../../Utils/Enums/sessions.js";
+import { notificationType, sessionStatus, sessionLanguage } from "../../Utils/Enums/sessions.js";
 import dayjs from "dayjs";
 
 export const createSchedule = {
@@ -63,7 +63,7 @@ export const createSchedule = {
         })
         .required(),
       type: generalFields.type.required(),
-      language: Joi.string().valid("en", "ar", "fr").default("en"),
+      language: Joi.string().valid(...Object.values(sessionLanguage)).default("en"),
       videoUrl: Joi.string().uri().allow(null, ""),
       slidesUrl: Joi.string().uri().allow(null, ""),
       notification_Time: Joi.string()
@@ -130,7 +130,7 @@ export const createRecurringSchedule = {
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required(),
-      language: Joi.string().valid("en", "ar", "fr").default("en"),
+      language: Joi.string().valid(...Object.values(sessionLanguage)).default("en"),
       videoUrl: Joi.string().uri().allow(null, ""),
     })
     .required(),
@@ -143,10 +143,10 @@ export const updateSchedule = {
       description: Joi.string().max(1000).allow("", null),
       link: generalFields.url,
       notes: Joi.string().max(1000).allow("", null),
-      status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
+      status: Joi.string().valid(...Object.values(sessionStatus)),
       start_time: Joi.date().greater("now"),
       type: generalFields.type,
-      language: Joi.string().valid("en", "ar", "fr"),
+      language: Joi.string().valid(...Object.values(sessionLanguage)),
       videoUrl: Joi.string().uri().allow(null, ""),
       slidesUrl: Joi.string().uri().allow(null, ""),
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
@@ -172,7 +172,7 @@ export const updateRecurringGroup = {
       description: Joi.string().max(1000).allow("", null),
       link: generalFields.url,
       notes: Joi.string().max(1000).allow("", null),
-      status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
+      status: Joi.string().valid(...Object.values(sessionStatus)),
       startTime: Joi.string().regex(/^([01]\d|2[0-3]):?([0-5]\d)$/),
       type: generalFields.type,
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
@@ -182,6 +182,26 @@ export const updateRecurringGroup = {
   params: Joi.object()
     .keys({
       parent_recurring_id: generalFields.parent_recurring_id.required(),
+    })
+    .required(),
+};
+
+export const updateScheduleStatus = {
+  body: Joi.object()
+    .keys({
+      status: Joi.string()
+        .valid(...Object.values(sessionStatus))
+        .required()
+        .messages({
+          "string.empty": "STATUS_REQUIRED",
+          "any.required": "STATUS_REQUIRED",
+          "any.only": "STATUS_INVALID",
+        }),
+    })
+    .required(),
+  params: Joi.object()
+    .keys({
+      id: generalFields.id.required(),
     })
     .required(),
 };
