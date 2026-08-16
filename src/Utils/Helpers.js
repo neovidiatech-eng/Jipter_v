@@ -165,13 +165,15 @@ export const getRecordLockStatus = (session) => {
   const startAt = session?.start_time || session?.startAt || null;
   if (!startAt) {
     return {
-      locked: true,
+      locked: false,
+      hasSchedule: false,
       availableAt: null,
     };
   }
   const isLocked = new Date() < new Date(startAt);
   return {
     locked: isLocked,
+    hasSchedule: true,
     availableAt: startAt,
   };
 };

@@ -154,21 +154,46 @@ export const getLectures = async ({ req, res, next }) => {
 
       const bookedSchedule = studentSchedules[0] || null;
 
+      // Fetch student's completed lectures
+      const userLectures = await db.findMany({
+        model: "user_lectures",
+        where: {
+          userId,
+          lectureId: { in: lecturesResult.data.map((l) => l.id) },
+        },
+      });
+
+      let foundFirstNonCompleted = false;
+
       lecturesResult.data = lecturesResult.data.map((lecture, index) => {
+        const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
         const session =
           studentSchedules.find((s) => s.lecturesId === lecture.id) ||
           studentSchedules.find((s) => s.courseId === lecture.courseId);
 
-        const { locked: timeLocked, availableAt } = getRecordLockStatus(session);
+        const { locked: timeLocked, availableAt, hasSchedule } = getRecordLockStatus(session);
 
-        let locked = timeLocked;
+        let locked = false;
 
         if (isFreeTrial) {
           const isLinkedLecture =
             bookedSchedule &&
             (bookedSchedule.lecturesId === lecture.id ||
               (!bookedSchedule.lecturesId && index === 0));
-          if (!isLinkedLecture) {
+          if (!isLinkedLecture || !hasSchedule || timeLocked) {
+            locked = true;
+          }
+        } else {
+          if (userLecture && userLecture.status === "completed") {
+            locked = false;
+          } else if (!foundFirstNonCompleted) {
+            if (hasSchedule && timeLocked) {
+              locked = true;
+            } else {
+              locked = false;
+              foundFirstNonCompleted = true;
+            }
+          } else {
             locked = true;
           }
         }
@@ -231,16 +256,7 @@ export const getLectureById = async (id, req) => {
         orderBy: { start_time: "asc" },
       });
 
-      const { locked, availableAt } = getRecordLockStatus(session);
-
-      if (locked) {
-        const error = createError({
-          message: "LECTURE_LOCKED",
-          status: 403,
-          next: req?.next,
-        });
-        throw error;
-      }
+      const { locked: timeLocked, availableAt, hasSchedule } = getRecordLockStatus(session);
 
       if (isFreeTrial) {
         const firstLectureInCourse = await db.findFirst({
@@ -251,6 +267,24 @@ export const getLectureById = async (id, req) => {
 
         const linkedLectureId = session?.lecturesId || firstLectureInCourse?.id;
         if (linkedLectureId && linkedLectureId !== id) {
+          const error = createError({
+            message: "LECTURE_LOCKED",
+            status: 403,
+            next: req?.next,
+          });
+          throw error;
+        }
+
+        if (!hasSchedule || timeLocked) {
+          const error = createError({
+            message: "LECTURE_LOCKED",
+            status: 403,
+            next: req?.next,
+          });
+          throw error;
+        }
+      } else {
+        if (hasSchedule && timeLocked) {
           const error = createError({
             message: "LECTURE_LOCKED",
             status: 403,
@@ -399,27 +433,27 @@ export const completeLecture = async ({ req, res, next }) => {
       orderBy: { start_time: "asc" },
     });
 
-    if (!bookedSchedule) {
-      const error = createError({
-        message: "LECTURE_LOCKED",
-        status: 403,
-        next,
-      });
-      throw error;
-    }
-
-    const { locked } = getRecordLockStatus(bookedSchedule);
-
-    if (locked || bookedSchedule.status !== sessionStatus.COMPLETED) {
-      const error = createError({
-        message: "LECTURE_LOCKED",
-        status: 403,
-        next,
-      });
-      throw error;
-    }
-
     if (isFreeTrial) {
+      if (!bookedSchedule) {
+        const error = createError({
+          message: "LECTURE_LOCKED",
+          status: 403,
+          next,
+        });
+        throw error;
+      }
+
+      const { locked } = getRecordLockStatus(bookedSchedule);
+
+      if (locked || bookedSchedule.status !== sessionStatus.COMPLETED) {
+        const error = createError({
+          message: "LECTURE_LOCKED",
+          status: 403,
+          next,
+        });
+        throw error;
+      }
+
       const firstLectureInCourse = await db.findFirst({
         model: "lectures",
         where: { courseId: lecture.courseId },
@@ -434,6 +468,18 @@ export const completeLecture = async ({ req, res, next }) => {
           next,
         });
         throw error;
+      }
+    } else {
+      if (bookedSchedule) {
+        const { locked } = getRecordLockStatus(bookedSchedule);
+        if (locked) {
+          const error = createError({
+            message: "LECTURE_LOCKED",
+            status: 403,
+            next,
+          });
+          throw error;
+        }
       }
     }
   }
