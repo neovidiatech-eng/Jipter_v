@@ -1,5 +1,5 @@
 import * as db from "../../../database/dbService.js";
-import { createError } from "../../../Utils/Helpers.js";
+import { createError, getRecordLockStatus, isFreeTrialStudent } from "../../../Utils/Helpers.js";
 
 /* -----------------------------
    Shared Includes
@@ -275,44 +275,55 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
 
   let isFreeTrial = false;
   let bookedSchedule = null;
+  let studentSchedules = [];
 
   if (student) {
-    isFreeTrial = student.sessions === 1 || 
-                  student.plan?.price === "0" || 
-                  student.plan?.name?.toLowerCase().includes("free") ||
-                  student.plan?.name?.toLowerCase().includes("trial") ||
-                  student.plan?.sessionsCount === 1;
+    studentSchedules = await db.findMany({
+      model: "schedule",
+      where: {
+        studentId: student.id,
+        courseId: id,
+      },
+      orderBy: { start_time: "asc" },
+    });
+
+    isFreeTrial = isFreeTrialStudent(student);
 
     if (isFreeTrial) {
-      bookedSchedule = await db.findFirst({
-        model: "schedule",
-        where: {
-          studentId: student.id,
-          courseId: id,
-        },
-      });
+      bookedSchedule = studentSchedules[0] || null;
     }
   }
 
-  // 3. Map lectures to include status
+  // 3. Map lectures to include status, locked, availableAt
   let foundFirstNonCompleted = false;
   const lecturesWithStatus = course.lectures.map((lecture, index) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
-    let status = "Locked";
+    const linkedSchedule =
+      studentSchedules.find((s) => s.lecturesId === lecture.id) ||
+      studentSchedules.find((s) => s.courseId === course.id) ||
+      bookedSchedule;
 
-    if (isFreeTrial) {
-      // Free trial user logic:
-      // - Must have booked a schedule in this course
-      // - Only the first lecture (index 0) can be unlocked
-      if (bookedSchedule && index === 0) {
+    const { locked, availableAt } = getRecordLockStatus(linkedSchedule);
+
+    let status = locked ? "Locked" : "Pending";
+
+    if (locked) {
+      status = "Locked";
+    } else if (isFreeTrial) {
+      const isLinkedLecture =
+        bookedSchedule &&
+        (bookedSchedule.lecturesId === lecture.id ||
+          (!bookedSchedule.lecturesId && index === 0));
+      if (isLinkedLecture) {
         if (userLecture && userLecture.status === "completed") {
           status = "Completed";
         } else {
           status = "Pending";
         }
+      } else {
+        status = "Locked";
       }
     } else {
-      // Normal progression logic:
       if (userLecture && userLecture.status === "completed") {
         status = "Completed";
       } else if (!foundFirstNonCompleted) {
@@ -321,10 +332,14 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
       }
     }
 
+    const isRecordLocked = locked || status === "Locked";
+
     return {
       ...lecture,
+      locked: isRecordLocked,
+      availableAt: availableAt || lecture.date || null,
       status,
-      ...(status === "Locked" && {
+      ...(isRecordLocked && {
         videoUrl: null,
         pdfUrl: null,
         slidesUrl: null,

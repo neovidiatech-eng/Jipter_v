@@ -239,10 +239,19 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
     });
   }
 
+  const isStudent = req?.user?.role?.name?.toLowerCase() === "student" || req?.user?.student;
+  const isLocked = new Date() < new Date(schedule?.start_time);
+  const availableAt = schedule?.start_time;
+
   const scheduleData = {
     ...schedule,
+    locked: isLocked,
+    availableAt,
     start_time: toLocal(schedule?.start_time, req.timezone),
     end_time: toLocal(schedule?.end_time, req.timezone),
+    ...(isStudent && isLocked && {
+      videoUrl: null,
+    }),
   };
 
   return successResponse({
@@ -796,10 +805,19 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
           text: s.teacher.user.phone,
         });
       }
+      const isStudent = user?.role?.name?.toLowerCase() === "student" || user?.student;
+      const isLocked = new Date() < new Date(s.start_time);
+      const availableAt = s.start_time;
+
       return {
         ...s,
+        locked: isLocked,
+        availableAt,
         start_time: toLocal(s.start_time, req.timezone),
         end_time: toLocal(s.end_time, req.timezone),
+        ...(isStudent && isLocked && {
+          videoUrl: null,
+        }),
       };
     }),
   );

@@ -233,17 +233,27 @@ export const getStudentCalendar = asyncHandler(async (req, res, next) => {
       },
     }),
   ]);
-  const formattedSessions = sessions.map((s) => ({
-    ...s,
-    start_time: toLocal(s.start_time, req.timezone),
-    end_time: toLocal(s.end_time, req.timezone),
-  }));
+  const formattedSessions = sessions.map((s) => {
+    const isLocked = new Date() < new Date(s.start_time);
+    return {
+      ...s,
+      locked: isLocked,
+      availableAt: s.start_time,
+      start_time: toLocal(s.start_time, req.timezone),
+      end_time: toLocal(s.end_time, req.timezone),
+    };
+  });
 
-  const formattedToDaySessions = toDaySessions.map((s) => ({
-    ...s,
-    start_time: toLocal(s.start_time, req.timezone),
-    end_time: toLocal(s.end_time, req.timezone),
-  }));
+  const formattedToDaySessions = toDaySessions.map((s) => {
+    const isLocked = new Date() < new Date(s.start_time);
+    return {
+      ...s,
+      locked: isLocked,
+      availableAt: s.start_time,
+      start_time: toLocal(s.start_time, req.timezone),
+      end_time: toLocal(s.end_time, req.timezone),
+    };
+  });
 
   return successResponse({
     res,

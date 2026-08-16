@@ -211,6 +211,9 @@ export const getDashboard = async ({ req, res, next }) => {
   delete student.createdAt;
 
   if (nextSchedule) {
+    const isLocked = new Date() < new Date(nextSchedule.start_time);
+    nextSchedule.locked = isLocked;
+    nextSchedule.availableAt = nextSchedule.start_time;
     nextSchedule.start_time = toLocal(nextSchedule.start_time, req.timezone);
     nextSchedule.end_time = toLocal(nextSchedule.end_time, req.timezone);
   }

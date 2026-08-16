@@ -12,7 +12,7 @@ export const getAllLectures = asyncHandler(async (req, res, next) => {
 });
 
 export const getLecture = asyncHandler(async (req, res, next) => {
-  const lecture = await lecturesService.getLectureById(req.params.id);
+  const lecture = await lecturesService.getLectureById(req.params.id, req);
   return successResponse({ res, req, message: "FETCH_SUCCESS", data: lecture });
 });
 

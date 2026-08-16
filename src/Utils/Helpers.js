@@ -151,3 +151,48 @@ export const findRankByAge = async ({ age, dbClient = db }) => {
       return numericAge >= minAge && numericAge <= maxAge;
     });
 };
+
+/**
+ * Calculates dynamic lock status for a Recorded item based on session start time.
+ * Rule:
+ * current time < session.startAt -> locked: true
+ * current time >= session.startAt -> locked: false
+ *
+ * @param {Object|null} session - Schedule / Session object with start_time or startAt
+ * @returns {{ locked: boolean, availableAt: string|Date|null }}
+ */
+export const getRecordLockStatus = (session) => {
+  const startAt = session?.start_time || session?.startAt || null;
+  if (!startAt) {
+    return {
+      locked: true,
+      availableAt: null,
+    };
+  }
+  const isLocked = new Date() < new Date(startAt);
+  return {
+    locked: isLocked,
+    availableAt: startAt,
+  };
+};
+
+/**
+ * Checks if a student is on a Free Trial or 1-session plan.
+ *
+ * @param {Object|null} student - Student object with plan
+ * @returns {boolean}
+ */
+export const isFreeTrialStudent = (student) => {
+  if (!student) return false;
+  return (
+    student.sessions === 1 ||
+    student.sessions_remaining === 1 ||
+    student.plan?.price === "0" ||
+    student.plan?.price === 0 ||
+    student.plan?.name?.toLowerCase().includes("free") ||
+    student.plan?.name?.toLowerCase().includes("trial") ||
+    student.plan?.sessionsCount === 1
+  );
+};
+
+
