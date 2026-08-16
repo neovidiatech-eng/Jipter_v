@@ -161,8 +161,8 @@ export const findRankByAge = async ({ age, dbClient = db }) => {
  * @param {Object|null} session - Schedule / Session object with start_time or startAt
  * @returns {{ locked: boolean, availableAt: string|Date|null }}
  */
-export const getRecordLockStatus = (session) => {
-  const startAt = session?.start_time || session?.startAt || null;
+export const getRecordLockStatus = (session, lecture = null) => {
+  const startAt = session?.start_time || session?.startAt || lecture?.date || null;
   if (!startAt) {
     return {
       locked: false,

@@ -6,15 +6,15 @@ This document outlines recent backend API updates, data model changes, and integ
 
 ## 📌 Summary of Key Updates
 
-1. **Sequential & Dynamic Lecture Unlocking (`locked` & `availableAt`)**:
+1. **Automatic & Sequential Lecture Unlocking (`locked` & `availableAt`)**:
+   - **Passed Time Rule**: Any lecture whose scheduled session start time or date has already passed (`new Date() >= start_time` or `new Date() >= lecture.date`) is **automatically unlocked** (`locked: false`).
    - **Regular Students**: 
-     - Lectures unlock sequentially. The **1st lecture** (or the next uncompleted lecture) is **unlocked** (`status: "Pending"`, `locked: false`).
+     - Lectures unlock sequentially. Any lecture whose scheduled time has arrived/passed or has no future time lock is **unlocked** (`status: "Pending"`, `locked: false`).
      - Completed lectures return `status: "Completed"`, `locked: false`.
-     - Future lectures return `status: "Locked"`, `locked: true`.
-     - If a scheduled live session is attached to a lecture, it is locked until the session start time (`new Date() < start_time`).
+     - Future lectures return `status: "Locked"`, `locked: true` until their start time arrives.
    - **Free Trial / 1-Session Plan Students**:
-     - Only the **single lecture** linked to their booked schedule (or lecture #1) is unlocked once the scheduled session start time arrives.
-     - All other lectures return `status: "Locked"` and `locked: true`.
+     - The single lecture linked to their booked session unlocks automatically once the scheduled session start time arrives (`new Date() >= start_time`).
+     - All other lectures in the course return `status: "Locked"` and `locked: true`.
    - When a lecture is `locked: true`, media assets (`videoUrl`, `pdfUrl`, `slidesUrl`, `content`) are stripped (`null`) by the backend.
 
 2. **Schedule Query Enhancements**:
@@ -38,8 +38,8 @@ This document outlines recent backend API updates, data model changes, and integ
   "title": "Introduction to Algebra",
   "order": 1,
   "status": "Pending", // "Pending" | "Completed" | "Locked"
-  "locked": false, // boolean
-  "availableAt": null, // ISO Date String or null
+  "locked": false, // boolean (false when time has passed or lecture is unlocked)
+  "availableAt": "2026-08-16T10:00:00.000Z", // ISO Date String or null
   "videoUrl": "https://...", // present when locked: false
   "pdfUrl": "https://...",   // present when locked: false
   "slidesUrl": "https://...",// present when locked: false
@@ -50,7 +50,7 @@ This document outlines recent backend API updates, data model changes, and integ
 #### Frontend UI Logic:
 | `locked` | `status` | UI Behavior |
 | :--- | :--- | :--- |
-| `true` | `"Locked"` | Render **Padlock Icon** 🔒. Disable play/view buttons. Show available time countdown using `availableAt` if present. |
+| `true` | `"Locked"` | Render **Padlock Icon** 🔒. Disable play/view buttons. Show available time countdown using `availableAt`. |
 | `false` | `"Pending"` | Render **Play / Open Button** ▶️. Allow student to watch media and complete the lecture. |
 | `false` | `"Completed"` | Render **Checkmark** ✅. Show lecture marked as completed. |
 
@@ -59,7 +59,7 @@ This document outlines recent backend API updates, data model changes, and integ
 ### 🔹 Fetching Single Lecture Details
 **Endpoint:** `GET /materials/lectures/:id`
 
-- If the lecture is **locked** (time locked by schedule or blocked trial lecture):
+- If the lecture is **locked** (future start time not reached or blocked trial lecture):
   - **HTTP Status:** `403 Forbidden`
   - **Response Body:**
     ```json
@@ -74,8 +74,8 @@ This document outlines recent backend API updates, data model changes, and integ
 ### 🔹 Marking a Lecture as Completed
 **Endpoint:** `POST /materials/lectures/:id/complete`
 
-- For **Regular Students**: Marks the lecture as completed in `user_lectures`, automatically unlocking the next sequential lecture in the course.
-- For **Free Trial Students**: Requires the booked trial session to be in `completed` status (`sessionStatus.COMPLETED`).
+- Works for any unlocked lecture whose scheduled start time has passed.
+- Automatically marks the lecture as completed in `user_lectures`, unlocking the next sequential lecture for regular students.
 
 ---
 

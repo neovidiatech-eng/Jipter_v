@@ -300,10 +300,10 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     const linkedSchedule =
       studentSchedules.find((s) => s.lecturesId === lecture.id) ||
-      studentSchedules.find((s) => s.courseId === course.id) ||
+      (studentSchedules.find((s) => s.courseId === course.id) || null) ||
       bookedSchedule;
 
-    const { locked: timeLocked, availableAt, hasSchedule } = getRecordLockStatus(linkedSchedule);
+    const { locked: timeLocked, availableAt, hasSchedule } = getRecordLockStatus(linkedSchedule, lecture);
 
     let status = "Pending";
     let isRecordLocked = false;
@@ -314,7 +314,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
         (bookedSchedule.lecturesId === lecture.id ||
           (!bookedSchedule.lecturesId && index === 0));
 
-      if (isLinkedLecture && hasSchedule && !timeLocked) {
+      if (isLinkedLecture && !timeLocked) {
         if (userLecture && userLecture.status === "completed") {
           status = "Completed";
           isRecordLocked = false;
@@ -330,15 +330,13 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
       if (userLecture && userLecture.status === "completed") {
         status = "Completed";
         isRecordLocked = false;
+      } else if (!timeLocked) {
+        status = "Pending";
+        isRecordLocked = false;
+        foundFirstNonCompleted = true;
       } else if (!foundFirstNonCompleted) {
-        if (hasSchedule && timeLocked) {
-          status = "Locked";
-          isRecordLocked = true;
-        } else {
-          status = "Pending";
-          isRecordLocked = false;
-          foundFirstNonCompleted = true;
-        }
+        status = "Locked";
+        isRecordLocked = true;
       } else {
         status = "Locked";
         isRecordLocked = true;
